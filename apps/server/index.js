@@ -15,8 +15,11 @@ app.get('/', (req, res) => {
     res.json({ message: 'Hello from the Backend!' });
 });
 
-// MongoDB Connection (Placeholder)
-// mongoose.connect(process.env.MONGO_URI).then(() => console.log("DB Connected"));
+// MongoDB Connection
+mongoose
+    .connect(process.env.MONGO_URI)
+    .then(() => console.log('MongoDB connected'))
+    .catch((err) => console.error('[ERR] MongoDB connection error:', err.message));
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

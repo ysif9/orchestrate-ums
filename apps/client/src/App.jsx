@@ -1,29 +1,18 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Dashboard from './components/Dashboard';
+import CourseDetails from './components/CourseDetails';
 import './App.css';
 
 function App() {
-    const [message, setMessage] = useState('');
-
-    useEffect(() => {
-        // Fetching from the backend
-        axios
-            .get('http://localhost:5000/')
-            .then((response) => {
-                setMessage(response.data.message);
-            })
-            .catch((error) => {
-                console.error('Error fetching data:', error);
-            });
-    }, []);
-
     return (
-        <>
-            <h1>MERN Monorepo</h1>
-            <div className="card">
-                <p>Backend says: {message}</p>
+        <BrowserRouter>
+            <div className="app-container">
+                <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/course/:id" element={<CourseDetails />} />
+                </Routes>
             </div>
-        </>
+        </BrowserRouter>
     );
 }
 

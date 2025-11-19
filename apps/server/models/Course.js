@@ -6,7 +6,7 @@ const courseSchema = new mongoose.Schema(
             type: String,
             required: true,
             unique: true
-        }, // e.g., CS101
+        },
         title: {
             type: String,
             required: true
@@ -21,13 +21,32 @@ const courseSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
+        // --- NEW FIELDS ---
+        professor: {
+            type: String, // For simplicity, storing name. Could be ObjectId ref to User(staff)
+            default: "TBA"
+        },
+        totalMarks: {
+            type: Number,
+            default: 100
+        },
+        passingMarks: {
+            type: Number,
+            default: 40
+        },
+        lessons: [{
+            title: { type: String },
+            content: { type: String }, // Simple description or link
+            duration: { type: String } // e.g., "1h 30m"
+        }],
+        // ------------------
         prerequisites: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Course'
         }],
     },
     {
-        timestamps: true, // adds createdAt and updatedAt
+        timestamps: true,
     }
 );
 

@@ -48,14 +48,7 @@ You need to configure the environment variables for the backend server before ru
    ```bash
    cd apps/server
    cp .env.example .env
-   ```
-
-   Open `apps/server/.env` and add the following configuration:
-
-   ```text
-   PORT=5000
-   MONGO_URI=mongodb://localhost:27017/orchestrate-ums
-   # Add any other secrets (JWT_SECRET, etc.) here
+   cd ../..
    ```
 
 ### Running the Application
@@ -64,7 +57,7 @@ We use **concurrently** to run both the client (React) and server (Express) from
 
 1. **Start Development Server**
 
-   Run the following command in the root directory:
+   Run the following command in the **root directory**:
 
    ```bash
    pnpm dev

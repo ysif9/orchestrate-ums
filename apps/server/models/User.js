@@ -18,6 +18,13 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        role: {
+            type: String,
+            enum: ['admin', 'staff', 'student'],
+            default: 'student',
+        },
+        // Specific fields for students
+        maxCredits: {type: Number, default: 18},
     },
     {
         timestamps: true, // adds createdAt and updatedAt

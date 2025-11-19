@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 // Define the schema
 const userSchema = new mongoose.Schema(
@@ -33,6 +34,24 @@ const userSchema = new mongoose.Schema(
         timestamps: true, // adds createdAt and updatedAt
     }
 );
+
+userSchema.pre('save', async function(next){
+    if (!this.isModified('password')) {
+        return next();
+    }
+    try {
+        this.password = await bcrypt.hash(this.password, 10);
+        next();
+    } catch (error) {
+        return next(error);
+    }
+})
+
+userSchema.methods.toJSON = function() {
+    const user = this.toObject();
+    delete user.password;
+    return user;
+}
 
 // Create the model
 const User = mongoose.model('User', userSchema);

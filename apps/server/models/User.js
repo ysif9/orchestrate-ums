@@ -24,7 +24,10 @@ const userSchema = new mongoose.Schema(
             default: 'student',
         },
         // Specific fields for students
-        maxCredits: {type: Number, default: 18},
+        maxCredits: {
+            type: Number,
+            default: 18
+        },
     },
     {
         timestamps: true, // adds createdAt and updatedAt

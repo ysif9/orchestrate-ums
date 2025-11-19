@@ -1,0 +1,16 @@
+### GET request to users
+GET http://localhost:5000/api/users
+
+### POST request to users
+POST http://localhost:5000/api/users
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "password123",
+  "role": "student",
+  "maxCredits": 18
+}
+
+###

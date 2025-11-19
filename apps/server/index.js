@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const userRoutes = require('./routes/userRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -12,7 +13,7 @@ app.use(express.json());
 
 // Basic Route
 app.get('/', (req, res) => {
-    res.json({ message: 'Hello from the Backend!' });
+    res.json({message: 'Hello from the Backend!'});
 });
 
 // MongoDB Connection
@@ -24,3 +25,5 @@ mongoose
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
+app.use('/api/users', userRoutes);

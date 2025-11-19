@@ -13,4 +13,32 @@ Content-Type: application/json
   "maxCredits": 18
 }
 
-###
+### GET request to courses
+GET http://localhost:5000/api/courses
+
+### POST request to courses
+POST http://localhost:5000/api/courses
+Content-Type: application/json
+
+{
+  "code": "CS101",
+  "title": "Introduction to Computer Science",
+  "description": "An introductory course to computer science.",
+  "type": "Core",
+  "credits": 3,
+  "prerequisites": []
+}
+
+
+### POST request to enrollments
+POST http://localhost:5000/api/enrollments
+Content-Type: application/json
+
+{
+  "course_code": "CS101",
+  "semester": "Fall 2024",
+  "student_id": "691de6e63810ae2f555c4462"
+}
+
+### GET request to enrollments
+GET http://localhost:5000/api/enrollments

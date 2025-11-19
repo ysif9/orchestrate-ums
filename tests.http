@@ -1,0 +1,44 @@
+### GET request to users
+GET http://localhost:5000/api/users
+
+### POST request to users
+POST http://localhost:5000/api/users
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "password123",
+  "role": "student",
+  "maxCredits": 18
+}
+
+### GET request to courses
+GET http://localhost:5000/api/courses
+
+### POST request to courses
+POST http://localhost:5000/api/courses
+Content-Type: application/json
+
+{
+  "code": "CS101",
+  "title": "Introduction to Computer Science",
+  "description": "An introductory course to computer science.",
+  "type": "Core",
+  "credits": 3,
+  "prerequisites": []
+}
+
+
+### POST request to enrollments
+POST http://localhost:5000/api/enrollments
+Content-Type: application/json
+
+{
+  "course_code": "CS101",
+  "semester": "Fall 2024",
+  "student_id": "691de6e63810ae2f555c4462"
+}
+
+### GET request to enrollments
+GET http://localhost:5000/api/enrollments

@@ -47,6 +47,15 @@ userSchema.pre('save', async function(next){
     }
 })
 
+/**
+ * Compare provided password with stored hashed password
+ * @param {string} candidatePassword - Password to compare
+ * @returns {Promise<boolean>} True if passwords match
+ */
+userSchema.methods.comparePassword = async function(candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
+};
+
 userSchema.methods.toJSON = function() {
     const user = this.toObject();
     delete user.password;

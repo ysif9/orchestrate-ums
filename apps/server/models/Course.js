@@ -25,13 +25,27 @@ const courseSchema = new mongoose.Schema(
             type: String,
             trim: true,
             validate: {
-                validator: function(v) {
+                validator: function (v) {
                     if (!v) return true; // allow courses without an assigned semester
                     return /^(Spring|Summer|Fall|Winter) \d{4}$/.test(v);
                 },
                 message: props => `${props.value} is not a valid semester. Use format 'Fall 2024'.`
             }
         },
+
+        image: {type: String, default: "https://placehold.co/600x400"}, // URL for card image
+        subjectArea: {type: String, default: "Science"}, // e.g., "Data Science", "Humanities"
+        difficulty: {type: String, enum: ['Introductory', 'Intermediate', 'Advanced'], default: 'Introductory'},
+        pace: {type: String, default: "Self-paced"},
+
+        professor: {type: String, default: "TBA"},
+        totalMarks: {type: Number, default: 100},
+        passingMarks: {type: Number, default: 40},
+        lessons: [{
+            title: {type: String},
+            content: {type: String},
+            duration: {type: String}
+        }],
         prerequisites: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Course'

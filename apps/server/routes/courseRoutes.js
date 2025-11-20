@@ -70,5 +70,17 @@ router.get('/', authenticate, async (req, res) => {
     }
 });
 
+// GET /api/courses/:id (Get Single Course Details)
+router.get('/:id', async (req, res) => {
+    try {
+        const course = await Course.findById(req.params.id).populate('prerequisites');
+        if (!course) {
+            return res.status(404).json({message: 'Course not found'});
+        }
+        res.json(course);
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
+});
 
 module.exports = router;

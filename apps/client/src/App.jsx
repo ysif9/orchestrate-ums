@@ -4,6 +4,8 @@ import Signup from './pages/Signup';
 import StudentHome from './pages/StudentHome';
 import AdminCourseManager from './pages/AdminCourseManager';
 import { authService } from './services/authService';
+import Dashboard from './components/Dashboard';
+import CourseDetails from './components/CourseDetails';
 import './App.css';
 
 /**
@@ -66,6 +68,8 @@ function App() {
 
                 {/* Catch all - smart redirect */}
                 <Route path="*" element={<RootRedirect />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/course/:id" element={<CourseDetails />} />
             </Routes>
         </BrowserRouter>
     );

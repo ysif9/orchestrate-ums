@@ -45,9 +45,6 @@ router.post('/', authenticate, authorize('student'), async (req, res) => {
             return res.status(404).json({message: 'Student not found'});
         }
 
-        if (student.role !== 'student') {
-            return res.status(403).json({message: 'Only students can enroll in courses'});
-        }
 
         // Find the course by code
         const course = await Course.findOne({code: course_code});

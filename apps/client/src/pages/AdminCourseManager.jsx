@@ -216,9 +216,14 @@ const AdminCourseManager = () => {
                     <td style={{color: '#64748b'}}>
                       {course.prerequisites?.length > 0
                         ? course.prerequisites
-                            .map(prereqId => {
-                              const prereqCourse = courses.find(c => c._id === prereqId);
-                              return prereqCourse ? prereqCourse.code : prereqId;
+                            .map(prereq => {
+                              // Check if prereq is already populated (object with code property)
+                              if (typeof prereq === 'object' && prereq.code) {
+                                return prereq.code;
+                              }
+                              // Otherwise, it's just an ID, so find the course
+                              const prereqCourse = courses.find(c => c._id === prereq);
+                              return prereqCourse ? prereqCourse.code : prereq;
                             })
                             .join(', ')
                         : 'None'}

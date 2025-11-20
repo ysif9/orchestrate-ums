@@ -3,6 +3,8 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import StudentHome from './pages/StudentHome';
 import AdminCourseManager from './pages/AdminCourseManager';
+import CourseCatalog from './pages/CourseCatalog';
+import CatalogCourseDetails from './pages/CatalogCourseDetails';
 import { authService } from './services/authService';
 import Dashboard from './components/Dashboard';
 import CourseDetails from './components/CourseDetails';
@@ -50,7 +52,23 @@ function App() {
                     path="/courses"
                     element={
                         <ProtectedRoute>
-                            <StudentHome />
+                            <CourseCatalog />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/catalog"
+                    element={
+                        <ProtectedRoute>
+                            <CourseCatalog />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/catalog/course/:id"
+                    element={
+                        <ProtectedRoute>
+                            <CatalogCourseDetails />
                         </ProtectedRoute>
                     }
                 />
@@ -62,14 +80,30 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+                <Route
+                    path="/course/:id"
+                    element={
+                        <ProtectedRoute>
+                            <CourseDetails />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Dashboard (legacy) */}
+                <Route
+                    path="/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
 
                 {/* Smart redirect based on authentication status */}
                 <Route path="/" element={<RootRedirect />} />
 
                 {/* Catch all - smart redirect */}
                 <Route path="*" element={<RootRedirect />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/course/:id" element={<CourseDetails />} />
             </Routes>
         </BrowserRouter>
     );

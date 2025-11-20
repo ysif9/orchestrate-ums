@@ -2,11 +2,12 @@ const express = require('express');
 const Enrollment = require('../models/Enrollment');
 const Course = require('../models/Course');
 const User = require('../models/User');
+const authenticate = require('../middleware/auth');
 
 const router = express.Router();
 
-// GET /api/enrollments
-router.get('/', async (req, res) => {
+// GET /api/enrollments - All authenticated users
+router.get('/', authenticate, async (req, res) => {
     try {
         const enrollments = await Enrollment.find();
         res.json(enrollments);
@@ -15,8 +16,8 @@ router.get('/', async (req, res) => {
     }
 });
 
-// POST /api/enrollments
-router.post('/', async (req, res) => {
+// POST /api/enrollments - All authenticated users
+router.post('/', authenticate, async (req, res) => {
     try {
         const {course_code, semester, student_id} = req.body;
         // TODO: Remove student hardcoded

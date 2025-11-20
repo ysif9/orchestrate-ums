@@ -1,11 +1,13 @@
 const express = require('express');
 const User = require('../models/User');
 const {body, validationResult} = require('express-validator');
+const authenticate = require('../middleware/auth');
+const authorize = require('../middleware/authorize');
 
 const router = express.Router();
 
-// POST /api/users
-router.post('/', [
+// POST /api/users - Admin only
+router.post('/', authenticate, authorize('admin'), [
     body('name').trim().notEmpty().withMessage('Name is required'),
     body('email').isEmail().withMessage('Valid email is required'),
     body('password').isLength({min: 8}).withMessage('Password must be at least 8 characters'),
@@ -31,8 +33,8 @@ router.post('/', [
     }
 });
 
-// GET /api/users
-router.get('/', async (req, res) => {
+// GET /api/users - Admin and Staff only
+router.get('/', authenticate, authorize('admin', 'staff'), async (req, res) => {
     try {
         const users = await User.find();
         res.json(users);

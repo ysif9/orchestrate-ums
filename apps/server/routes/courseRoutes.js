@@ -1,10 +1,12 @@
 const express = require('express');
 const Course = require('../models/Course');
+const authenticate = require('../middleware/auth');
+const authorize = require('../middleware/authorize');
 
 const router = express.Router();
 
-// POST /api/courses
-router.post('/', async (req, res) => {
+// POST /api/courses - Admin and Staff only
+router.post('/', authenticate, authorize('admin', 'staff'), async (req, res) => {
     try {
         const {code, title, description, type, credits, prerequisites, semester} = req.body;
 
@@ -18,8 +20,8 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT /api/courses/:id
-router.put('/:id', async (req, res) => {
+// PUT /api/courses/:id - Admin and Staff only
+router.put('/:id', authenticate, authorize('admin', 'staff'), async (req, res) => {
     try {
         const {code, title, description, type, credits, prerequisites, semester} = req.body;
 
@@ -39,8 +41,8 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// DELETE /api/courses/:id
-router.delete('/:id', async (req, res) => {
+// DELETE /api/courses/:id - Admin only
+router.delete('/:id', authenticate, authorize('admin'), async (req, res) => {
     try {
         const course = await Course.findByIdAndDelete(req.params.id, {new: true});
 
@@ -54,8 +56,8 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-// GET /api/courses
-router.get('/', async (req, res) => {
+// GET /api/courses - All authenticated users
+router.get('/', authenticate, async (req, res) => {
     try {
         //TODO: Add filters
         const credits = req.query.credits;

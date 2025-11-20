@@ -16,6 +16,15 @@ function ProtectedRoute({ children }) {
 }
 
 /**
+ * Root Redirect Component
+ * Redirects to home if authenticated, otherwise to login
+ */
+function RootRedirect() {
+    const isAuthenticated = authService.isAuthenticated();
+    return <Navigate to={isAuthenticated ? "/home" : "/login"} replace />;
+}
+
+/**
  * Main App Component with Routing
  */
 function App() {
@@ -27,6 +36,14 @@ function App() {
                 <Route path="/signup" element={<Signup />} />
 
                 {/* Protected Routes */}
+                <Route
+                    path="/home"
+                    element={
+                        <ProtectedRoute>
+                            <StudentHome />
+                        </ProtectedRoute>
+                    }
+                />
                 <Route
                     path="/courses"
                     element={
@@ -44,11 +61,11 @@ function App() {
                     }
                 />
 
-                {/* Default redirect to login */}
-                <Route path="/" element={<Navigate to="/login" replace />} />
+                {/* Smart redirect based on authentication status */}
+                <Route path="/" element={<RootRedirect />} />
 
-                {/* Catch all - redirect to login */}
-                <Route path="*" element={<Navigate to="/login" replace />} />
+                {/* Catch all - smart redirect */}
+                <Route path="*" element={<RootRedirect />} />
             </Routes>
         </BrowserRouter>
     );

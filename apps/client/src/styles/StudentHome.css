@@ -1,16 +1,37 @@
-/* Student Home Page Styles */
+/* Temporary Home Page Styles - Professional Light Mode */
+
+:root {
+    --home-bg: #f4f6f8;
+    --home-card-bg: #ffffff;
+    --home-primary: #2563eb;
+    --home-primary-hover: #1d4ed8;
+    --home-primary-active: #1e40af;
+    --home-text-primary: #1e293b;
+    --home-text-secondary: #475569;
+    --home-border: #e2e8f0;
+    --home-notice-bg: #f0f9ff;
+    --home-notice-border: #bae6fd;
+    --home-admin-bg: #fef3c7;
+    --home-admin-border: #fbbf24;
+    --home-staff-bg: #ddd6fe;
+    --home-staff-border: #a78bfa;
+    --home-student-bg: #dbeafe;
+    --home-student-border: #60a5fa;
+    --home-action-bg: #f8fafc;
+}
 
 .student-home-container {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f4f6f8;
+    background-color: var(--home-bg);
     padding: 2rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .student-home-card {
-    background: white;
+    background: var(--home-card-bg);
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     padding: 3rem;
@@ -19,49 +40,147 @@
     text-align: center;
 }
 
-.student-home-card h1 {
-    color: #1e293b;
+.welcome-section {
     margin-bottom: 2rem;
-    font-size: 1.75rem;
 }
 
-.user-info {
-    background-color: #f8fafc;
+.student-home-card h1 {
+    color: var(--home-text-primary);
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.welcome-message {
+    color: var(--home-text-secondary);
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.welcome-message strong {
+    color: var(--home-text-primary);
+    font-weight: 600;
+}
+
+/* Role Badge Styles */
+.role-badge-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 2px solid;
+}
+
+.role-badge.role-admin {
+    background-color: var(--home-admin-bg);
+    border-color: var(--home-admin-border);
+    color: #92400e;
+}
+
+.role-badge.role-staff {
+    background-color: var(--home-staff-bg);
+    border-color: var(--home-staff-border);
+    color: #5b21b6;
+}
+
+.role-badge.role-student {
+    background-color: var(--home-student-bg);
+    border-color: var(--home-student-border);
+    color: #1e40af;
+}
+
+.temp-notice {
+    background-color: var(--home-notice-bg);
+    border: 1px solid var(--home-notice-border);
+    border-radius: 8px;
+    padding: 1rem;
+    color: var(--home-text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* Quick Actions Section */
+.quick-actions {
+    background-color: var(--home-action-bg);
+    border: 1px solid var(--home-border);
     border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 2rem;
+}
+
+.quick-actions h3 {
+    color: var(--home-text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
     text-align: left;
 }
 
-.user-info p {
-    margin: 0.75rem 0;
-    color: #475569;
-    font-size: 1rem;
+.action-btn {
+    background-color: var(--home-primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
-.user-info strong {
-    color: #1e293b;
-    margin-right: 0.5rem;
+.action-btn:hover {
+    background-color: var(--home-primary-hover);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.action-btn:active {
+    background-color: var(--home-primary-active);
+    transform: translateY(0);
 }
 
 .logout-btn {
-    background-color: #2563eb;
+    background-color: #dc2626;
     color: white;
     border: none;
-    padding: 0.75rem 2rem;
+    padding: 0.875rem 2rem;
     font-size: 1rem;
     font-weight: 500;
     border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
     width: 100%;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .logout-btn:hover {
-    background-color: #1d4ed8;
+    background-color: #b91c1c;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .logout-btn:active {
-    background-color: #1e40af;
+    background-color: #991b1b;
+    transform: translateY(1px);
+}
+
+.logout-btn:focus {
+    outline: 2px solid #dc2626;
+    outline-offset: 2px;
 }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/authService';
 import '../styles/Auth.css';
@@ -12,6 +12,13 @@ function Login() {
     const [errors, setErrors] = useState({});
     const [apiError, setApiError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    // Redirect to home if already authenticated
+    useEffect(() => {
+        if (authService.isAuthenticated()) {
+            navigate('/home', { replace: true });
+        }
+    }, [navigate]);
 
     /**
      * Validate form fields
@@ -79,13 +86,8 @@ function Login() {
             });
 
             if (response.success) {
-                // Redirect based on user role
-                const user = response.user;
-                if (user.role === 'admin' || user.role === 'staff') {
-                    navigate('/admin/courses');
-                } else {
-                    navigate('/courses');
-                }
+                // Redirect to home page after successful login
+                navigate('/home');
             }
         } catch (error) {
             console.error('Login error:', error);

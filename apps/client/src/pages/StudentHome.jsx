@@ -2,6 +2,11 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import '../styles/StudentHome.css';
 
+/**
+ * Temporary Home Page Component
+ * Displays a simple welcome message and logout functionality
+ * This serves as a placeholder until a comprehensive dashboard is implemented
+ */
 function StudentHome() {
     const navigate = useNavigate();
     const user = authService.getCurrentUser();
@@ -11,18 +16,44 @@ function StudentHome() {
         navigate('/login');
     };
 
+    const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+
     return (
         <div className="student-home-container">
             <div className="student-home-card">
-                <h1>Welcome to Orchestrate UMS</h1>
-                <div className="user-info">
-                    <p><strong>Name:</strong> {user?.name}</p>
-                    <p><strong>Email:</strong> {user?.email}</p>
-                    <p><strong>Role:</strong> {user?.role}</p>
-                    {user?.role === 'student' && user?.maxCredits && (
-                        <p><strong>Max Credits:</strong> {user.maxCredits}</p>
-                    )}
+                <div className="welcome-section">
+                    <h1>Welcome to Orchestrate UMS</h1>
+                    <p className="welcome-message">
+                        You are successfully logged in as <strong>{user?.name}</strong>
+                    </p>
+
+                    {/* User Role Display */}
+                    <div className="role-badge-container">
+                        <span className={`role-badge role-${user?.role}`}>
+                            {user?.role === 'admin' && '👤 Administrator'}
+                            {user?.role === 'staff' && '👤 Staff Member'}
+                            {user?.role === 'student' && '🎓 Student'}
+                        </span>
+                    </div>
+
+                    <p className="temp-notice">
+                        This is a temporary home page. A comprehensive dashboard will be available soon.
+                    </p>
                 </div>
+
+                {/* Admin/Staff Quick Actions */}
+                {isAdminOrStaff && (
+                    <div className="quick-actions">
+                        <h3>Quick Actions</h3>
+                        <button
+                            onClick={() => navigate('/admin/courses')}
+                            className="action-btn"
+                        >
+                            📚 Manage Courses
+                        </button>
+                    </div>
+                )}
+
                 <button onClick={handleLogout} className="logout-btn">
                     Logout
                 </button>

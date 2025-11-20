@@ -32,6 +32,7 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 // POST /api/enrollments - Students only
+// Validates prerequisites before allowing enrollment
 router.post('/', authenticate, authorize('student'), async (req, res) => {
     try {
         const {course_code, semester} = req.body;
@@ -45,11 +46,38 @@ router.post('/', authenticate, authorize('student'), async (req, res) => {
             return res.status(404).json({message: 'Student not found'});
         }
 
-
-        // Find the course by code
-        const course = await Course.findOne({code: course_code});
+        // Find the course by code and populate prerequisites
+        const course = await Course.findOne({code: course_code}).populate('prerequisites', 'code title');
         if (!course) {
             return res.status(404).json({message: 'Course not found'});
+        }
+
+        // Check prerequisites if the course has any
+        if (course.prerequisites && course.prerequisites.length > 0) {
+            // Get all completed enrollments for this student
+            const completedEnrollments = await Enrollment.find({
+                student: studentId,
+                status: 'completed'
+            }).select('course');
+
+            const completedCourseIds = completedEnrollments.map(e => e.course.toString());
+
+            // Check if all prerequisites are met
+            const missingPrerequisites = course.prerequisites.filter(
+                prereq => !completedCourseIds.includes(prereq._id.toString())
+            );
+
+            if (missingPrerequisites.length > 0) {
+                const missingCourseNames = missingPrerequisites.map(p => `${p.code} - ${p.title}`).join(', ');
+
+                return res.status(400).json({
+                    message: `Cannot enroll: You must complete the following prerequisite course(s) first: ${missingCourseNames}`,
+                    missingPrerequisites: missingPrerequisites.map(p => ({
+                        code: p.code,
+                        title: p.title
+                    }))
+                });
+            }
         }
 
         // Create the enrollment

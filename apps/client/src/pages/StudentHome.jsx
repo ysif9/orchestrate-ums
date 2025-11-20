@@ -41,18 +41,30 @@ function StudentHome() {
                     </p>
                 </div>
 
-                {/* Admin/Staff Quick Actions */}
-                {isAdminOrStaff && (
-                    <div className="quick-actions">
-                        <h3>Quick Actions</h3>
+                {/* Quick Actions */}
+                <div className="quick-actions">
+                    <h3>Quick Actions</h3>
+
+                    {/* Student Actions */}
+                    {user?.role === 'student' && (
+                        <button
+                            onClick={() => navigate('/catalog')}
+                            className="action-btn"
+                        >
+                            📚 Browse Course Catalog
+                        </button>
+                    )}
+
+                    {/* Admin/Staff Actions */}
+                    {isAdminOrStaff && (
                         <button
                             onClick={() => navigate('/admin/courses')}
                             className="action-btn"
                         >
                             📚 Manage Courses
                         </button>
-                    </div>
-                )}
+                    )}
+                </div>
 
                 <button onClick={handleLogout} className="logout-btn">
                     Logout

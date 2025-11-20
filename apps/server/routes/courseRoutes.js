@@ -26,7 +26,7 @@ router.put('/:id', async (req, res) => {
         const course = await Course.findByIdAndUpdate(
             req.params.id,
             {code, title, description, type, credits, prerequisites, semester},
-            {new: true}
+            {new: true, runValidators: true}
         );
 
         if (!course) {

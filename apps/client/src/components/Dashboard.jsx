@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 // ⚠️ PASTE YOUR NEW STUDENT ID HERE FROM THE SEED SCRIPT ⚠️
-const STUDENT_ID = "691e44c63d0af8f1082df056"; 
+const STUDENT_ID = "691f9834e54ca678e3d4dcd7"; 
 
 const Dashboard = () => {
     const [courses, setCourses] = useState([]);

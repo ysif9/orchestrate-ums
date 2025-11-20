@@ -26,6 +26,7 @@ Content-Type: application/json
   "description": "An introductory course to computer science.",
   "type": "Core",
   "credits": 3,
+  "semester": "Fall 2024",
   "prerequisites": []
 }
 

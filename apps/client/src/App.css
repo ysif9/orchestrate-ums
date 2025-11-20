@@ -1,8 +1,8 @@
 :root {
   /* CHANGED: Ain Shams Blue */
-  --primary-color: #003366; 
+  --primary-color: #003366;
   --gold-accent: #D4AF37; /* Optional gold accent common in logos */
-  
+
   --bg-gray: #f4f6f8;
   --text-dark: #222;
   --text-light: #666;
@@ -93,7 +93,7 @@ a { text-decoration: none; color: inherit; }
 /* --- LAYOUT FIX --- */
 .dashboard-container {
   /* CHANGED: Use 90% width or max 1600px to fill the pane */
-  width: 90%; 
+  width: 90%;
   max-width: 1600px;
   margin: 2rem auto;
 }

@@ -6,9 +6,9 @@ const router = express.Router();
 // POST /api/courses
 router.post('/', async (req, res) => {
     try {
-        const {code, title, description, type, credits, prerequisites} = req.body;
+        const {code, title, description, type, credits, prerequisites, semester} = req.body;
 
-        const course = new Course({code, title, description, type, credits, prerequisites});
+        const course = new Course({code, title, description, type, credits, prerequisites, semester});
         await course.save();
 
         res.status(201).json(course);
@@ -21,12 +21,12 @@ router.post('/', async (req, res) => {
 // PUT /api/courses/:id
 router.put('/:id', async (req, res) => {
     try {
-        const {code, title, description, type, credits, prerequisites} = req.body;
+        const {code, title, description, type, credits, prerequisites, semester} = req.body;
 
         const course = await Course.findByIdAndUpdate(
             req.params.id,
-            {code, title, description, type, credits, prerequisites},
-            {new: true}
+            {code, title, description, type, credits, prerequisites, semester},
+            {new: true, runValidators: true}
         );
 
         if (!course) {

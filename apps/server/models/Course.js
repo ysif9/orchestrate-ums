@@ -21,6 +21,17 @@ const courseSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
+        semester: {
+            type: String,
+            trim: true,
+            validate: {
+                validator: function(v) {
+                    if (!v) return true; // allow courses without an assigned semester
+                    return /^(Spring|Summer|Fall|Winter) \d{4}$/.test(v);
+                },
+                message: props => `${props.value} is not a valid semester. Use format 'Fall 2024'.`
+            }
+        },
         prerequisites: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Course'
@@ -32,6 +43,7 @@ const courseSchema = new mongoose.Schema(
 );
 
 courseSchema.index({code: 1}, {unique: true});
+courseSchema.index({semester: 1});
 
 const Course = mongoose.model('Course', courseSchema);
 

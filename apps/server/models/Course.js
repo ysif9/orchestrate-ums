@@ -50,6 +50,10 @@ const courseSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Course'
         }],
+        createdBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }
     },
     {
         timestamps: true, // adds createdAt and updatedAt

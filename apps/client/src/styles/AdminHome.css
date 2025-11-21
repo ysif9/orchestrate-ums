@@ -1,0 +1,222 @@
+/* Admin Home Styles - Ain Shams Theme */
+
+:root {
+    --primary-color: #003366; /* Ain Shams Blue */
+    --gold-accent: #D4AF37;   /* Ain Shams Gold */
+    --bg-gray: #f4f6f8;
+    --text-dark: #1e293b;
+    --card-border: #e2e8f0;
+}
+
+.admin-dashboard {
+    min-height: 100vh;
+    background-color: var(--bg-gray);
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Header Navigation Tweaks */
+.nav-logout-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.4);
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 1rem;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.nav-logout-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: white;
+}
+
+.user-greeting {
+    color: #e0e0e0;
+    font-size: 0.9rem;
+    margin-right: 1rem;
+}
+
+/* Admin Container */
+.admin-container {
+    width: 90%;
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding-bottom: 3rem;
+}
+
+/* Welcome Section */
+.welcome-section {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #004080 100%);
+    padding: 3rem 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 2.5rem;
+    color: white;
+}
+
+.welcome-content {
+    max-width: 800px;
+}
+
+.welcome-title {
+    margin: 0;
+    font-size: 2.5rem;
+    color: white;
+    font-weight: 700;
+}
+
+.welcome-subtitle {
+    margin: 0.5rem 0 0 0;
+    font-size: 1.2rem;
+    color: var(--gold-accent);
+    font-weight: 500;
+}
+
+.welcome-description {
+    margin: 1rem 0 0 0;
+    font-size: 1rem;
+    color: rgba(255,255,255,0.9);
+    line-height: 1.6;
+}
+
+/* Quick Actions Section */
+.quick-actions-section {
+    margin-bottom: 2.5rem;
+}
+
+.section-title {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin: 0 0 1.5rem 0;
+    font-weight: 600;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.action-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-left: 4px solid var(--primary-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+.action-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.action-content {
+    flex: 1;
+}
+
+.action-title {
+    margin: 0 0 0.5rem 0;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.action-description {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.action-arrow {
+    font-size: 1.5rem;
+    color: #cbd5e1;
+    transition: all 0.3s ease;
+}
+
+.action-card:hover .action-arrow {
+    color: var(--primary-color);
+    transform: translateX(4px);
+}
+
+/* System Info Section */
+.system-info-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.info-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-top: 3px solid var(--gold-accent);
+}
+
+.info-card h3 {
+    margin: 0 0 1rem 0;
+    color: var(--primary-color);
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #cbd5e1;
+}
+
+.status-dot.active {
+    background-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+}
+
+.semester-text {
+    margin: 0;
+    color: var(--text-dark);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.role-badge {
+    margin: 0;
+    display: inline-block;
+    background: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+

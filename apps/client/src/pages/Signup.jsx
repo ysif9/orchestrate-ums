@@ -17,10 +17,12 @@ function Signup() {
     const [apiError, setApiError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // Redirect to home if already authenticated
+    // Redirect to appropriate home if already authenticated
     useEffect(() => {
         if (authService.isAuthenticated()) {
-            navigate('/home', { replace: true });
+            const user = authService.getCurrentUser();
+            const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+            navigate(isAdminOrStaff ? '/admin/home' : '/home', { replace: true });
         }
     }, [navigate]);
 
@@ -153,8 +155,10 @@ function Signup() {
             const response = await authService.signup(signupData);
 
             if (response.success) {
-                // Redirect to home page after successful signup
-                navigate('/home');
+                // Redirect based on user role
+                const user = response.user;
+                const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+                navigate(isAdminOrStaff ? '/admin/home' : '/home');
             }
         } catch (error) {
             console.error('Signup error:', error);

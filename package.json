@@ -1,0 +1,18 @@
+{
+  "name": "orchestrate-ums",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter server dev\" \"pnpm --filter client dev\"",
+    "install:all": "pnpm install -r",
+    "build": "pnpm --filter client build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.22.0",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

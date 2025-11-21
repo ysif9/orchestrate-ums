@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
-import { BookOpen, Plus, Users, BarChart3 } from 'lucide-react';
+import { BookOpen, Plus, Users, BarChart3, FileText, ClipboardCheck } from 'lucide-react';
 import '../styles/AdminHome.css';
 
 function AdminHome() {
@@ -27,6 +27,20 @@ function AdminHome() {
             icon: Plus,
             path: '/admin/courses?action=create',
             color: '#D4AF37'
+        },
+        {
+            title: 'Create Assessment',
+            description: 'Create quizzes, assignments, and exams',
+            icon: FileText,
+            path: '/admin/assessments/create',
+            color: '#8b5cf6'
+        },
+        {
+            title: 'Grade Assessments',
+            description: 'Review and grade student submissions',
+            icon: ClipboardCheck,
+            path: '/admin/gradebook',
+            color: '#0891b2'
         },
         {
             title: 'View All Users',

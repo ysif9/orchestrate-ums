@@ -9,6 +9,9 @@ import CatalogCourseDetails from './pages/CatalogCourseDetails';
 import CourseDetails from './components/CourseDetails'; // View for enrolled course
 import { authService } from './services/authService';
 import './App.css';
+import GradebookPage from './pages/GradebookPage';
+import AssessmentCreationPage from './pages/AssessmentCreationPage';
+import MyGradesPage from './pages/MyGradesPage';
 
 /**
  * Protected Route Component
@@ -102,6 +105,36 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <AdminCourseManager />
+                        </ProtectedRoute>
+                    }
+                />
+                {/* NEW ROUTE: Assessment Creation */}
+                <Route
+                    path="/admin/assessments/create"
+                    element={
+                        <ProtectedRoute>
+                            <AssessmentCreationPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+
+                {/* Gradebook for Admin/Staff */}
+                <Route
+                    path="/admin/gradebook"
+                    element={
+                        <ProtectedRoute>
+                            <GradebookPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Student Grades View */}
+                <Route
+                    path="/my-grades"
+                    element={
+                        <ProtectedRoute>
+                            <MyGradesPage />
                         </ProtectedRoute>
                     }
                 />

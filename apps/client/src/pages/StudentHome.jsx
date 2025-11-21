@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { authService } from '../services/authService';
+import { ClipboardCheck, BarChart3, BookOpen, Sparkles } from 'lucide-react';
 import '../styles/StudentHome.css';
 
 function StudentHome() {
@@ -35,6 +36,8 @@ function StudentHome() {
         authService.logout();
         navigate('/login');
     };
+
+    const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
 
     if (loading) return (
         <div className="loading-container">
@@ -81,6 +84,35 @@ function StudentHome() {
                         <button onClick={() => navigate('/catalog')} className="btn-primary">
                             + Register New Course
                         </button>
+                        {/* Admin/Staff Assessment Management Buttons */}
+                        {isAdminOrStaff && (
+                            <>
+                                <button
+                                    onClick={() => navigate('/admin/assessments/create')}
+                                    className="action-btn action-create-assessment"
+                                >
+                                    <Sparkles size={18} style={{marginRight:'8px', display:'inline', verticalAlign:'middle'}} />
+                                    Create Assessment
+                                </button>
+                                <button
+                                    onClick={() => navigate('/admin/gradebook')}
+                                    className="action-btn action-grade-assessments"
+                                >
+                                    <ClipboardCheck size={18} style={{marginRight:'8px', display:'inline', verticalAlign:'middle'}} />
+                                    Grade Assessments
+                                </button>
+                            </>
+                        )}
+                        {/* Student Grades View Button */}
+                        {!isAdminOrStaff && (
+                            <button
+                                onClick={() => navigate('/my-grades')}
+                                className="action-btn action-view-grades"
+                            >
+                                <BarChart3 size={18} style={{marginRight:'8px', display:'inline', verticalAlign:'middle'}} />
+                                View My Grades
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -89,7 +121,9 @@ function StudentHome() {
                 {/* ENROLLED COURSES GRID */}
                 {enrollments.length === 0 ? (
                     <div className="empty-state">
-                        <div className="empty-icon">📚</div>
+                        <div className="empty-icon">
+                            <BookOpen size={64} strokeWidth={1.5} />
+                        </div>
                         <h3>No Active Enrollments</h3>
                         <p>You are not currently enrolled in any courses for this semester.</p>
                         <button onClick={() => navigate('/catalog')} className="btn-primary">
@@ -106,16 +140,16 @@ function StudentHome() {
                                 <Link to={`/course/${course._id}`} key={enrollment._id} className="course-card-link">
                                     <div className="course-card">
                                         <div className="card-image-wrapper">
-                                            <img 
-                                                src={course.image || "https://placehold.co/600x400"} 
-                                                alt={course.title} 
-                                                className="card-image" 
+                                            <img
+                                                src={course.image || "https://placehold.co/600x400"}
+                                                alt={course.title}
+                                                className="card-image"
                                             />
                                             <span className={`status-badge ${enrollment.status}`}>
                                                 {enrollment.status}
                                             </span>
                                         </div>
-                                        
+
                                         <div className="card-body">
                                             <div className="subject-tag">
                                                 {course.subjectArea || "General"}
@@ -125,12 +159,12 @@ function StudentHome() {
                                                 <span className="code">{course.code}</span>
                                                 <span className="credits">{course.credits} Credits</span>
                                             </div>
-                                            
+
                                             <div className="progress-bar-container">
                                                 <div className="progress-text">Progress</div>
                                                 <div className="progress-track">
-                                                    <div 
-                                                        className="progress-fill" 
+                                                    <div
+                                                        className="progress-fill"
                                                         style={{width: enrollment.status === 'completed' ? '100%' : '0%'}}
                                                     ></div>
                                                 </div>

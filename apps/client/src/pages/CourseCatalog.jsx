@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { authService } from '../services/authService';
+import { Lock } from 'lucide-react';
 import '../styles/CourseCatalog.css';
 
 /**
@@ -11,7 +12,8 @@ import '../styles/CourseCatalog.css';
 function CourseCatalog() {
     const navigate = useNavigate();
     const user = authService.getCurrentUser();
-    
+    const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+
     const [courses, setCourses] = useState([]);
     const [filteredCourses, setFilteredCourses] = useState([]);
     const [completedCourseIds, setCompletedCourseIds] = useState([]);
@@ -148,7 +150,10 @@ function CourseCatalog() {
                 </div>
                 <div className="header-actions">
                     <span className="user-info">Welcome, {user?.name}</span>
-                    <button onClick={() => navigate('/home')} className="btn-secondary">
+                    <button
+                        onClick={() => navigate(isAdminOrStaff ? '/admin/home' : '/home')}
+                        className="btn-secondary"
+                    >
                         Home
                     </button>
                     <button onClick={handleLogout} className="btn-logout">
@@ -272,7 +277,7 @@ function CourseCatalog() {
                                             <span className={`badge badge-${course.type.toLowerCase()}`}>
                                                 {course.type}
                                             </span>
-                                            {locked && <span className="badge badge-locked">🔒 Locked</span>}
+                                            {locked && <span className="badge badge-locked"><Lock size={14} style={{marginRight:'4px', display:'inline', verticalAlign:'middle'}} /> Locked</span>}
                                         </div>
                                     </div>
 

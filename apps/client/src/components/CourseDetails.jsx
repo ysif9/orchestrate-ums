@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import { authService } from '../services/authService';
 
 const CourseDetails = () => {
     const { id } = useParams();
+    const user = authService.getCurrentUser();
+    const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -38,8 +41,8 @@ const CourseDetails = () => {
                     <span className="uni-subtext">UNIVERSITY | FACULTY OF ENGINEERING</span>
                 </h1>
                 <div className="nav-links">
-                    {/* UPDATED: Link back to My Courses (Home) instead of Dashboard */}
-                    <Link to="/home">← Back to My Courses</Link>
+                    {/* UPDATED: Link back to My Courses (Home) based on user role */}
+                    <Link to={isAdminOrStaff ? '/admin/home' : '/home'}>← Back to My Courses</Link>
                 </div>
             </nav>
 

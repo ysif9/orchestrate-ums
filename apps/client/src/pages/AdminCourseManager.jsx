@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { courseService } from '../services/courseService';
 import '../styles/AdminCourseManager.css';
 
 const AdminCourseManager = () => {
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -171,6 +173,12 @@ const AdminCourseManager = () => {
 
         {/* Header */}
         <header className="admin-header">
+          <button
+            className="btn-back-home"
+            onClick={() => navigate('/admin/home')}
+          >
+            ← Back to Home
+          </button>
           <div className="admin-title">
             <h1>Course Management</h1>
             <p>Create, edit, and manage university curriculum</p>

@@ -1,13 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import StudentHome from './pages/StudentHome';
+import StudentHome from './pages/StudentHome'; // Now acts as "My Courses"
+import AdminHome from './pages/AdminHome'; // Admin/Staff landing page
 import AdminCourseManager from './pages/AdminCourseManager';
 import CourseCatalog from './pages/CourseCatalog';
 import CatalogCourseDetails from './pages/CatalogCourseDetails';
+import CourseDetails from './components/CourseDetails'; // View for enrolled course
 import { authService } from './services/authService';
-import Dashboard from './components/Dashboard';
-import CourseDetails from './components/CourseDetails';
 import './App.css';
 
 /**
@@ -21,11 +21,22 @@ function ProtectedRoute({ children }) {
 
 /**
  * Root Redirect Component
- * Redirects to home if authenticated, otherwise to login
+ * Redirects based on authentication status and user role
+ * - Admin/Staff -> /admin/home
+ * - Student -> /home
+ * - Not authenticated -> /login
  */
 function RootRedirect() {
     const isAuthenticated = authService.isAuthenticated();
-    return <Navigate to={isAuthenticated ? "/home" : "/login"} replace />;
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+
+    const user = authService.getCurrentUser();
+    const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+
+    return <Navigate to={isAdminOrStaff ? "/admin/home" : "/home"} replace />;
 }
 
 /**
@@ -40,6 +51,8 @@ function App() {
                 <Route path="/signup" element={<Signup />} />
 
                 {/* Protected Routes */}
+                
+                {/* Student Home / Dashboard (My Courses) */}
                 <Route
                     path="/home"
                     element={
@@ -48,6 +61,8 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+                
+                {/* Course Catalog (Browsing new courses) */}
                 <Route
                     path="/courses"
                     element={
@@ -72,6 +87,16 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+
+                {/* Admin Routes */}
+                <Route
+                    path="/admin/home"
+                    element={
+                        <ProtectedRoute>
+                            <AdminHome />
+                        </ProtectedRoute>
+                    }
+                />
                 <Route
                     path="/admin/courses"
                     element={
@@ -80,21 +105,13 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+
+                {/* Enrolled Course Detail View */}
                 <Route
                     path="/course/:id"
                     element={
                         <ProtectedRoute>
                             <CourseDetails />
-                        </ProtectedRoute>
-                    }
-                />
-
-                {/* Dashboard (legacy) */}
-                <Route
-                    path="/dashboard"
-                    element={
-                        <ProtectedRoute>
-                            <Dashboard />
                         </ProtectedRoute>
                     }
                 />

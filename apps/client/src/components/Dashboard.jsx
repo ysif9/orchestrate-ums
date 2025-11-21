@@ -2,14 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
-// ⚠️ PASTE YOUR NEW STUDENT ID HERE FROM THE SEED SCRIPT ⚠️
-const STUDENT_ID = "691e44c63d0af8f1082df056"; 
-
 const Dashboard = () => {
     const [courses, setCourses] = useState([]);
     const [filteredCourses, setFilteredCourses] = useState([]);
     const [completedCourseIds, setCompletedCourseIds] = useState([]);
-    
+
     // Filters State
     const [subjectFilter, setSubjectFilter] = useState('All');
     const [difficultyFilter, setDifficultyFilter] = useState('All');
@@ -21,10 +18,12 @@ const Dashboard = () => {
                 setCourses(coursesRes.data);
                 setFilteredCourses(coursesRes.data);
 
+                // Get enrollments for the current authenticated user
+                // The API automatically filters by the authenticated user's ID
                 const enrollRes = await axios.get('http://localhost:5000/api/enrollments');
                 const completed = enrollRes.data
-                    .filter(enr => enr.student === STUDENT_ID && enr.status === 'completed')
-                    .map(enr => enr.course);
+                    .filter(enr => enr.status === 'completed')
+                    .map(enr => enr.course._id || enr.course);
                 setCompletedCourseIds(completed);
             } catch (error) {
                 console.error("Error loading data:", error);

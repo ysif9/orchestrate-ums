@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import { authService } from '../services/authService';
 
 const CourseDetails = () => {
     const { id } = useParams();

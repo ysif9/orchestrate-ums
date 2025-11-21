@@ -102,7 +102,9 @@ function GradebookPage() {
                         : item
                 )
             );
-            setMessage(`Grade for ${item.student.name} saved successfully.`);
+            // After successful save
+            const savedStudent = gradeData.find(g => g.student._id === studentId);
+            setMessage(`Grade saved successfully for ${savedStudent?.student?.name || 'Student'}!`);
         } catch (error) {
             setMessage(`Failed to save grade: ${error.response?.data?.message || error.message}`);
         }

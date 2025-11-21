@@ -69,6 +69,19 @@ function StudentHome() {
                     </div>
                 )}
 
+                {/* Student Quick Actions */}
+                {!isAdminOrStaff && (
+                    <div className="quick-actions">
+                        <h3>My Academic Tools</h3>
+                        <button
+                        onClick={() => navigate('/my-grades')}
+                        className="action-btn action-view-grades"
+                        >
+                        View My Grades & Feedback
+                        </button>
+                    </div>
+                    )}
+
                 <button onClick={handleLogout} className="logout-btn">
                     Logout
                 </button>

@@ -15,12 +15,17 @@ const router = express.Router();
 
 // ADMIN: Get all courses created/taught by the logged-in user (professor/admin)
 // Endpoint: GET /api/assessments/courses/my-teaching-courses
-router.get('/courses/my-teaching-courses', authenticate, authorize('admin'), async (req, res) => {
+router.get('/courses/my-teaching-courses', authenticate, authorize('admin','staff'), async (req, res) => {
     try {
         // Filter restored: Querying ONLY courses created by the user, with ID conversion.
-        const courses = await Course.find({ 
-          createdBy: new mongoose.Types.ObjectId(req.user.id) 
-        }).select('title code _id'); 
+        let courses;
+          if (req.user.role === 'admin') {
+            courses = await Course.find().select('title code _id');
+          } else {
+            courses = await Course.find({ 
+              createdBy: new mongoose.Types.ObjectId(req.user.id) 
+            }).select('title code _id');
+          }
 
         res.json({
             success: true,

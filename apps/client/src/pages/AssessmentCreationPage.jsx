@@ -1,190 +1,170 @@
-// File: src/pages/AssessmentCreationPage.jsx
-
+// src/pages/AssessmentCreationPage.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-// Ensure your styles for AssessmentCreationPage.css exist or use existing common styles
+import '../styles/AssessmentCreationPage.css';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
 function AssessmentCreationPage() {
-    const navigate = useNavigate();
-    const [courses, setCourses] = useState([]);
-    const [formData, setFormData] = useState({
-        course: '',
-        title: '',
-        description: '',
-        type: 'assignment',
-        totalMarks: 10,
-        dueDate: ''
-    });
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState(null);
-    const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const [courses, setCourses] = useState([]);
+  const [formData, setFormData] = useState({
+    course: '',
+    title: '',
+    description: '',
+    type: 'assignment',
+    totalMarks: 100,
+    dueDate: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
-    // Fetch Courses 
-    useEffect(() => {
-        const fetchCourses = async () => {
-            try {
-                // Uses the route we debugged: GET /api/assessments/courses/my-teaching-courses
-                const response = await axios.get(`${API_BASE_URL}/assessments/courses/my-teaching-courses`); 
-                setCourses(response.data.courses || []);
-            } catch (err) {
-                setError('Failed to load courses. Check backend connectivity.');
-            }
-        };
-        fetchCourses();
-    }, []);
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ 
-            ...prev, 
-            [name]: name === 'totalMarks' ? parseInt(value) || 0 : value 
-        }));
-        setError(null);
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/assessments/courses/my-teaching-courses`);
+        setCourses(response.data.courses || []);
+      } catch (err) {
+        setError('Failed to load your courses. Please ensure you have created courses.');
+      }
     };
+    fetchCourses();
+  }, []);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
-        setMessage(null);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'totalMarks' ? parseInt(value) || null : value
+    }));
+    setError('');
+  };
 
-        if (!formData.course || !formData.title || !formData.totalMarks) {
-            setError('Please fill in all required fields (Course, Title, Total Marks).');
-            setLoading(false);
-            return;
-        }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setMessage('');
 
-        try {
-            // POST to your EXISTING assessment creation route: POST /api/assessments/
-            const response = await axios.post(`${API_BASE_URL}/assessments`, formData); 
+    if (!formData.course || !formData.title || !formData.totalMarks) {
+      setError('Course, Title, and Total Marks are required.');
+      setLoading(false);
+      return;
+    }
 
-            setMessage(response.data.message);
-            // Optionally redirect after a brief success message
-            setTimeout(() => {
-                navigate('/admin/courses'); 
-            }, 1500);
+    try {
+      const response = await axios.post(`${API_BASE_URL}/assessments`, formData);
+      setMessage('Assessment created successfully! Redirecting...');
+      setTimeout(() => navigate('/admin/courses'), 2000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to create assessment.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        } catch (err) {
-            const msg = err.response?.data?.message || 'Assessment creation failed.';
-            setError(msg);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <div className="container assessment-creation-container">
-            <h1>Create New Assessment</h1>
-            <button onClick={() => navigate('/home')} className="back-btn">
-                ← Back to Home
-            </button>
-            
-            {error && <div className="error-box">{error}</div>}
-            {message && <div className="success-box">{message}</div>}
-
-            <form onSubmit={handleSubmit} className="assessment-form">
-                
-                {/* 1. Course Selector */}
-                <div className="form-group">
-                    <label htmlFor="course">Select Course:</label>
-                    <select
-                        id="course"
-                        name="course"
-                        value={formData.course}
-                        onChange={handleChange}
-                        disabled={courses.length === 0 || loading}
-                        required
-                    >
-                        <option value="">-- Choose a Course --</option>
-                        {courses.map(course => (
-                            <option key={course._id} value={course._id}>
-                                {course.code} - {course.title}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* 2. Assessment Title */}
-                <div className="form-group">
-                    <label htmlFor="title">Assessment Title:</label>
-                    <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleChange}
-                        placeholder="e.g., Final Exam, Homework 5"
-                        disabled={loading}
-                        required
-                    />
-                </div>
-
-                {/* 3. Assessment Type */}
-                <div className="form-group">
-                    <label htmlFor="type">Type:</label>
-                    <select
-                        id="type"
-                        name="type"
-                        value={formData.type}
-                        onChange={handleChange}
-                        disabled={loading}
-                    >
-                        {['assignment', 'quiz', 'midterm', 'final', 'project'].map(t => (
-                            <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* 4. Total Marks */}
-                <div className="form-group">
-                    <label htmlFor="totalMarks">Total Marks:</label>
-                    <input
-                        type="number"
-                        id="totalMarks"
-                        name="totalMarks"
-                        value={formData.totalMarks}
-                        onChange={handleChange}
-                        min="1"
-                        disabled={loading}
-                        required
-                    />
-                </div>
-
-                {/* 5. Due Date */}
-                <div className="form-group">
-                    <label htmlFor="dueDate">Due Date:</label>
-                    <input
-                        type="date"
-                        id="dueDate"
-                        name="dueDate"
-                        value={formData.dueDate}
-                        onChange={handleChange}
-                        disabled={loading}
-                    />
-                </div>
-
-                {/* 6. Description */}
-                <div className="form-group">
-                    <label htmlFor="description">Description (Optional):</label>
-                    <textarea
-                        id="description"
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        rows="3"
-                        disabled={loading}
-                    />
-                </div>
-
-                <button type="submit" disabled={loading} className="submit-btn">
-                    {loading ? 'Creating...' : 'Create Assessment'}
-                </button>
-            </form>
+  return (
+    <div className="assessment-creation-page">
+      <div className="assessment-container">
+        <div className="assessment-header">
+          <button onClick={() => navigate('/home')} className="back-home-btn">
+            Back to Home
+          </button>
+          <h1>Create New Assessment</h1>
+          <p>Add quizzes, assignments, midterms, or final exams</p>
         </div>
-    );
+
+        <div className="assessment-form-wrapper">
+          {error && <div className="message error-message">{error}</div>}
+          {message && <div className="message success-message">{message}</div>}
+
+          <form onSubmit={handleSubmit} className="assessment-form">
+            <div className="form-group">
+              <label>Select Course <span className="required">*</span></label>
+              <select
+                name="course"
+                value={formData.course}
+                onChange={handleChange}
+                required
+                disabled={courses.length === 0}
+              >
+                <option value="">-- Choose a Course --</option>
+                {courses.map(course => (
+                  <option key={course._id} value={course._id}>
+                    {course.code} - {course.title}
+                  </option>
+                ))}
+              </select>
+              {courses.length === 0 && <small>No courses found. Create a course first.</small>}
+            </div>
+
+            <div className="form-group">
+              <label>Assessment Title <span className="required">*</span></label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                placeholder="e.g., Final Exam, Midterm Quiz, Project Phase 2"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Type</label>
+              <select name="type" value={formData.type} onChange={handleChange}>
+                <option value="assignment">Assignment</option>
+                <option value="quiz">Quiz</option>
+                <option value="midterm">Midterm Exam</option>
+                <option value="final">Final Exam</option>
+                <option value="project">Project</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Total Marks <span className="required">*</span></label>
+              <input
+                type="number"
+                name="totalMarks"
+                value={formData.totalMarks}
+                onChange={handleChange}
+                min="1"
+                max="500"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Due Date</label>
+              <input
+                type="date"
+                name="dueDate"
+                value={formData.dueDate}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Description / Instructions (Optional)</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Provide details, rubric, or submission instructions..."
+                rows="4"
+              />
+            </div>
+
+            <button type="submit" disabled={loading} className="submit-btn">
+              {loading ? 'Creating Assessment...' : 'Create Assessment'}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default AssessmentCreationPage;

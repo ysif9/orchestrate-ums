@@ -84,6 +84,15 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+
+                {/* <Route 
+                    path="/my-grades" 
+                    element={
+                        <ProtectedRoute>
+                            <MyGradesPage />
+                        </ProtectedRoute>
+                    } 
+                /> */}
                 {/* ============================= */}
 
                 {/* Smart redirect based on authentication status */}

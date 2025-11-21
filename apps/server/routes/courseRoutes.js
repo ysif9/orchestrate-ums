@@ -69,14 +69,41 @@ router.delete('/:id', authenticate, authorize('admin'), async (req, res) => {
     }
 });
 
-// GET /api/courses - All authenticated users (Read all courses)
+// GET /api/courses - All authenticated users
+// Supports filtering by: level (difficulty), credits, type, hasPrerequisites
 router.get('/', authenticate, async (req, res) => {
     try {
-        //TODO: Add filters
-        const credits = req.query.credits;
-        const type = req.query.type;
+        const { level, credits, type, hasPrerequisites } = req.query;
 
-        const courses = await Course.find();
+        // Build filter object
+        const filter = {};
+
+        // Filter by level (difficulty)
+        if (level && level !== 'All') {
+            filter.difficulty = level;
+        }
+
+        // Filter by credits
+        if (credits) {
+            filter.credits = parseInt(credits);
+        }
+
+        // Filter by type (Core/Elective)
+        if (type && type !== 'All') {
+            filter.type = type;
+        }
+
+        // Filter by prerequisite status
+        if (hasPrerequisites === 'true') {
+            filter.prerequisites = { $exists: true, $ne: [] };
+        } else if (hasPrerequisites === 'false') {
+            filter.$or = [
+                { prerequisites: { $exists: false } },
+                { prerequisites: { $size: 0 } }
+            ];
+        }
+
+        const courses = await Course.find(filter).populate('prerequisites', 'code title');
         res.json(courses);
     } catch (error) {
         res.status(500).json({message: error.message});

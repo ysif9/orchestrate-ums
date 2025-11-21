@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { authService } from '../services/authService';
+import { AlertTriangle, Lock } from 'lucide-react';
 import '../styles/CatalogCourseDetails.css';
 
 /**
@@ -13,7 +14,8 @@ function CatalogCourseDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
     const user = authService.getCurrentUser();
-    
+    const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+
     const [course, setCourse] = useState(null);
     const [completedCourseIds, setCompletedCourseIds] = useState([]);
     const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
@@ -82,10 +84,10 @@ function CatalogCourseDetails() {
             
             setEnrollmentSuccess(true);
             setEnrolledCourseIds([...enrolledCourseIds, id]);
-            
+
             // Redirect to home after 2 seconds
             setTimeout(() => {
-                navigate('/home');
+                navigate(isAdminOrStaff ? '/admin/home' : '/home');
             }, 2000);
         } catch (error) {
             setEnrollmentError(
@@ -136,7 +138,10 @@ function CatalogCourseDetails() {
                     <button onClick={() => navigate('/catalog')} className="btn-secondary">
                         Back to Catalog
                     </button>
-                    <button onClick={() => navigate('/home')} className="btn-secondary">
+                    <button
+                        onClick={() => navigate(isAdminOrStaff ? '/admin/home' : '/home')}
+                        className="btn-secondary"
+                    >
                         Home
                     </button>
                     <button onClick={handleLogout} className="btn-logout">
@@ -214,7 +219,8 @@ function CatalogCourseDetails() {
                                 </div>
                                 {!prerequisitesMet && (
                                     <p className="prerequisites-warning">
-                                        ⚠️ You must complete all prerequisite courses before enrolling.
+                                        <AlertTriangle size={16} style={{marginRight:'8px', display:'inline', verticalAlign:'middle'}} />
+                                        You must complete all prerequisite courses before enrolling.
                                     </p>
                                 )}
                             </section>
@@ -313,7 +319,8 @@ function CatalogCourseDetails() {
                                     </button>
                                 ) : !prerequisitesMet ? (
                                     <button className="btn-disabled" disabled>
-                                        🔒 Prerequisites Required
+                                        <Lock size={16} style={{marginRight:'8px', display:'inline', verticalAlign:'middle'}} />
+                                        Prerequisites Required
                                     </button>
                                 ) : (
                                     <button

@@ -2,12 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { authService } from '../services/authService';
 import '../styles/AssessmentCreationPage.css';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
 function AssessmentCreationPage() {
   const navigate = useNavigate();
+  const user = authService.getCurrentUser();
+  const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+
   const [courses, setCourses] = useState([]);
   const [formData, setFormData] = useState({
     course: '',
@@ -69,7 +73,10 @@ function AssessmentCreationPage() {
     <div className="assessment-creation-page">
       <div className="assessment-container">
         <div className="assessment-header">
-          <button onClick={() => navigate('/home')} className="back-home-btn">
+          <button
+            onClick={() => navigate(isAdminOrStaff ? '/admin/home' : '/home')}
+            className="back-home-btn"
+          >
             Back to Home
           </button>
           <h1>Create New Assessment</h1>

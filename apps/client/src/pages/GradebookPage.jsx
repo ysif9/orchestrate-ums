@@ -1,13 +1,15 @@
 // Updated File: src/components/GradebookPage.jsx
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Using axios directly, based on CourseDetails.jsx
 import '../styles/GradebookPage.css';
 
 // Base URL for the backend API
-const API_BASE_URL = 'http://localhost:5000/api'; 
+const API_BASE_URL = 'http://localhost:5000/api';
 
 function GradebookPage() {
+    const navigate = useNavigate();
     const [courses, setCourses] = useState([]);
     const [assessments, setAssessments] = useState([]);
     const [selectedCourseId, setSelectedCourseId] = useState('');
@@ -114,8 +116,16 @@ function GradebookPage() {
     // --- Render Logic ---
     return (
         <div className="gradebook-container">
-            <h1>Assessment Gradebook</h1>
-            
+            <div className="gradebook-header">
+                <button
+                    onClick={() => navigate('/admin/home')}
+                    className="back-home-btn"
+                >
+                    Back to Home
+                </button>
+                <h1>Assessment Gradebook</h1>
+            </div>
+
             {/* Course Selector */}
             <div className="selector-group">
                 <label htmlFor="course-select">Select Course:</label>

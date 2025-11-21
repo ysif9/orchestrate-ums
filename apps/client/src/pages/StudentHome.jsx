@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { authService } from '../services/authService';
+import { ClipboardCheck, BarChart3, BookOpen, Sparkles } from 'lucide-react';
 import '../styles/StudentHome.css';
 
 function StudentHome() {
@@ -90,13 +91,15 @@ function StudentHome() {
                                     onClick={() => navigate('/admin/assessments/create')}
                                     className="action-btn action-create-assessment"
                                 >
-                                    ✨ Create Assessment
+                                    <Sparkles size={18} style={{marginRight:'8px', display:'inline', verticalAlign:'middle'}} />
+                                    Create Assessment
                                 </button>
                                 <button
                                     onClick={() => navigate('/admin/gradebook')}
                                     className="action-btn action-grade-assessments"
                                 >
-                                    📝 Grade Assessments
+                                    <ClipboardCheck size={18} style={{marginRight:'8px', display:'inline', verticalAlign:'middle'}} />
+                                    Grade Assessments
                                 </button>
                             </>
                         )}
@@ -106,7 +109,8 @@ function StudentHome() {
                                 onClick={() => navigate('/my-grades')}
                                 className="action-btn action-view-grades"
                             >
-                                📊 View My Grades
+                                <BarChart3 size={18} style={{marginRight:'8px', display:'inline', verticalAlign:'middle'}} />
+                                View My Grades
                             </button>
                         )}
                     </div>
@@ -117,7 +121,9 @@ function StudentHome() {
                 {/* ENROLLED COURSES GRID */}
                 {enrollments.length === 0 ? (
                     <div className="empty-state">
-                        <div className="empty-icon">📚</div>
+                        <div className="empty-icon">
+                            <BookOpen size={64} strokeWidth={1.5} />
+                        </div>
                         <h3>No Active Enrollments</h3>
                         <p>You are not currently enrolled in any courses for this semester.</p>
                         <button onClick={() => navigate('/catalog')} className="btn-primary">

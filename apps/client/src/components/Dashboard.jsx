@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { Lock } from 'lucide-react';
 
 const Dashboard = () => {
     const [courses, setCourses] = useState([]);
@@ -95,7 +96,7 @@ const Dashboard = () => {
                                     
                                     <div className="card-body">
                                         <div className="subject-tag">
-                                            {locked && <span style={{marginRight:'5px'}}>🔒</span>} 
+                                            {locked && <Lock size={14} style={{marginRight:'5px', display:'inline'}} />}
                                             {course.subjectArea}
                                         </div>
                                         <h3 className="card-title">{course.title}</h3>

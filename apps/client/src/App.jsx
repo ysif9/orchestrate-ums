@@ -108,7 +108,7 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
-                {/* 🌟 NEW ROUTE ADDED HERE: Assessment Creation 🌟 */}
+                {/* NEW ROUTE: Assessment Creation */}
                 <Route
                     path="/admin/assessments/create"
                     element={

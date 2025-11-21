@@ -1,11 +1,13 @@
 // src/pages/MyGradesPage.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/MyGradesPage.css';
 
 const API_BASE = 'http://localhost:5000/api';
 
 function MyGradesPage() {
+  const navigate = useNavigate();
   const [grades, setGrades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -30,7 +32,15 @@ function MyGradesPage() {
 
   return (
     <div className="my-grades-page">
-      <h1>My Grades & Feedback</h1>
+      <div className="grades-header">
+        <button
+          onClick={() => navigate('/home')}
+          className="back-home-btn"
+        >
+          Back to Home
+        </button>
+        <h1>My Grades & Feedback</h1>
+      </div>
 
       {grades.length === 0 ? (
         <p>No grades have been posted yet.</p>

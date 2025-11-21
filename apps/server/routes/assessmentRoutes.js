@@ -1,12 +1,59 @@
-
 const express = require('express');
+const mongoose = require('mongoose'); // <-- Mongoose imported for ObjectId conversion
 const Assessment = require('../models/Assessment');
 const Grade = require('../models/Grade');
 const Enrollment = require('../models/Enrollment');
+const Course = require('../models/Course'); 
 const authenticate = require('../middleware/auth');
 const authorize = require('../middleware/authorize');
 
 const router = express.Router();
+
+// ==========================================================
+// NEW ROUTES FOR GRADEBOOK FRONTEND DATA POPULATION 
+// ==========================================================
+
+// ADMIN: Get all courses created/taught by the logged-in user (professor/admin)
+// Endpoint: GET /api/assessments/courses/my-teaching-courses
+router.get('/courses/my-teaching-courses', authenticate, authorize('admin'), async (req, res) => {
+    try {
+        // Filter restored: Querying ONLY courses created by the user, with ID conversion.
+        const courses = await Course.find({ 
+          createdBy: new mongoose.Types.ObjectId(req.user.id) 
+        }).select('title code _id'); 
+
+        res.json({
+            success: true,
+            courses
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error loading teaching courses: ' + error.message });
+    }
+});
+
+// ADMIN: Get all assessments for a specific course ID
+// Endpoint: GET /api/assessments/course/:courseId/assessments
+router.get('/course/:courseId/assessments', authenticate, authorize('admin'), async (req, res) => {
+    try {
+        // Filter restored: Querying by course ID AND the user's ID.
+        const assessments = await Assessment.find({ 
+            course: req.params.courseId,
+            createdBy: new mongoose.Types.ObjectId(req.user.id) 
+        }).select('title totalMarks _id'); 
+
+        res.json({
+            success: true,
+            assessments
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error loading course assessments: ' + error.message });
+    }
+});
+
+
+// ==========================================================
+// EXISTING ROUTES FOR ASSESSMENT CREATION AND GRADING
+// ==========================================================
 
 // CREATE ASSESSMENT (Admin = Professor only)
 router.post('/', authenticate, authorize('admin'), async (req, res) => {
@@ -20,7 +67,8 @@ router.post('/', authenticate, authorize('admin'), async (req, res) => {
       course,
       totalMarks,
       dueDate,
-      createdBy: req.user.id
+      // Fix applied: Ensure the creator ID is saved correctly with conversion
+      createdBy: new mongoose.Types.ObjectId(req.user.id) 
     });
 
     await assessment.save();
@@ -43,7 +91,7 @@ router.post('/grade', authenticate, authorize('admin'), async (req, res) => {
 
     const assessment = await Assessment.findOne({ 
       _id: assessmentId, 
-      createdBy: req.user.id 
+      createdBy: new mongoose.Types.ObjectId(req.user.id) // ID Conversion applied for authorization
     });
 
     if (!assessment) {
@@ -99,12 +147,12 @@ router.get('/my-grades', authenticate, authorize('student'), async (req, res) =>
   }
 });
 
-// ADMIN (Professor): See all grades for one assessment (shows ungraded students too)
+// ADMIN (Professor): See all grades for one assessment 
 router.get('/:assessmentId/grades', authenticate, authorize('admin'), async (req, res) => {
   try {
     const assessment = await Assessment.findOne({
       _id: req.params.assessmentId,
-      createdBy: req.user.id
+      createdBy: new mongoose.Types.ObjectId(req.user.id) // ID Conversion applied for authorization
     });
 
     if (!assessment) {

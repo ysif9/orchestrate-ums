@@ -7,6 +7,8 @@ import { authService } from './services/authService';
 import Dashboard from './components/Dashboard';
 import CourseDetails from './components/CourseDetails';
 import './App.css';
+import GradebookPage from './pages/GradebookPage'; // Already imported
+import AssessmentCreationPage from './pages/AssessmentCreationPage';
 
 /**
  * Protected Route Component
@@ -62,6 +64,27 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+                {/* 🌟 NEW ROUTE ADDED HERE: Assessment Creation 🌟 */}
+                <Route
+                    path="/admin/assessments/create"
+                    element={
+                        <ProtectedRoute>
+                            <AssessmentCreationPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+
+                {/* === NEW ROUTE ADDED HERE === */}
+                <Route
+                    path="/admin/gradebook"
+                    element={
+                        <ProtectedRoute>
+                            <GradebookPage />
+                        </ProtectedRoute>
+                    }
+                />
+                {/* ============================= */}
 
                 {/* Smart redirect based on authentication status */}
                 <Route path="/" element={<RootRedirect />} />

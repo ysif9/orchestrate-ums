@@ -1,0 +1,101 @@
+/* File to be created: src/styles/GradebookPage.css */
+
+.gradebook-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.gradebook-container h1 {
+    color: #2c3e50;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.selector-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.selector-group label {
+    font-weight: bold;
+    margin-right: 15px;
+    color: #34495e;
+    min-width: 120px;
+}
+
+.selector-group select {
+    padding: 10px;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+    flex-grow: 1;
+    max-width: 400px;
+}
+
+.status-message {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    background-color: #fcf8e3;
+    color: #8a6d3b;
+    border: 1px solid #faebcc;
+}
+
+/* Grade Table Styling */
+.grade-table-wrapper {
+    margin-top: 30px;
+}
+
+.grade-table-wrapper h2 {
+    color: #3498db;
+    margin-bottom: 15px;
+}
+
+.grade-table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.grade-table-wrapper th,
+.grade-table-wrapper td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.grade-table-wrapper th {
+    background-color: #f8f9fa;
+    color: #7f8c8d;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+.grade-table-wrapper input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+}
+
+.save-btn {
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: 500;
+}
+
+.save-btn:hover {
+    background-color: #27ae60;
+}

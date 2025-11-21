@@ -1,16 +1,29 @@
 const express = require('express');
+const mongoose = require('mongoose'); // <--- NEW: Added Mongoose import for ID conversion
 const Course = require('../models/Course');
 const authenticate = require('../middleware/auth');
 const authorize = require('../middleware/authorize');
 
 const router = express.Router();
 
-// POST /api/courses - Admin and Staff only
+// POST /api/courses - Admin and Staff only (CREATE COURSE)
 router.post('/', authenticate, authorize('admin', 'staff'), async (req, res) => {
     try {
         const {code, title, description, type, credits, prerequisites, semester} = req.body;
 
-        const course = new Course({code, title, description, type, credits, prerequisites, semester});
+        const course = new Course({
+            code, 
+            title, 
+            description, 
+            type, 
+            credits, 
+            prerequisites, 
+            semester,
+            // 🚨 CRITICAL FIX APPLIED: Link the course to the creator, 
+            // converting the string ID to a Mongoose ObjectId for correct storage.
+            createdBy: new mongoose.Types.ObjectId(req.user.id) 
+        }); 
+        
         await course.save();
 
         res.status(201).json(course);
@@ -56,7 +69,7 @@ router.delete('/:id', authenticate, authorize('admin'), async (req, res) => {
     }
 });
 
-// GET /api/courses - All authenticated users
+// GET /api/courses - All authenticated users (Read all courses)
 router.get('/', authenticate, async (req, res) => {
     try {
         //TODO: Add filters

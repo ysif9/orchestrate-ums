@@ -51,6 +51,21 @@ function StudentHome() {
                         >
                             📚 Manage Courses
                         </button>
+                        {/* NEW BUTTON ADDED HERE */}
+                        <button
+                            onClick={() => navigate('/admin/assessments/create')}
+                            className="action-btn action-create-assessment"
+                        >
+                            ✨ Create Assessment
+                        </button>
+                        {/* NEW BUTTON ADDED HERE */}
+                        <button
+                            onClick={() => navigate('/admin/gradebook')} // NEW ROUTE
+                            className="action-btn action-grade-assessments" // Added class for distinct styling
+                        >
+                            📝 Grade Assessments
+                        </button>
+                            
                     </div>
                 )}
 

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/authService';
-import '../styles/Auth.css';
 
 function Login() {
     const navigate = useNavigate();
@@ -17,7 +16,7 @@ function Login() {
     useEffect(() => {
         if (authService.isAuthenticated()) {
             const user = authService.getCurrentUser();
-            const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+            const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
             navigate(isAdminOrStaff ? '/admin/home' : '/home', { replace: true });
         }
     }, [navigate]);
@@ -72,7 +71,7 @@ function Login() {
      */
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         // Validate form
         if (!validateForm()) {
             return;
@@ -90,12 +89,12 @@ function Login() {
             if (response.success) {
                 // Redirect based on user role
                 const user = response.user;
-                const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+                const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
                 navigate(isAdminOrStaff ? '/admin/home' : '/home');
             }
         } catch (error) {
             console.error('Login error:', error);
-            
+
             // Handle different error types
             if (error.response) {
                 // Server responded with error
@@ -114,22 +113,24 @@ function Login() {
     };
 
     return (
-        <div className="auth-container">
-            <div className="auth-card">
-                <div className="auth-header">
-                    <h1>Welcome Back</h1>
-                    <p>Sign in to your Orchestrate UMS account</p>
+        <div className="min-h-screen flex items-center justify-center p-8">
+            <div className="bg-surface rounded-xl shadow-card p-12 max-w-md w-full">
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl mb-2 text-brand-500">Welcome Back</h1>
+                    <p className="text-content-secondary">Sign in to your Orchestrate UMS account</p>
                 </div>
 
                 {apiError && (
-                    <div className="auth-error">
+                    <div className="bg-error-100 text-error-700 px-4 py-3 rounded-lg mb-6 text-sm border border-error-200">
                         {apiError}
                     </div>
                 )}
 
-                <form className="auth-form" onSubmit={handleSubmit}>
-                    <div className="auth-form-group">
-                        <label htmlFor="email">Email Address</label>
+                <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="email" className="text-content font-medium text-sm">
+                            Email Address
+                        </label>
                         <input
                             type="email"
                             id="email"
@@ -138,16 +139,19 @@ function Login() {
                             onChange={handleChange}
                             placeholder="Enter your email"
                             disabled={loading}
+                            className="px-4 py-3 border border-border rounded-lg text-base bg-surface text-content transition-colors focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:bg-surface-tertiary disabled:cursor-not-allowed disabled:opacity-60"
                         />
                         {errors.email && (
-                            <span style={{ color: 'var(--auth-danger)', fontSize: '0.875rem' }}>
+                            <span className="text-error-600 text-sm">
                                 {errors.email}
                             </span>
                         )}
                     </div>
 
-                    <div className="auth-form-group">
-                        <label htmlFor="password">Password</label>
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="password" className="text-content font-medium text-sm">
+                            Password
+                        </label>
                         <input
                             type="password"
                             id="password"
@@ -156,26 +160,27 @@ function Login() {
                             onChange={handleChange}
                             placeholder="Enter your password"
                             disabled={loading}
+                            className="px-4 py-3 border border-border rounded-lg text-base bg-surface text-content transition-colors focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:bg-surface-tertiary disabled:cursor-not-allowed disabled:opacity-60"
                         />
                         {errors.password && (
-                            <span style={{ color: 'var(--auth-danger)', fontSize: '0.875rem' }}>
+                            <span className="text-error-600 text-sm">
                                 {errors.password}
                             </span>
                         )}
                     </div>
 
-                    <button 
-                        type="submit" 
-                        className="auth-submit-btn"
+                    <button
+                        type="submit"
+                        className="w-full bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-content-inverse font-medium py-3 px-6 rounded-lg transition-colors shadow-button hover:shadow-button-hover disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                         disabled={loading}
                     >
                         {loading ? 'Signing in...' : 'Sign In'}
                     </button>
                 </form>
 
-                <div className="auth-footer">
-                    <p>
-                        Don&apos;t have an account? <Link to="/signup">Sign up here</Link>
+                <div className="text-center mt-6">
+                    <p className="text-content-secondary text-sm">
+                        Don&apos;t have an account? <Link to="/signup" className="text-brand-500 hover:text-brand-600 font-medium underline">Sign up here</Link>
                     </p>
                 </div>
             </div>

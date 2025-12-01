@@ -3,7 +3,7 @@ const mongoose = require('mongoose'); // <-- Mongoose imported for ObjectId conv
 const Assessment = require('../models/Assessment');
 const Grade = require('../models/Grade');
 const Enrollment = require('../models/Enrollment');
-const Course = require('../models/Course'); 
+const Course = require('../models/Course');
 const authenticate = require('../middleware/auth');
 const authorize = require('../middleware/authorize');
 
@@ -15,44 +15,44 @@ const router = express.Router();
 
 // ADMIN: Get all courses created/taught by the logged-in user (professor/admin)
 // Endpoint: GET /api/assessments/courses/my-teaching-courses
-router.get('/courses/my-teaching-courses', authenticate, authorize('admin','staff'), async (req, res) => {
-    try {
-        // Filter restored: Querying ONLY courses created by the user, with ID conversion.
-        let courses;
-          if (req.user.role === 'admin') {
-            courses = await Course.find().select('title code _id');
-          } else {
-            courses = await Course.find({ 
-              createdBy: new mongoose.Types.ObjectId(req.user.id) 
-            }).select('title code _id');
-          }
-
-        res.json({
-            success: true,
-            courses
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Error loading teaching courses: ' + error.message });
+router.get('/courses/my-teaching-courses', authenticate, authorize('staff', 'professor'), async (req, res) => {
+  try {
+    // Filter restored: Querying ONLY courses created by the user, with ID conversion.
+    let courses;
+    if (req.user.role === 'staff') {
+      courses = await Course.find().select('title code _id');
+    } else {
+      courses = await Course.find({
+        createdBy: new mongoose.Types.ObjectId(req.user.id)
+      }).select('title code _id');
     }
+
+    res.json({
+      success: true,
+      courses
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error loading teaching courses: ' + error.message });
+  }
 });
 
 // ADMIN: Get all assessments for a specific course ID
 // Endpoint: GET /api/assessments/course/:courseId/assessments
-router.get('/course/:courseId/assessments', authenticate, authorize('admin'), async (req, res) => {
-    try {
-        // Filter restored: Querying by course ID AND the user's ID.
-        const assessments = await Assessment.find({ 
-            course: req.params.courseId,
-            createdBy: new mongoose.Types.ObjectId(req.user.id) 
-        }).select('title totalMarks _id'); 
+router.get('/course/:courseId/assessments', authenticate, authorize('staff', 'professor'), async (req, res) => {
+  try {
+    // Filter restored: Querying by course ID AND the user's ID.
+    const assessments = await Assessment.find({
+      course: req.params.courseId,
+      createdBy: new mongoose.Types.ObjectId(req.user.id)
+    }).select('title totalMarks _id');
 
-        res.json({
-            success: true,
-            assessments
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Error loading course assessments: ' + error.message });
-    }
+    res.json({
+      success: true,
+      assessments
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error loading course assessments: ' + error.message });
+  }
 });
 
 
@@ -61,7 +61,7 @@ router.get('/course/:courseId/assessments', authenticate, authorize('admin'), as
 // ==========================================================
 
 // CREATE ASSESSMENT (Admin = Professor only)
-router.post('/', authenticate, authorize('admin'), async (req, res) => {
+router.post('/', authenticate, authorize('staff', 'professor'), async (req, res) => {
   try {
     const { title, description, type, course, totalMarks, dueDate } = req.body;
 
@@ -73,7 +73,7 @@ router.post('/', authenticate, authorize('admin'), async (req, res) => {
       totalMarks,
       dueDate,
       // Fix applied: Ensure the creator ID is saved correctly with conversion
-      createdBy: new mongoose.Types.ObjectId(req.user.id) 
+      createdBy: new mongoose.Types.ObjectId(req.user.id)
     });
 
     await assessment.save();
@@ -90,30 +90,30 @@ router.post('/', authenticate, authorize('admin'), async (req, res) => {
 });
 
 // ADMIN (Professor): Grade a student + add feedback
-router.post('/grade', authenticate, authorize('admin'), async (req, res) => {
+router.post('/grade', authenticate, authorize('staff', 'professor'), async (req, res) => {
   try {
     const { assessmentId, studentId, score, feedback } = req.body;
 
-    const assessment = await Assessment.findOne({ 
-      _id: assessmentId, 
+    const assessment = await Assessment.findOne({
+      _id: assessmentId,
       createdBy: new mongoose.Types.ObjectId(req.user.id) // ID Conversion applied for authorization
     });
 
     if (!assessment) {
-      return res.status(403).json({ 
-        success: false, 
-        message: 'You can only grade assessments you created' 
+      return res.status(403).json({
+        success: false,
+        message: 'You can only grade assessments you created'
       });
     }
 
-    const enrollment = await Enrollment.findOne({ 
-      student: studentId, 
-      course: assessment.course 
+    const enrollment = await Enrollment.findOne({
+      student: studentId,
+      course: assessment.course
     });
     if (!enrollment) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Student is not enrolled in this course' 
+      return res.status(400).json({
+        success: false,
+        message: 'Student is not enrolled in this course'
       });
     }
 
@@ -122,8 +122,8 @@ router.post('/grade', authenticate, authorize('admin'), async (req, res) => {
       { score, feedback, gradedBy: req.user.id, gradedAt: Date.now() },
       { upsert: true, new: true }
     )
-    .populate('student', 'name email')
-    .populate('assessment', 'title');
+      .populate('student', 'name email')
+      .populate('assessment', 'title');
 
     res.json({
       success: true,
@@ -153,7 +153,7 @@ router.get('/my-grades', authenticate, authorize('student'), async (req, res) =>
 });
 
 // ADMIN (Professor): See all grades for one assessment 
-router.get('/:assessmentId/grades', authenticate, authorize('admin'), async (req, res) => {
+router.get('/:assessmentId/grades', authenticate, authorize('staff', 'professor'), async (req, res) => {
   try {
     const assessment = await Assessment.findOne({
       _id: req.params.assessmentId,

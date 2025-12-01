@@ -8,7 +8,6 @@ import CourseCatalog from './pages/CourseCatalog';
 import CatalogCourseDetails from './pages/CatalogCourseDetails';
 import CourseDetails from './components/CourseDetails'; // View for enrolled course
 import { authService } from './services/authService';
-import './App.css';
 import GradebookPage from './pages/GradebookPage';
 import AssessmentCreationPage from './pages/AssessmentCreationPage';
 import MyGradesPage from './pages/MyGradesPage';
@@ -37,7 +36,7 @@ function RootRedirect() {
     }
 
     const user = authService.getCurrentUser();
-    const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+    const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
 
     return <Navigate to={isAdminOrStaff ? "/admin/home" : "/home"} replace />;
 }
@@ -54,7 +53,7 @@ function App() {
                 <Route path="/signup" element={<Signup />} />
 
                 {/* Protected Routes */}
-                
+
                 {/* Student Home / Dashboard (My Courses) */}
                 <Route
                     path="/home"
@@ -64,7 +63,7 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
-                
+
                 {/* Course Catalog (Browsing new courses) */}
                 <Route
                     path="/courses"

@@ -4,12 +4,12 @@
  * Must be used after authenticate middleware
  * 
  * Usage:
- * router.post('/admin-only', authenticate, authorize('admin'), (req, res) => {
- *   // Only admins can access this route
+ * router.post('/staff-only', authenticate, authorize('staff'), (req, res) => {
+ *   // Only staff can access this route
  * });
  * 
- * router.get('/staff-or-admin', authenticate, authorize('admin', 'staff'), (req, res) => {
- *   // Admins or staff can access this route
+ * router.get('/professor-or-staff', authenticate, authorize('professor', 'staff'), (req, res) => {
+ *   // Professors or staff can access this route
  * });
  */
 const authorize = (...allowedRoles) => {

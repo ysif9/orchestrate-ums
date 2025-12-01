@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
         },
         role: {
             type: String,
-            enum: ['admin', 'staff', 'student'],
+            enum: ['staff', 'professor', 'student'],
             default: 'student',
         },
         // Specific fields for students
@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema(
     }
 );
 
-userSchema.pre('save', async function(next){
+userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
         return next();
     }
@@ -52,11 +52,11 @@ userSchema.pre('save', async function(next){
  * @param {string} candidatePassword - Password to compare
  * @returns {Promise<boolean>} True if passwords match
  */
-userSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function (candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);
 };
 
-userSchema.methods.toJSON = function() {
+userSchema.methods.toJSON = function () {
     const user = this.toObject();
     delete user.password;
     return user;

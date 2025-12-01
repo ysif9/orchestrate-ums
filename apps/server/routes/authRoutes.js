@@ -48,7 +48,7 @@ router.post('/signup', [
         }
         return true;
     }),
-    body('role').optional().isIn(['admin', 'staff', 'student']).withMessage('Valid role is required'),
+    body('role').optional().isIn(['staff', 'professor', 'student']).withMessage('Valid role is required'),
     body('maxCredits').optional().isInt({ min: 0 }).withMessage('Max credits must be a positive integer'),
 ], async (req, res) => {
     // Check for validation errors

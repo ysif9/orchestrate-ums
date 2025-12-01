@@ -22,7 +22,7 @@ function GradebookPage() {
         const fetchCourses = async () => {
             try {
                 // Uses the NEW backend route
-                const response = await axios.get(`${API_BASE_URL}/assessments/courses/my-teaching-courses`); 
+                const response = await axios.get(`${API_BASE_URL}/assessments/courses/my-teaching-courses`);
                 setCourses(response.data.courses || []);
             } catch (error) {
                 setMessage('Error loading courses. Ensure you are logged in as admin/staff and the new backend route is defined.');
@@ -48,9 +48,9 @@ function GradebookPage() {
                 }
             };
             fetchAssessments();
-        } 
+        }
     }, [selectedCourseId]);
-    
+
     // --- 3. Fetch Student Grades when an Assessment is selected
     useEffect(() => {
         if (!selectedAssessment) {
@@ -73,7 +73,7 @@ function GradebookPage() {
             }
         };
         fetchGrades();
-        
+
     }, [selectedAssessment]);
 
     const handleAssessmentChange = (e) => {
@@ -94,7 +94,7 @@ function GradebookPage() {
 
             // Uses your EXISTING backend route: POST /api/assessments/grade
             const response = await axios.post(`${API_BASE_URL}/assessments/grade`, data);
-            
+
             // Update the local state with the new grade/feedback
             setGradeData(prevData =>
                 prevData.map(item =>
@@ -114,7 +114,7 @@ function GradebookPage() {
 
     // --- Render Logic ---
     return (
-        <div className="min-h-screen bg-background p-8">
+        <div className="min-h-screen p-8">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
                     <button

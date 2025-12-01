@@ -58,25 +58,25 @@ function AdminHome() {
     ];
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen">
             {/* HEADER MATCHING THEME */}
-            <nav className="bg-brand-500 text-content-inverse px-8 py-4 shadow-md">
+            <nav className="bg-indigo-600 text-white px-8 py-4 shadow-md">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <h1 className="text-2xl font-bold text-content-inverse">
+                    <h1 className="text-2xl font-bold text-white">
                         AIN SHAMS
                         <span className="block text-xs font-normal text-brand-100 tracking-wider mt-1">
                             UNIVERSITY | FACULTY OF ENGINEERING
                         </span>
                     </h1>
                     <div className="flex items-center gap-6">
-                        <span className="text-brand-100 text-sm">
-                            {user?.name} ({user?.role})
+                        <span className="text-sm font-medium text-brand-100">
+                            {user?.role === 'admin' ? 'Administrator' : 'Staff Member'}
                         </span>
                         <button
                             onClick={handleLogout}
-                            className="bg-transparent border border-brand-200 hover:bg-brand-400 hover:border-brand-100 text-content-inverse px-4 py-2 rounded text-sm transition-all font-medium"
+                            className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
                         >
-                            Logout
+                            Sign Out
                         </button>
                     </div>
                 </div>
@@ -84,15 +84,10 @@ function AdminHome() {
 
             <div className="max-w-7xl mx-auto px-8 py-8">
                 {/* WELCOME SECTION */}
-                <div className="bg-gradient-to-r from-brand-500 to-brand-600 text-content-inverse rounded-lg p-8 mb-8 shadow-card">
+                <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-lg p-8 mb-8 shadow-card">
                     <div>
-                        <h1 className="text-3xl font-bold mb-2 text-content-inverse">Welcome, {user?.name}</h1>
-                        <p className="text-xl text-brand-100 mb-2">
-                            {user?.role === 'admin' ? 'Administrator' : 'Staff Member'} Dashboard
-                        </p>
-                        <p className="text-brand-100">
-                            Manage courses, users, and system settings from your centralized control panel.
-                        </p>
+                        <h1 className="text-3xl font-bold mb-2 text-white">Welcome, {user?.name}</h1>
+                        <p className="text-brand-100">Manage courses, students, and system settings.</p>
                     </div>
                 </div>
 

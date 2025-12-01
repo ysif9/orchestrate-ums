@@ -35,25 +35,25 @@ const CourseDetails = () => {
 
     return (
         <>
-             <nav className="bg-brand-500 text-content-inverse px-8 py-6 shadow-md">
+            <nav className="bg-indigo-600 text-white px-8 py-6 shadow-md">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <h1 className="text-2xl font-bold m-0 text-content-inverse">
+                    <h1 className="text-2xl font-bold m-0 text-white">
                         AIN SHAMS
                         <span className="block text-xs font-normal tracking-wider text-brand-100 mt-1">UNIVERSITY | FACULTY OF ENGINEERING</span>
                     </h1>
                     <div className="flex gap-6">
                         {/* UPDATED: Link back to My Courses (Home) based on user role */}
-                        <Link to={isAdminOrStaff ? '/admin/home' : '/home'} className="text-content-inverse hover:text-accent-300 transition-colors no-underline">← Back to My Courses</Link>
+                        <Link to={isAdminOrStaff ? '/admin/home' : '/home'} className="text-white hover:text-accent-300 transition-colors no-underline">← Back to My Courses</Link>
                     </div>
                 </div>
             </nav>
 
             {/* Hero Section */}
-            <div className="bg-gradient-to-r from-brand-500 to-brand-600 text-content-inverse text-center py-16 px-8">
-                <span className="bg-white/20 px-3 py-1 rounded text-sm mb-3 inline-block text-content-inverse">
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-center py-16 px-8">
+                <span className="bg-white/20 px-3 py-1 rounded text-sm mb-3 inline-block text-white">
                     {course.code}
                 </span>
-                <h1 className="text-4xl font-bold m-0 mb-4 text-content-inverse">{course.title}</h1>
+                <h1 className="text-4xl font-bold m-0 mb-4 text-white">{course.title}</h1>
                 <p className="text-xl max-w-3xl mx-auto text-brand-100">
                     {course.semester || 'Fall 2024'} | {course.type} Course
                 </p>
@@ -108,7 +108,7 @@ const CourseDetails = () => {
                                 {course.professor ? course.professor.charAt(0) : "T"}
                             </div>
                             <div>
-                                <strong className="text-content">{course.professor || "To Be Announced"}</strong><br/>
+                                <strong className="text-content">{course.professor || "To Be Announced"}</strong><br />
                                 <span className="text-content-tertiary text-sm">Faculty of Engineering</span>
                             </div>
                         </div>

@@ -103,12 +103,12 @@ function Signup() {
     const handleChange = (e) => {
         const { name, value } = e.target;
         const newValue = name === 'maxCredits' ? parseInt(value) || '' : value;
-        
+
         setFormData(prev => ({
             ...prev,
             [name]: newValue
         }));
-        
+
         // Clear error for this field when user starts typing
         if (errors[name]) {
             setErrors(prev => ({
@@ -116,7 +116,7 @@ function Signup() {
                 [name]: ''
             }));
         }
-        
+
         // Clear API error when user starts typing
         if (apiError) {
             setApiError('');
@@ -128,7 +128,7 @@ function Signup() {
      */
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         // Validate form
         if (!validateForm()) {
             return;
@@ -161,7 +161,7 @@ function Signup() {
             }
         } catch (error) {
             console.error('Signup error:', error);
-            
+
             // Handle different error types
             if (error.response) {
                 // Server responded with error
@@ -180,7 +180,7 @@ function Signup() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background p-8">
+        <div className="min-h-screen flex items-center justify-center p-8">
             <div className="bg-surface rounded-xl shadow-card p-12 max-w-md w-full">
                 <div className="text-center mb-8">
                     <h1 className="text-3xl mb-2 text-brand-500">Create Account</h1>

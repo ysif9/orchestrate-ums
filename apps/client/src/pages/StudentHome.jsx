@@ -7,7 +7,7 @@ import { ClipboardCheck, BarChart3, BookOpen, Sparkles } from 'lucide-react';
 function StudentHome() {
     const navigate = useNavigate();
     const user = authService.getCurrentUser();
-    
+
     const [enrollments, setEnrollments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -39,7 +39,7 @@ function StudentHome() {
     const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
 
     if (loading) return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+        <div className="min-h-screen flex flex-col items-center justify-center">
             <div className="loading-spinner"></div>
             <p className="mt-4 text-content-secondary">Loading your academic profile...</p>
         </div>
@@ -49,11 +49,11 @@ function StudentHome() {
     const totalCredits = enrollments.reduce((acc, curr) => acc + (curr.course?.credits || 0), 0);
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen">
             {/* HEADER MATCHING THEME */}
-            <nav className="bg-brand-500 text-content-inverse px-8 py-4 shadow-md">
+            <nav className="bg-indigo-600 text-white px-8 py-4 shadow-md">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <h1 className="text-2xl font-bold text-content-inverse">
+                    <h1 className="text-2xl font-bold text-white">
                         AIN SHAMS
                         <span className="block text-xs font-normal text-brand-100 tracking-wider mt-1">
                             UNIVERSITY | FACULTY OF ENGINEERING
@@ -61,12 +61,12 @@ function StudentHome() {
                     </h1>
                     <div className="flex items-center gap-6">
                         <span className="text-brand-100 text-sm">Welcome, {user?.name}</span>
-                        <Link to="/catalog" className="text-content-inverse hover:text-accent-300 transition-colors font-medium">
+                        <Link to="/catalog" className="text-white hover:text-accent-300 transition-colors font-medium">
                             Course Catalog
                         </Link>
                         <button
                             onClick={handleLogout}
-                            className="bg-transparent border border-brand-200 hover:bg-brand-400 hover:border-brand-100 text-content-inverse px-4 py-2 rounded transition-all font-medium"
+                            className="bg-transparent border border-brand-200 hover:bg-brand-400 hover:border-brand-100 text-white px-4 py-2 rounded transition-all font-medium"
                         >
                             Logout
                         </button>
@@ -161,11 +161,10 @@ function StudentHome() {
                                                 alt={course.title}
                                                 className="w-full h-48 object-cover"
                                             />
-                                            <span className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold uppercase ${
-                                                enrollment.status === 'completed' ? 'bg-success-100 text-success-700' :
+                                            <span className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold uppercase ${enrollment.status === 'completed' ? 'bg-success-100 text-success-700' :
                                                 enrollment.status === 'active' ? 'bg-info-100 text-info-700' :
-                                                'bg-surface-tertiary text-content-secondary'
-                                            }`}>
+                                                    'bg-surface-tertiary text-content-secondary'
+                                                }`}>
                                                 {enrollment.status}
                                             </span>
                                         </div>
@@ -185,7 +184,7 @@ function StudentHome() {
                                                 <div className="w-full bg-surface-tertiary rounded-full h-2 overflow-hidden">
                                                     <div
                                                         className="bg-brand-500 h-full transition-all duration-300"
-                                                        style={{width: enrollment.status === 'completed' ? '100%' : '0%'}}
+                                                        style={{ width: enrollment.status === 'completed' ? '100%' : '0%' }}
                                                     ></div>
                                                 </div>
                                             </div>

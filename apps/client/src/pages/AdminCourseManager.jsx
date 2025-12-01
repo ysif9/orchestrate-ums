@@ -164,10 +164,10 @@ const AdminCourseManager = () => {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-background text-content">Loading...</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-content">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
@@ -220,11 +220,10 @@ const AdminCourseManager = () => {
                       </td>
                       <td className="px-6 py-4 border-b border-border align-middle text-content">{course.title}</td>
                       <td className="px-6 py-4 border-b border-border align-middle">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          course.type === 'Core'
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${course.type === 'Core'
                             ? 'bg-course-core-bg text-course-core'
                             : 'bg-course-elective-bg text-course-elective'
-                        }`}>
+                          }`}>
                           {course.type}
                         </span>
                       </td>
@@ -233,16 +232,16 @@ const AdminCourseManager = () => {
                       <td className="px-6 py-4 border-b border-border align-middle text-content-tertiary">
                         {course.prerequisites?.length > 0
                           ? course.prerequisites
-                              .map(prereq => {
-                                // Check if prereq is already populated (object with code property)
-                                if (typeof prereq === 'object' && prereq.code) {
-                                  return prereq.code;
-                                }
-                                // Otherwise, it's just an ID, so find the course
-                                const prereqCourse = courses.find(c => c._id === prereq);
-                                return prereqCourse ? prereqCourse.code : prereq;
-                              })
-                              .join(', ')
+                            .map(prereq => {
+                              // Check if prereq is already populated (object with code property)
+                              if (typeof prereq === 'object' && prereq.code) {
+                                return prereq.code;
+                              }
+                              // Otherwise, it's just an ID, so find the course
+                              const prereqCourse = courses.find(c => c._id === prereq);
+                              return prereqCourse ? prereqCourse.code : prereq;
+                            })
+                            .join(', ')
                           : 'None'}
                       </td>
                       <td className="px-6 py-4 border-b border-border align-middle">
@@ -416,15 +415,14 @@ const AdminCourseManager = () => {
                             getAvailableCourses().map(course => (
                               <div
                                 key={course._id}
-                                className={`px-3 py-2 cursor-pointer hover:bg-surface-hover transition-colors flex items-center gap-2 ${
-                                  formData.prerequisites.includes(course._id) ? 'bg-brand-50' : ''
-                                }`}
+                                className={`px-3 py-2 cursor-pointer hover:bg-surface-hover transition-colors flex items-center gap-2 ${formData.prerequisites.includes(course._id) ? 'bg-brand-50' : ''
+                                  }`}
                                 onClick={() => handlePrerequisiteToggle(course._id)}
                               >
                                 <input
                                   type="checkbox"
                                   checked={formData.prerequisites.includes(course._id)}
-                                  onChange={() => {}}
+                                  onChange={() => { }}
                                   className="w-4 h-4 accent-brand-500"
                                 />
                                 <div className="flex-1">

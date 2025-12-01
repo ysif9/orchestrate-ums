@@ -27,11 +27,11 @@ function CatalogCourseDetails() {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                
+
                 // Fetch course details
                 const courseRes = await axios.get(`http://localhost:5000/api/courses/${id}`);
                 setCourse(courseRes.data);
-                
+
                 // Fetch user's enrollments
                 const enrollRes = await axios.get('http://localhost:5000/api/enrollments');
                 const completed = enrollRes.data
@@ -40,7 +40,7 @@ function CatalogCourseDetails() {
                 const enrolled = enrollRes.data
                     .filter(enr => enr.status === 'enrolled')
                     .map(enr => enr.course._id);
-                    
+
                 setCompletedCourseIds(completed);
                 setEnrolledCourseIds(enrolled);
             } catch (error) {
@@ -57,7 +57,7 @@ function CatalogCourseDetails() {
         if (!course || !course.prerequisites || course.prerequisites.length === 0) {
             return true;
         }
-        return course.prerequisites.every(prereq => 
+        return course.prerequisites.every(prereq =>
             completedCourseIds.includes(prereq._id)
         );
     };
@@ -70,17 +70,17 @@ function CatalogCourseDetails() {
     // Handle enrollment
     const handleEnroll = async () => {
         if (!course) return;
-        
+
         setEnrolling(true);
         setEnrollmentError('');
         setEnrollmentSuccess(false);
-        
+
         try {
             await axios.post('http://localhost:5000/api/enrollments', {
                 course_code: course.code,
                 semester: course.semester || 'Fall 2024'
             });
-            
+
             setEnrollmentSuccess(true);
             setEnrolledCourseIds([...enrolledCourseIds, id]);
 
@@ -90,7 +90,7 @@ function CatalogCourseDetails() {
             }, 2000);
         } catch (error) {
             setEnrollmentError(
-                error.response?.data?.message || 
+                error.response?.data?.message ||
                 'Failed to enroll in course. Please try again.'
             );
         } finally {
@@ -105,7 +105,7 @@ function CatalogCourseDetails() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+            <div className="min-h-screen flex flex-col items-center justify-center">
                 <div className="loading-spinner"></div>
                 <p className="mt-4 text-content-secondary">Loading course details...</p>
             </div>
@@ -114,7 +114,7 @@ function CatalogCourseDetails() {
 
     if (!course) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+            <div className="min-h-screen flex flex-col items-center justify-center">
                 <h2 className="text-2xl font-bold text-content mb-4">Course not found</h2>
                 <Link
                     to="/catalog"
@@ -131,7 +131,7 @@ function CatalogCourseDetails() {
     const hasPrerequisites = course.prerequisites && course.prerequisites.length > 0;
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen">
             {/* Header */}
             <header className="bg-brand-500 text-content-inverse px-8 py-6 shadow-md">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -170,11 +170,10 @@ function CatalogCourseDetails() {
                     <p className="text-xl text-brand-100 mb-6">{course.description}</p>
 
                     <div className="flex flex-wrap gap-4">
-                        <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                            course.type === 'Core'
+                        <span className={`px-4 py-2 rounded-full text-sm font-semibold ${course.type === 'Core'
                                 ? 'bg-course-core-bg text-course-core'
                                 : 'bg-course-elective-bg text-course-elective'
-                        }`}>
+                            }`}>
                             {course.type}
                         </span>
                         <span className="bg-white/20 text-content-inverse px-4 py-2 rounded-full text-sm">
@@ -220,21 +219,19 @@ function CatalogCourseDetails() {
                                         return (
                                             <div
                                                 key={prereq._id}
-                                                className={`flex justify-between items-center p-4 rounded-lg border ${
-                                                    isCompleted
+                                                className={`flex justify-between items-center p-4 rounded-lg border ${isCompleted
                                                         ? 'bg-success-50 border-success-200'
                                                         : 'bg-error-50 border-error-200'
-                                                }`}
+                                                    }`}
                                             >
                                                 <div>
                                                     <span className="font-bold text-brand-500 mr-2">{prereq.code}</span>
                                                     <span className="text-content-secondary">{prereq.title}</span>
                                                 </div>
-                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                    isCompleted
+                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${isCompleted
                                                         ? 'bg-success-100 text-success-700'
                                                         : 'bg-error-100 text-error-700'
-                                                }`}>
+                                                    }`}>
                                                     {isCompleted ? '✓ Completed' : '✗ Not Completed'}
                                                 </span>
                                             </div>
@@ -372,11 +369,10 @@ function CatalogCourseDetails() {
                                         {course.prerequisites.map(prereq => (
                                             <li
                                                 key={prereq._id}
-                                                className={`text-sm ${
-                                                    completedCourseIds.includes(prereq._id)
+                                                className={`text-sm ${completedCourseIds.includes(prereq._id)
                                                         ? 'text-success-700 font-semibold'
                                                         : 'text-content-secondary'
-                                                }`}
+                                                    }`}
                                             >
                                                 {prereq.code}
                                                 {completedCourseIds.includes(prereq._id) && ' ✓'}

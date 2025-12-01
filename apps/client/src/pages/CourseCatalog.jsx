@@ -17,7 +17,7 @@ function CourseCatalog() {
     const [filteredCourses, setFilteredCourses] = useState([]);
     const [completedCourseIds, setCompletedCourseIds] = useState([]);
     const [loading, setLoading] = useState(true);
-    
+
     // Filter states
     const [filters, setFilters] = useState({
         level: 'All',
@@ -32,11 +32,11 @@ function CourseCatalog() {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                
+
                 // Fetch all courses
                 const coursesRes = await axios.get('http://localhost:5000/api/courses');
                 setCourses(coursesRes.data);
-                
+
                 // Fetch user's enrollments to determine completed courses
                 const enrollRes = await axios.get('http://localhost:5000/api/enrollments');
                 const completed = enrollRes.data
@@ -81,7 +81,7 @@ function CourseCatalog() {
         // Filter by search term
         if (filters.searchTerm) {
             const search = filters.searchTerm.toLowerCase();
-            result = result.filter(c => 
+            result = result.filter(c =>
                 c.title.toLowerCase().includes(search) ||
                 c.code.toLowerCase().includes(search) ||
                 c.description?.toLowerCase().includes(search)
@@ -94,7 +94,7 @@ function CourseCatalog() {
     // Check if a course is locked due to unmet prerequisites
     const isLocked = (course) => {
         if (!course.prerequisites || course.prerequisites.length === 0) return false;
-        return !course.prerequisites.every(prereq => 
+        return !course.prerequisites.every(prereq =>
             completedCourseIds.includes(prereq._id || prereq)
         );
     };
@@ -132,7 +132,7 @@ function CourseCatalog() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+            <div className="min-h-screen flex flex-col items-center justify-center">
                 <div className="loading-spinner"></div>
                 <p className="mt-4 text-content-secondary">Loading courses...</p>
             </div>
@@ -140,7 +140,7 @@ function CourseCatalog() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen">
             {/* Header */}
             <header className="bg-brand-500 text-content-inverse px-8 py-6 shadow-md">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -288,11 +288,10 @@ function CourseCatalog() {
                                         <div className="flex justify-between items-start mb-4">
                                             <div className="text-brand-500 font-bold text-lg">{course.code}</div>
                                             <div className="flex gap-2 flex-wrap justify-end">
-                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                    course.type === 'Core'
+                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${course.type === 'Core'
                                                         ? 'bg-course-core-bg text-course-core'
                                                         : 'bg-course-elective-bg text-course-elective'
-                                                }`}>
+                                                    }`}>
                                                     {course.type}
                                                 </span>
                                                 {locked && (

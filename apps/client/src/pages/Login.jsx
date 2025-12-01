@@ -71,7 +71,7 @@ function Login() {
      */
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         // Validate form
         if (!validateForm()) {
             return;
@@ -94,7 +94,7 @@ function Login() {
             }
         } catch (error) {
             console.error('Login error:', error);
-            
+
             // Handle different error types
             if (error.response) {
                 // Server responded with error
@@ -113,7 +113,7 @@ function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background p-8">
+        <div className="min-h-screen flex items-center justify-center p-8">
             <div className="bg-surface rounded-xl shadow-card p-12 max-w-md w-full">
                 <div className="text-center mb-8">
                     <h1 className="text-3xl mb-2 text-brand-500">Welcome Back</h1>

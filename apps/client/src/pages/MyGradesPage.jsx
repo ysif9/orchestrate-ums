@@ -26,8 +26,8 @@ function MyGradesPage() {
     fetchGrades();
   }, []);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-background text-content-secondary">Loading your grades...</div>;
-  if (error) return <div className="min-h-screen flex items-center justify-center bg-background text-error-600">{error}</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-content-secondary">Loading your grades...</div>;
+  if (error) return <div className="min-h-screen flex items-center justify-center text-error-600">{error}</div>;
 
   return (
     <div className="max-w-6xl mx-auto my-10 px-5 bg-surface rounded-xl shadow-lg">

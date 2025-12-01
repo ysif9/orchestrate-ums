@@ -9,7 +9,7 @@ const API_BASE_URL = 'http://localhost:5000/api';
 function AssessmentCreationPage() {
   const navigate = useNavigate();
   const user = authService.getCurrentUser();
-  const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+  const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
 
   const [courses, setCourses] = useState([]);
   const [formData, setFormData] = useState({

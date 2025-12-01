@@ -20,7 +20,7 @@ function Signup() {
     useEffect(() => {
         if (authService.isAuthenticated()) {
             const user = authService.getCurrentUser();
-            const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+            const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
             navigate(isAdminOrStaff ? '/admin/home' : '/home', { replace: true });
         }
     }, [navigate]);
@@ -156,7 +156,7 @@ function Signup() {
             if (response.success) {
                 // Redirect based on user role
                 const user = response.user;
-                const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+                const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
                 navigate(isAdminOrStaff ? '/admin/home' : '/home');
             }
         } catch (error) {
@@ -250,7 +250,7 @@ function Signup() {
                         >
                             <option value="student">Student</option>
                             <option value="staff">Staff</option>
-                            <option value="admin">Admin</option>
+                            <option value="professor">Professor</option>
                         </select>
                     </div>
 

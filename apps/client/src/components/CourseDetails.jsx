@@ -6,7 +6,7 @@ import { authService } from '../services/authService';
 const CourseDetails = () => {
     const { id } = useParams();
     const user = authService.getCurrentUser();
-    const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+    const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
 

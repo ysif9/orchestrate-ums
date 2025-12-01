@@ -24,6 +24,22 @@ const seedData = async () => {
             role: "student"
         });
 
+        // Create Staff
+        const staff = await User.create({
+            name: "Admin Staff",
+            email: "staff@eng.asu.edu.eg",
+            password: "password123",
+            role: "staff"
+        });
+
+        // Create Professor
+        const professor = await User.create({
+            name: "Dr. Professor",
+            email: "professor@eng.asu.edu.eg",
+            password: "password123",
+            role: "professor"
+        });
+
         // --- 1. COMPUTER ENGINEERING ---
         // Prerequisite
         const comp1 = await Course.create({
@@ -52,7 +68,7 @@ const seedData = async () => {
             image: "https://images.unsplash.com/photo-1555255707-c07966088b7b?w=800&q=80",
         });
 
-       // --- 2. MECHATRONICS ---
+        // --- 2. MECHATRONICS ---
         const mech = await Course.create({
             code: "MCT201",
             title: "Robotics and Automation",

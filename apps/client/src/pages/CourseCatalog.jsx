@@ -11,7 +11,7 @@ import { Lock } from 'lucide-react';
 function CourseCatalog() {
     const navigate = useNavigate();
     const user = authService.getCurrentUser();
-    const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+    const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
 
     const [courses, setCourses] = useState([]);
     const [filteredCourses, setFilteredCourses] = useState([]);
@@ -289,8 +289,8 @@ function CourseCatalog() {
                                             <div className="text-brand-500 font-bold text-lg">{course.code}</div>
                                             <div className="flex gap-2 flex-wrap justify-end">
                                                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${course.type === 'Core'
-                                                        ? 'bg-course-core-bg text-course-core'
-                                                        : 'bg-course-elective-bg text-course-elective'
+                                                    ? 'bg-course-core-bg text-course-core'
+                                                    : 'bg-course-elective-bg text-course-elective'
                                                     }`}>
                                                     {course.type}
                                                 </span>

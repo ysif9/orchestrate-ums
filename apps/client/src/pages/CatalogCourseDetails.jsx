@@ -13,7 +13,7 @@ function CatalogCourseDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
     const user = authService.getCurrentUser();
-    const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+    const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
 
     const [course, setCourse] = useState(null);
     const [completedCourseIds, setCompletedCourseIds] = useState([]);
@@ -171,8 +171,8 @@ function CatalogCourseDetails() {
 
                     <div className="flex flex-wrap gap-4">
                         <span className={`px-4 py-2 rounded-full text-sm font-semibold ${course.type === 'Core'
-                                ? 'bg-course-core-bg text-course-core'
-                                : 'bg-course-elective-bg text-course-elective'
+                            ? 'bg-course-core-bg text-course-core'
+                            : 'bg-course-elective-bg text-course-elective'
                             }`}>
                             {course.type}
                         </span>
@@ -220,8 +220,8 @@ function CatalogCourseDetails() {
                                             <div
                                                 key={prereq._id}
                                                 className={`flex justify-between items-center p-4 rounded-lg border ${isCompleted
-                                                        ? 'bg-success-50 border-success-200'
-                                                        : 'bg-error-50 border-error-200'
+                                                    ? 'bg-success-50 border-success-200'
+                                                    : 'bg-error-50 border-error-200'
                                                     }`}
                                             >
                                                 <div>
@@ -229,8 +229,8 @@ function CatalogCourseDetails() {
                                                     <span className="text-content-secondary">{prereq.title}</span>
                                                 </div>
                                                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${isCompleted
-                                                        ? 'bg-success-100 text-success-700'
-                                                        : 'bg-error-100 text-error-700'
+                                                    ? 'bg-success-100 text-success-700'
+                                                    : 'bg-error-100 text-error-700'
                                                     }`}>
                                                     {isCompleted ? '✓ Completed' : '✗ Not Completed'}
                                                 </span>
@@ -370,8 +370,8 @@ function CatalogCourseDetails() {
                                             <li
                                                 key={prereq._id}
                                                 className={`text-sm ${completedCourseIds.includes(prereq._id)
-                                                        ? 'text-success-700 font-semibold'
-                                                        : 'text-content-secondary'
+                                                    ? 'text-success-700 font-semibold'
+                                                    : 'text-content-secondary'
                                                     }`}
                                             >
                                                 {prereq.code}

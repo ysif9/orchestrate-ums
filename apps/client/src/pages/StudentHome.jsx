@@ -36,7 +36,7 @@ function StudentHome() {
         navigate('/login');
     };
 
-    const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
+    const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
 
     if (loading) return (
         <div className="min-h-screen flex flex-col items-center justify-center">

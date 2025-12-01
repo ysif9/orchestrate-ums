@@ -70,7 +70,7 @@ function AdminHome() {
                     </h1>
                     <div className="flex items-center gap-6">
                         <span className="text-sm font-medium text-brand-100">
-                            {user?.role === 'admin' ? 'Administrator' : 'Staff Member'}
+                            {user?.role === 'professor' ? 'Professor' : 'Staff Member'}
                         </span>
                         <button
                             onClick={handleLogout}

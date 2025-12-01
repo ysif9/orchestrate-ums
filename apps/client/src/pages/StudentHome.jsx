@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { authService } from '../services/authService';
 import { ClipboardCheck, BarChart3, BookOpen, Sparkles } from 'lucide-react';
-import '../styles/StudentHome.css';
 
 function StudentHome() {
     const navigate = useNavigate();
@@ -40,9 +39,9 @@ function StudentHome() {
     const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff';
 
     if (loading) return (
-        <div className="loading-container">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-background">
             <div className="loading-spinner"></div>
-            <p>Loading your academic profile...</p>
+            <p className="mt-4 text-content-secondary">Loading your academic profile...</p>
         </div>
     );
 
@@ -50,38 +49,52 @@ function StudentHome() {
     const totalCredits = enrollments.reduce((acc, curr) => acc + (curr.course?.credits || 0), 0);
 
     return (
-        <div className="student-dashboard">
+        <div className="min-h-screen bg-background">
             {/* HEADER MATCHING THEME */}
-            <nav className="navbar">
-                <h1>
-                    AIN SHAMS
-                    <span className="uni-subtext">UNIVERSITY | FACULTY OF ENGINEERING</span>
-                </h1>
-                <div className="nav-links">
-                    <span className="user-greeting">Welcome, {user?.name}</span>
-                    <Link to="/catalog">Course Catalog</Link>
-                    <button onClick={handleLogout} className="nav-logout-btn">Logout</button>
+            <nav className="bg-brand-500 text-content-inverse px-8 py-4 shadow-md">
+                <div className="max-w-7xl mx-auto flex justify-between items-center">
+                    <h1 className="text-2xl font-bold text-content-inverse">
+                        AIN SHAMS
+                        <span className="block text-xs font-normal text-brand-100 tracking-wider mt-1">
+                            UNIVERSITY | FACULTY OF ENGINEERING
+                        </span>
+                    </h1>
+                    <div className="flex items-center gap-6">
+                        <span className="text-brand-100 text-sm">Welcome, {user?.name}</span>
+                        <Link to="/catalog" className="text-content-inverse hover:text-accent-300 transition-colors font-medium">
+                            Course Catalog
+                        </Link>
+                        <button
+                            onClick={handleLogout}
+                            className="bg-transparent border border-brand-200 hover:bg-brand-400 hover:border-brand-100 text-content-inverse px-4 py-2 rounded transition-all font-medium"
+                        >
+                            Logout
+                        </button>
+                    </div>
                 </div>
             </nav>
 
-            <div className="dashboard-container">
+            <div className="max-w-7xl mx-auto px-8 py-8">
                 {/* DASHBOARD SUMMARY SECTION */}
-                <div className="welcome-banner">
-                    <div className="banner-text">
-                        <h2>My Enrolled Courses</h2>
-                        <p className="semester-info">Current Semester: Fall 2024</p>
+                <div className="bg-surface rounded-lg shadow-card p-8 mb-8">
+                    <div className="mb-6">
+                        <h2 className="text-2xl font-bold text-brand-500 mb-2">My Enrolled Courses</h2>
+                        <p className="text-content-secondary">Current Semester: Fall 2024</p>
                     </div>
-                    
-                    <div className="quick-stats">
-                        <div className="stat-item">
-                            <span className="stat-value">{enrollments.length}</span>
-                            <span className="stat-label">Active Courses</span>
+
+                    <div className="flex flex-wrap items-center gap-4">
+                        <div className="flex flex-col items-center bg-surface-tertiary px-6 py-4 rounded-lg min-w-[120px]">
+                            <span className="text-3xl font-bold text-brand-500">{enrollments.length}</span>
+                            <span className="text-sm text-content-secondary mt-1">Active Courses</span>
                         </div>
-                        <div className="stat-item">
-                            <span className="stat-value">{totalCredits}</span>
-                            <span className="stat-label">Total Credits</span>
+                        <div className="flex flex-col items-center bg-surface-tertiary px-6 py-4 rounded-lg min-w-[120px]">
+                            <span className="text-3xl font-bold text-brand-500">{totalCredits}</span>
+                            <span className="text-sm text-content-secondary mt-1">Total Credits</span>
                         </div>
-                        <button onClick={() => navigate('/catalog')} className="btn-primary">
+                        <button
+                            onClick={() => navigate('/catalog')}
+                            className="bg-brand-500 hover:bg-brand-600 text-content-inverse font-medium px-6 py-3 rounded-lg transition-colors shadow-button hover:shadow-button-hover"
+                        >
                             + Register New Course
                         </button>
                         {/* Admin/Staff Assessment Management Buttons */}
@@ -89,16 +102,16 @@ function StudentHome() {
                             <>
                                 <button
                                     onClick={() => navigate('/admin/assessments/create')}
-                                    className="action-btn action-create-assessment"
+                                    className="bg-course-core hover:bg-purple-700 text-content-inverse font-medium px-6 py-3 rounded-lg transition-colors flex items-center gap-2 shadow-button hover:shadow-button-hover"
                                 >
-                                    <Sparkles size={18} style={{marginRight:'8px', display:'inline', verticalAlign:'middle'}} />
+                                    <Sparkles size={18} />
                                     Create Assessment
                                 </button>
                                 <button
                                     onClick={() => navigate('/admin/gradebook')}
-                                    className="action-btn action-grade-assessments"
+                                    className="bg-success-600 hover:bg-success-700 text-content-inverse font-medium px-6 py-3 rounded-lg transition-colors flex items-center gap-2 shadow-button hover:shadow-button-hover"
                                 >
-                                    <ClipboardCheck size={18} style={{marginRight:'8px', display:'inline', verticalAlign:'middle'}} />
+                                    <ClipboardCheck size={18} />
                                     Grade Assessments
                                 </button>
                             </>
@@ -107,64 +120,71 @@ function StudentHome() {
                         {!isAdminOrStaff && (
                             <button
                                 onClick={() => navigate('/my-grades')}
-                                className="action-btn action-view-grades"
+                                className="bg-info-600 hover:bg-info-700 text-content-inverse font-medium px-6 py-3 rounded-lg transition-colors flex items-center gap-2 shadow-button hover:shadow-button-hover"
                             >
-                                <BarChart3 size={18} style={{marginRight:'8px', display:'inline', verticalAlign:'middle'}} />
+                                <BarChart3 size={18} />
                                 View My Grades
                             </button>
                         )}
                     </div>
                 </div>
 
-                {error && <div className="alert alert-error">{error}</div>}
+                {error && <div className="bg-error-100 text-error-700 px-4 py-3 rounded-lg mb-6 border border-error-200">{error}</div>}
 
                 {/* ENROLLED COURSES GRID */}
                 {enrollments.length === 0 ? (
-                    <div className="empty-state">
-                        <div className="empty-icon">
+                    <div className="text-center py-16 bg-surface rounded-lg border-2 border-dashed border-border">
+                        <div className="text-content-tertiary mb-4 flex justify-center">
                             <BookOpen size={64} strokeWidth={1.5} />
                         </div>
-                        <h3>No Active Enrollments</h3>
-                        <p>You are not currently enrolled in any courses for this semester.</p>
-                        <button onClick={() => navigate('/catalog')} className="btn-primary">
+                        <h3 className="text-xl font-semibold text-content mb-2">No Active Enrollments</h3>
+                        <p className="text-content-tertiary mb-6">You are not currently enrolled in any courses for this semester.</p>
+                        <button
+                            onClick={() => navigate('/catalog')}
+                            className="bg-brand-500 hover:bg-brand-600 text-content-inverse font-medium px-6 py-3 rounded-lg transition-colors shadow-button hover:shadow-button-hover"
+                        >
                             Browse Course Catalog
                         </button>
                     </div>
                 ) : (
-                    <div className="course-grid">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {enrollments.map((enrollment) => {
                             const course = enrollment.course;
                             if (!course) return null;
 
                             return (
-                                <Link to={`/course/${course._id}`} key={enrollment._id} className="course-card-link">
-                                    <div className="course-card">
-                                        <div className="card-image-wrapper">
+                                <Link to={`/course/${course._id}`} key={enrollment._id} className="no-underline text-inherit">
+                                    <div className="bg-surface border border-border rounded-lg overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover h-full flex flex-col relative">
+                                        <div className="relative">
                                             <img
                                                 src={course.image || "https://placehold.co/600x400"}
                                                 alt={course.title}
-                                                className="card-image"
+                                                className="w-full h-48 object-cover"
                                             />
-                                            <span className={`status-badge ${enrollment.status}`}>
+                                            <span className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold uppercase ${
+                                                enrollment.status === 'completed' ? 'bg-success-100 text-success-700' :
+                                                enrollment.status === 'active' ? 'bg-info-100 text-info-700' :
+                                                'bg-surface-tertiary text-content-secondary'
+                                            }`}>
                                                 {enrollment.status}
                                             </span>
                                         </div>
 
-                                        <div className="card-body">
-                                            <div className="subject-tag">
+                                        <div className="p-6 flex flex-col flex-grow">
+                                            <div className="text-xs font-bold text-accent-600 uppercase tracking-wider mb-2">
                                                 {course.subjectArea || "General"}
                                             </div>
-                                            <h3 className="card-title">{course.title}</h3>
-                                            <div className="card-meta">
-                                                <span className="code">{course.code}</span>
-                                                <span className="credits">{course.credits} Credits</span>
+                                            <h3 className="text-lg font-bold text-brand-500 mb-3 line-clamp-2">{course.title}</h3>
+                                            <div className="flex justify-between items-center text-sm text-content-secondary mb-4">
+                                                <span className="font-mono font-semibold">{course.code}</span>
+                                                <span className="font-medium">{course.credits} Credits</span>
                                             </div>
 
-                                            <div className="progress-bar-container">
-                                                <div className="progress-text">Progress</div>
-                                                <div className="progress-track">
+                                            <div className="mt-auto">
+                                                <div className="text-xs text-content-secondary mb-2">Progress</div>
+                                                <div className="w-full bg-surface-tertiary rounded-full h-2 overflow-hidden">
                                                     <div
-                                                        className="progress-fill"
+                                                        className="bg-brand-500 h-full transition-all duration-300"
                                                         style={{width: enrollment.status === 'completed' ? '100%' : '0%'}}
                                                     ></div>
                                                 </div>

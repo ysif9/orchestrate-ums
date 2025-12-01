@@ -3,7 +3,6 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { authService } from '../services/authService';
 import { AlertTriangle, Lock } from 'lucide-react';
-import '../styles/CatalogCourseDetails.css';
 
 /**
  * Catalog Course Details Page
@@ -106,18 +105,23 @@ function CatalogCourseDetails() {
 
     if (loading) {
         return (
-            <div className="catalog-details-loading">
+            <div className="min-h-screen flex flex-col items-center justify-center bg-background">
                 <div className="loading-spinner"></div>
-                <p>Loading course details...</p>
+                <p className="mt-4 text-content-secondary">Loading course details...</p>
             </div>
         );
     }
 
     if (!course) {
         return (
-            <div className="catalog-details-error">
-                <h2>Course not found</h2>
-                <Link to="/catalog" className="btn-primary">Back to Catalog</Link>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+                <h2 className="text-2xl font-bold text-content mb-4">Course not found</h2>
+                <Link
+                    to="/catalog"
+                    className="bg-brand-500 hover:bg-brand-600 text-content-inverse px-6 py-3 rounded-lg transition-all no-underline font-medium"
+                >
+                    Back to Catalog
+                </Link>
             </div>
         );
     }
@@ -127,48 +131,60 @@ function CatalogCourseDetails() {
     const hasPrerequisites = course.prerequisites && course.prerequisites.length > 0;
 
     return (
-        <div className="catalog-details-container">
+        <div className="min-h-screen bg-background">
             {/* Header */}
-            <header className="catalog-details-header">
-                <div className="header-content">
-                    <h1>Course Details</h1>
-                </div>
-                <div className="header-actions">
-                    <span className="user-info">Welcome, {user?.name}</span>
-                    <button onClick={() => navigate('/catalog')} className="btn-secondary">
-                        Back to Catalog
-                    </button>
-                    <button
-                        onClick={() => navigate(isAdminOrStaff ? '/admin/home' : '/home')}
-                        className="btn-secondary"
-                    >
-                        Home
-                    </button>
-                    <button onClick={handleLogout} className="btn-logout">
-                        Logout
-                    </button>
+            <header className="bg-brand-500 text-content-inverse px-8 py-6 shadow-md">
+                <div className="max-w-7xl mx-auto flex justify-between items-center">
+                    <div>
+                        <h1 className="text-3xl font-bold m-0 text-content-inverse">Course Details</h1>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <span className="text-brand-100 text-sm">Welcome, {user?.name}</span>
+                        <button
+                            onClick={() => navigate('/catalog')}
+                            className="bg-transparent border border-brand-200 hover:bg-brand-400 hover:border-brand-100 text-content-inverse px-4 py-2 rounded text-sm transition-all font-medium"
+                        >
+                            Back to Catalog
+                        </button>
+                        <button
+                            onClick={() => navigate(isAdminOrStaff ? '/admin/home' : '/home')}
+                            className="bg-transparent border border-brand-200 hover:bg-brand-400 hover:border-brand-100 text-content-inverse px-4 py-2 rounded text-sm transition-all font-medium"
+                        >
+                            Home
+                        </button>
+                        <button
+                            onClick={handleLogout}
+                            className="bg-error-600 hover:bg-error-700 text-content-inverse px-4 py-2 rounded text-sm transition-all font-medium"
+                        >
+                            Logout
+                        </button>
+                    </div>
                 </div>
             </header>
 
             {/* Course Hero Section */}
-            <div className="course-hero">
-                <div className="course-hero-content">
-                    <div className="course-code-badge">{course.code}</div>
-                    <h1 className="course-hero-title">{course.title}</h1>
-                    <p className="course-hero-description">{course.description}</p>
+            <div className="bg-gradient-to-r from-brand-500 to-brand-600 text-content-inverse px-8 py-12">
+                <div className="max-w-7xl mx-auto">
+                    <div className="inline-block bg-white/20 text-content-inverse px-4 py-2 rounded-full text-sm font-bold mb-4">{course.code}</div>
+                    <h1 className="text-4xl font-bold mb-4 text-content-inverse">{course.title}</h1>
+                    <p className="text-xl text-brand-100 mb-6">{course.description}</p>
 
-                    <div className="course-meta">
-                        <span className={`meta-badge badge-${course.type.toLowerCase()}`}>
+                    <div className="flex flex-wrap gap-4">
+                        <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                            course.type === 'Core'
+                                ? 'bg-course-core-bg text-course-core'
+                                : 'bg-course-elective-bg text-course-elective'
+                        }`}>
                             {course.type}
                         </span>
-                        <span className="meta-item">
+                        <span className="bg-white/20 text-content-inverse px-4 py-2 rounded-full text-sm">
                             <strong>Level:</strong> {course.difficulty}
                         </span>
-                        <span className="meta-item">
+                        <span className="bg-white/20 text-content-inverse px-4 py-2 rounded-full text-sm">
                             <strong>Credits:</strong> {course.credits} CH
                         </span>
                         {course.professor && (
-                            <span className="meta-item">
+                            <span className="bg-white/20 text-content-inverse px-4 py-2 rounded-full text-sm">
                                 <strong>Professor:</strong> {course.professor}
                             </span>
                         )}
@@ -177,40 +193,48 @@ function CatalogCourseDetails() {
             </div>
 
             {/* Main Content */}
-            <div className="catalog-details-content">
+            <div className="max-w-7xl mx-auto px-8 py-8">
                 {/* Enrollment Status Messages */}
                 {enrollmentSuccess && (
-                    <div className="alert alert-success">
+                    <div className="bg-success-100 text-success-700 px-6 py-4 rounded-lg mb-6 border border-success-200">
                         ✓ Successfully enrolled in {course.title}! Redirecting to home...
                     </div>
                 )}
 
                 {enrollmentError && (
-                    <div className="alert alert-error">
+                    <div className="bg-error-100 text-error-700 px-6 py-4 rounded-lg mb-6 border border-error-200">
                         ✗ {enrollmentError}
                     </div>
                 )}
 
-                <div className="content-grid">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column - Course Information */}
-                    <div className="content-main">
+                    <div className="lg:col-span-2 space-y-6">
                         {/* Prerequisites Section */}
                         {hasPrerequisites && (
-                            <section className="details-section">
-                                <h2>Prerequisites</h2>
-                                <div className="prerequisites-list">
+                            <section className="bg-surface rounded-lg shadow-card p-6">
+                                <h2 className="text-xl font-bold text-content mb-4">Prerequisites</h2>
+                                <div className="space-y-3">
                                     {course.prerequisites.map(prereq => {
                                         const isCompleted = completedCourseIds.includes(prereq._id);
                                         return (
                                             <div
                                                 key={prereq._id}
-                                                className={`prerequisite-item ${isCompleted ? 'completed' : 'incomplete'}`}
+                                                className={`flex justify-between items-center p-4 rounded-lg border ${
+                                                    isCompleted
+                                                        ? 'bg-success-50 border-success-200'
+                                                        : 'bg-error-50 border-error-200'
+                                                }`}
                                             >
-                                                <div className="prereq-info">
-                                                    <span className="prereq-code">{prereq.code}</span>
-                                                    <span className="prereq-title">{prereq.title}</span>
+                                                <div>
+                                                    <span className="font-bold text-brand-500 mr-2">{prereq.code}</span>
+                                                    <span className="text-content-secondary">{prereq.title}</span>
                                                 </div>
-                                                <span className={`prereq-status ${isCompleted ? 'status-completed' : 'status-incomplete'}`}>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                    isCompleted
+                                                        ? 'bg-success-100 text-success-700'
+                                                        : 'bg-error-100 text-error-700'
+                                                }`}>
                                                     {isCompleted ? '✓ Completed' : '✗ Not Completed'}
                                                 </span>
                                             </div>
@@ -218,8 +242,8 @@ function CatalogCourseDetails() {
                                     })}
                                 </div>
                                 {!prerequisitesMet && (
-                                    <p className="prerequisites-warning">
-                                        <AlertTriangle size={16} style={{marginRight:'8px', display:'inline', verticalAlign:'middle'}} />
+                                    <p className="mt-4 flex items-center gap-2 text-warning-700 bg-warning-50 px-4 py-3 rounded-lg border border-warning-200">
+                                        <AlertTriangle size={16} />
                                         You must complete all prerequisite courses before enrolling.
                                     </p>
                                 )}
@@ -227,18 +251,18 @@ function CatalogCourseDetails() {
                         )}
 
                         {/* Course Overview */}
-                        <section className="details-section">
-                            <h2>Course Overview</h2>
-                            <p>{course.description}</p>
+                        <section className="bg-surface rounded-lg shadow-card p-6">
+                            <h2 className="text-xl font-bold text-content mb-4">Course Overview</h2>
+                            <p className="text-content-secondary mb-3">{course.description}</p>
                             {course.subjectArea && (
-                                <p><strong>Subject Area:</strong> {course.subjectArea}</p>
+                                <p className="text-content-secondary"><strong>Subject Area:</strong> {course.subjectArea}</p>
                             )}
                         </section>
 
                         {/* Learning Outcomes */}
-                        <section className="details-section">
-                            <h2>What You'll Learn</h2>
-                            <ul className="learning-outcomes">
+                        <section className="bg-surface rounded-lg shadow-card p-6">
+                            <h2 className="text-xl font-bold text-content mb-4">What You'll Learn</h2>
+                            <ul className="space-y-2 list-disc list-inside text-content-secondary">
                                 <li>Master fundamental concepts in {course.subjectArea || course.title}</li>
                                 <li>Apply theoretical knowledge to practical scenarios</li>
                                 <li>Develop critical thinking and problem-solving skills</li>
@@ -248,16 +272,18 @@ function CatalogCourseDetails() {
 
                         {/* Syllabus */}
                         {course.lessons && course.lessons.length > 0 && (
-                            <section className="details-section">
-                                <h2>Course Syllabus</h2>
-                                <div className="syllabus-list">
+                            <section className="bg-surface rounded-lg shadow-card p-6">
+                                <h2 className="text-xl font-bold text-content mb-4">Course Syllabus</h2>
+                                <div className="space-y-3">
                                     {course.lessons.map((lesson, index) => (
-                                        <div key={index} className="syllabus-item">
-                                            <div className="syllabus-week">Week {index + 1}</div>
-                                            <div className="syllabus-content">
-                                                <div className="syllabus-title">{lesson.title}</div>
+                                        <div key={index} className="flex gap-4 p-4 bg-surface-tertiary rounded-lg">
+                                            <div className="bg-brand-500 text-content-inverse px-3 py-1 rounded-full text-sm font-bold h-fit">
+                                                Week {index + 1}
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="font-semibold text-content">{lesson.title}</div>
                                                 {lesson.duration && (
-                                                    <div className="syllabus-duration">{lesson.duration}</div>
+                                                    <div className="text-sm text-content-tertiary mt-1">{lesson.duration}</div>
                                                 )}
                                             </div>
                                         </div>
@@ -268,14 +294,14 @@ function CatalogCourseDetails() {
 
                         {/* Grading Information */}
                         {(course.totalMarks || course.passingMarks) && (
-                            <section className="details-section">
-                                <h2>Grading Information</h2>
-                                <div className="grading-info">
+                            <section className="bg-surface rounded-lg shadow-card p-6">
+                                <h2 className="text-xl font-bold text-content mb-4">Grading Information</h2>
+                                <div className="space-y-2">
                                     {course.totalMarks && (
-                                        <p><strong>Total Marks:</strong> {course.totalMarks}</p>
+                                        <p className="text-content-secondary"><strong>Total Marks:</strong> {course.totalMarks}</p>
                                     )}
                                     {course.passingMarks && (
-                                        <p><strong>Passing Marks:</strong> {course.passingMarks}</p>
+                                        <p className="text-content-secondary"><strong>Passing Marks:</strong> {course.passingMarks}</p>
                                     )}
                                 </div>
                             </section>
@@ -283,49 +309,55 @@ function CatalogCourseDetails() {
                     </div>
 
                     {/* Right Column - Enrollment Card */}
-                    <div className="content-sidebar">
-                        <div className="enrollment-card">
-                            <h3>Enrollment</h3>
+                    <div className="lg:col-span-1">
+                        <div className="bg-surface rounded-lg shadow-card p-6 sticky top-8">
+                            <h3 className="text-lg font-bold text-content mb-4">Enrollment</h3>
 
-                            <div className="enrollment-details">
-                                <div className="detail-row">
-                                    <span className="detail-label">Course Code</span>
-                                    <span className="detail-value">{course.code}</span>
+                            <div className="space-y-3 mb-6">
+                                <div className="flex justify-between">
+                                    <span className="text-content-tertiary">Course Code</span>
+                                    <span className="font-semibold text-content">{course.code}</span>
                                 </div>
-                                <div className="detail-row">
-                                    <span className="detail-label">Credits</span>
-                                    <span className="detail-value">{course.credits} CH</span>
+                                <div className="flex justify-between">
+                                    <span className="text-content-tertiary">Credits</span>
+                                    <span className="font-semibold text-content">{course.credits} CH</span>
                                 </div>
-                                <div className="detail-row">
-                                    <span className="detail-label">Level</span>
-                                    <span className="detail-value">{course.difficulty}</span>
+                                <div className="flex justify-between">
+                                    <span className="text-content-tertiary">Level</span>
+                                    <span className="font-semibold text-content">{course.difficulty}</span>
                                 </div>
-                                <div className="detail-row">
-                                    <span className="detail-label">Type</span>
-                                    <span className="detail-value">{course.type}</span>
+                                <div className="flex justify-between">
+                                    <span className="text-content-tertiary">Type</span>
+                                    <span className="font-semibold text-content">{course.type}</span>
                                 </div>
                                 {course.semester && (
-                                    <div className="detail-row">
-                                        <span className="detail-label">Semester</span>
-                                        <span className="detail-value">{course.semester}</span>
+                                    <div className="flex justify-between">
+                                        <span className="text-content-tertiary">Semester</span>
+                                        <span className="font-semibold text-content">{course.semester}</span>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="enrollment-action">
+                            <div>
                                 {alreadyEnrolled ? (
-                                    <button className="btn-enrolled" disabled>
+                                    <button
+                                        className="w-full bg-success-100 text-success-700 px-6 py-3 rounded-lg font-semibold cursor-not-allowed"
+                                        disabled
+                                    >
                                         ✓ Already Enrolled
                                     </button>
                                 ) : !prerequisitesMet ? (
-                                    <button className="btn-disabled" disabled>
-                                        <Lock size={16} style={{marginRight:'8px', display:'inline', verticalAlign:'middle'}} />
+                                    <button
+                                        className="w-full bg-surface-tertiary text-content-secondary px-6 py-3 rounded-lg font-semibold cursor-not-allowed flex items-center justify-center gap-2"
+                                        disabled
+                                    >
+                                        <Lock size={16} />
                                         Prerequisites Required
                                     </button>
                                 ) : (
                                     <button
                                         onClick={handleEnroll}
-                                        className="btn-enroll"
+                                        className="w-full bg-brand-500 hover:bg-brand-600 text-content-inverse px-6 py-3 rounded-lg font-semibold transition-all shadow-button hover:shadow-button-hover disabled:opacity-50 disabled:cursor-not-allowed"
                                         disabled={enrolling}
                                     >
                                         {enrolling ? 'Enrolling...' : 'Enroll Now'}
@@ -334,11 +366,18 @@ function CatalogCourseDetails() {
                             </div>
 
                             {hasPrerequisites && (
-                                <div className="prerequisites-summary">
-                                    <h4>Prerequisites</h4>
-                                    <ul>
+                                <div className="mt-6 pt-6 border-t border-border">
+                                    <h4 className="text-sm font-bold text-content mb-3">Prerequisites</h4>
+                                    <ul className="space-y-2">
                                         {course.prerequisites.map(prereq => (
-                                            <li key={prereq._id} className={completedCourseIds.includes(prereq._id) ? 'completed' : ''}>
+                                            <li
+                                                key={prereq._id}
+                                                className={`text-sm ${
+                                                    completedCourseIds.includes(prereq._id)
+                                                        ? 'text-success-700 font-semibold'
+                                                        : 'text-content-secondary'
+                                                }`}
+                                            >
                                                 {prereq.code}
                                                 {completedCourseIds.includes(prereq._id) && ' ✓'}
                                             </li>

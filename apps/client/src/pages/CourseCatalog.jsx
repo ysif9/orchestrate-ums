@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { authService } from '../services/authService';
 import { Lock } from 'lucide-react';
-import '../styles/CourseCatalog.css';
 
 /**
  * Course Catalog Page
@@ -133,191 +132,218 @@ function CourseCatalog() {
 
     if (loading) {
         return (
-            <div className="catalog-loading">
+            <div className="min-h-screen flex flex-col items-center justify-center bg-background">
                 <div className="loading-spinner"></div>
-                <p>Loading courses...</p>
+                <p className="mt-4 text-content-secondary">Loading courses...</p>
             </div>
         );
     }
 
     return (
-        <div className="catalog-container">
+        <div className="min-h-screen bg-background">
             {/* Header */}
-            <header className="catalog-header">
-                <div className="header-content">
-                    <h1>Course Catalog</h1>
-                    <p className="header-subtitle">Browse and filter available courses</p>
-                </div>
-                <div className="header-actions">
-                    <span className="user-info">Welcome, {user?.name}</span>
-                    <button
-                        onClick={() => navigate(isAdminOrStaff ? '/admin/home' : '/home')}
-                        className="btn-secondary"
-                    >
-                        Home
-                    </button>
-                    <button onClick={handleLogout} className="btn-logout">
-                        Logout
-                    </button>
+            <header className="bg-brand-500 text-content-inverse px-8 py-6 shadow-md">
+                <div className="max-w-7xl mx-auto flex justify-between items-center">
+                    <div>
+                        <h1 className="text-3xl font-bold m-0 text-content-inverse">Course Catalog</h1>
+                        <p className="text-brand-100 mt-1">Browse and filter available courses</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <span className="text-brand-100 text-sm">Welcome, {user?.name}</span>
+                        <button
+                            onClick={() => navigate(isAdminOrStaff ? '/admin/home' : '/home')}
+                            className="bg-transparent border border-brand-200 hover:bg-brand-400 hover:border-brand-100 text-content-inverse px-4 py-2 rounded text-sm transition-all font-medium"
+                        >
+                            Home
+                        </button>
+                        <button
+                            onClick={handleLogout}
+                            className="bg-error-600 hover:bg-error-700 text-content-inverse px-4 py-2 rounded text-sm transition-all font-medium"
+                        >
+                            Logout
+                        </button>
+                    </div>
                 </div>
             </header>
 
-            {/* Filter Section */}
-            <div className="filter-section">
-                <div className="filter-header">
-                    <h2>Filter Courses</h2>
-                    <button onClick={resetFilters} className="btn-reset">
-                        Reset Filters
-                    </button>
-                </div>
-
-                <div className="filters-grid">
-                    {/* Search */}
-                    <div className="filter-group">
-                        <label htmlFor="search">Search</label>
-                        <input
-                            id="search"
-                            type="text"
-                            placeholder="Search by title, code, or description..."
-                            value={filters.searchTerm}
-                            onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
-                            className="filter-input"
-                        />
-                    </div>
-
-                    {/* Level Filter */}
-                    <div className="filter-group">
-                        <label htmlFor="level">Level</label>
-                        <select
-                            id="level"
-                            value={filters.level}
-                            onChange={(e) => handleFilterChange('level', e.target.value)}
-                            className="filter-select"
+            <div className="max-w-7xl mx-auto px-8 py-8">
+                {/* Filter Section */}
+                <div className="bg-surface rounded-lg shadow-card p-6 mb-8">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-bold text-content m-0">Filter Courses</h2>
+                        <button
+                            onClick={resetFilters}
+                            className="bg-surface-tertiary hover:bg-surface-hover text-content px-4 py-2 rounded text-sm transition-colors font-medium"
                         >
-                            <option value="All">All Levels</option>
-                            <option value="Introductory">Introductory</option>
-                            <option value="Intermediate">Intermediate</option>
-                            <option value="Advanced">Advanced</option>
-                        </select>
-                    </div>
-
-                    {/* Credits Filter */}
-                    <div className="filter-group">
-                        <label htmlFor="credits">Credit Hours</label>
-                        <select
-                            id="credits"
-                            value={filters.credits}
-                            onChange={(e) => handleFilterChange('credits', e.target.value)}
-                            className="filter-select"
-                        >
-                            {uniqueCredits.map(credit => (
-                                <option key={credit} value={credit}>
-                                    {credit === 'All' ? 'All Credits' : `${credit} Credits`}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Type Filter */}
-                    <div className="filter-group">
-                        <label htmlFor="type">Course Type</label>
-                        <select
-                            id="type"
-                            value={filters.type}
-                            onChange={(e) => handleFilterChange('type', e.target.value)}
-                            className="filter-select"
-                        >
-                            <option value="All">All Types</option>
-                            <option value="Core">Core</option>
-                            <option value="Elective">Elective</option>
-                        </select>
-                    </div>
-
-                    {/* Prerequisites Filter */}
-                    <div className="filter-group">
-                        <label htmlFor="prerequisites">Prerequisites</label>
-                        <select
-                            id="prerequisites"
-                            value={filters.hasPrerequisites}
-                            onChange={(e) => handleFilterChange('hasPrerequisites', e.target.value)}
-                            className="filter-select"
-                        >
-                            <option value="All">All Courses</option>
-                            <option value="false">No Prerequisites</option>
-                            <option value="true">Has Prerequisites</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            {/* Results Section */}
-            <div className="results-section">
-                <div className="results-header">
-                    <h3>{filteredCourses.length} Course{filteredCourses.length !== 1 ? 's' : ''} Found</h3>
-                </div>
-
-                {filteredCourses.length === 0 ? (
-                    <div className="no-results">
-                        <p>No courses match your current filters.</p>
-                        <button onClick={resetFilters} className="btn-primary">
-                            Clear Filters
+                            Reset Filters
                         </button>
                     </div>
-                ) : (
-                    <div className="courses-grid">
-                        {filteredCourses.map(course => {
-                            const locked = isLocked(course);
-                            const hasPrereqs = course.prerequisites && course.prerequisites.length > 0;
 
-                            return (
-                                <div key={course._id} className={`course-card ${locked ? 'locked' : ''}`}>
-                                    <div className="course-card-header">
-                                        <div className="course-code">{course.code}</div>
-                                        <div className="course-badges">
-                                            <span className={`badge badge-${course.type.toLowerCase()}`}>
-                                                {course.type}
-                                            </span>
-                                            {locked && <span className="badge badge-locked"><Lock size={14} style={{marginRight:'4px', display:'inline', verticalAlign:'middle'}} /> Locked</span>}
-                                        </div>
-                                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {/* Search */}
+                        <div className="flex flex-col">
+                            <label htmlFor="search" className="text-sm font-medium mb-2 text-content">Search</label>
+                            <input
+                                id="search"
+                                type="text"
+                                placeholder="Search by title, code, or description..."
+                                value={filters.searchTerm}
+                                onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
+                                className="px-3 py-2 border border-border rounded-md text-sm transition-colors focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 bg-surface text-content"
+                            />
+                        </div>
 
-                                    <h3 className="course-title">{course.title}</h3>
-                                    <p className="course-description">{course.description}</p>
+                        {/* Level Filter */}
+                        <div className="flex flex-col">
+                            <label htmlFor="level" className="text-sm font-medium mb-2 text-content">Level</label>
+                            <select
+                                id="level"
+                                value={filters.level}
+                                onChange={(e) => handleFilterChange('level', e.target.value)}
+                                className="px-3 py-2 border border-border rounded-md text-sm transition-colors focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 bg-surface text-content"
+                            >
+                                <option value="All">All Levels</option>
+                                <option value="Introductory">Introductory</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
 
-                                    <div className="course-details">
-                                        <div className="detail-item">
-                                            <span className="detail-label">Level:</span>
-                                            <span className="detail-value">{course.difficulty}</span>
-                                        </div>
-                                        <div className="detail-item">
-                                            <span className="detail-label">Credits:</span>
-                                            <span className="detail-value">{course.credits} CH</span>
-                                        </div>
-                                        {hasPrereqs && (
-                                            <div className="detail-item full-width">
-                                                <span className="detail-label">Prerequisites:</span>
-                                                <span className="detail-value">
-                                                    {course.prerequisites.map((prereq, idx) => (
-                                                        <span key={prereq._id || prereq}>
-                                                            {prereq.code || prereq}
-                                                            {idx < course.prerequisites.length - 1 ? ', ' : ''}
-                                                        </span>
-                                                    ))}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
+                        {/* Credits Filter */}
+                        <div className="flex flex-col">
+                            <label htmlFor="credits" className="text-sm font-medium mb-2 text-content">Credit Hours</label>
+                            <select
+                                id="credits"
+                                value={filters.credits}
+                                onChange={(e) => handleFilterChange('credits', e.target.value)}
+                                className="px-3 py-2 border border-border rounded-md text-sm transition-colors focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 bg-surface text-content"
+                            >
+                                {uniqueCredits.map(credit => (
+                                    <option key={credit} value={credit}>
+                                        {credit === 'All' ? 'All Credits' : `${credit} Credits`}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
-                                    <div className="course-card-footer">
-                                        <Link to={`/catalog/course/${course._id}`} className="btn-view">
-                                            View Details
-                                        </Link>
-                                    </div>
-                                </div>
-                            );
-                        })}
+                        {/* Type Filter */}
+                        <div className="flex flex-col">
+                            <label htmlFor="type" className="text-sm font-medium mb-2 text-content">Course Type</label>
+                            <select
+                                id="type"
+                                value={filters.type}
+                                onChange={(e) => handleFilterChange('type', e.target.value)}
+                                className="px-3 py-2 border border-border rounded-md text-sm transition-colors focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 bg-surface text-content"
+                            >
+                                <option value="All">All Types</option>
+                                <option value="Core">Core</option>
+                                <option value="Elective">Elective</option>
+                            </select>
+                        </div>
+
+                        {/* Prerequisites Filter */}
+                        <div className="flex flex-col">
+                            <label htmlFor="prerequisites" className="text-sm font-medium mb-2 text-content">Prerequisites</label>
+                            <select
+                                id="prerequisites"
+                                value={filters.hasPrerequisites}
+                                onChange={(e) => handleFilterChange('hasPrerequisites', e.target.value)}
+                                className="px-3 py-2 border border-border rounded-md text-sm transition-colors focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 bg-surface text-content"
+                            >
+                                <option value="All">All Courses</option>
+                                <option value="false">No Prerequisites</option>
+                                <option value="true">Has Prerequisites</option>
+                            </select>
+                        </div>
                     </div>
-                )}
+                </div>
+
+                {/* Results Section */}
+                <div>
+                    <div className="mb-6">
+                        <h3 className="text-lg font-semibold text-content">{filteredCourses.length} Course{filteredCourses.length !== 1 ? 's' : ''} Found</h3>
+                    </div>
+
+                    {filteredCourses.length === 0 ? (
+                        <div className="text-center py-12">
+                            <p className="text-content-secondary mb-4">No courses match your current filters.</p>
+                            <button
+                                onClick={resetFilters}
+                                className="bg-brand-500 hover:bg-brand-600 text-content-inverse px-6 py-3 rounded-lg transition-all font-medium shadow-button hover:shadow-button-hover"
+                            >
+                                Clear Filters
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filteredCourses.map(course => {
+                                const locked = isLocked(course);
+                                const hasPrereqs = course.prerequisites && course.prerequisites.length > 0;
+
+                                return (
+                                    <div
+                                        key={course._id}
+                                        className={`bg-surface rounded-lg shadow-card hover:shadow-card-hover transition-all p-6 flex flex-col ${locked ? 'opacity-75' : ''}`}
+                                    >
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="text-brand-500 font-bold text-lg">{course.code}</div>
+                                            <div className="flex gap-2 flex-wrap justify-end">
+                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                    course.type === 'Core'
+                                                        ? 'bg-course-core-bg text-course-core'
+                                                        : 'bg-course-elective-bg text-course-elective'
+                                                }`}>
+                                                    {course.type}
+                                                </span>
+                                                {locked && (
+                                                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-surface-tertiary text-content-secondary flex items-center gap-1">
+                                                        <Lock size={14} /> Locked
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <h3 className="text-lg font-semibold text-content mb-2">{course.title}</h3>
+                                        <p className="text-sm text-content-secondary mb-4 flex-grow line-clamp-3">{course.description}</p>
+
+                                        <div className="space-y-2 mb-4">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-content-tertiary">Level:</span>
+                                                <span className="font-medium text-content">{course.difficulty}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-content-tertiary">Credits:</span>
+                                                <span className="font-medium text-content">{course.credits} CH</span>
+                                            </div>
+                                            {hasPrereqs && (
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-content-tertiary">Prerequisites:</span>
+                                                    <span className="font-medium text-content">
+                                                        {course.prerequisites.map((prereq, idx) => (
+                                                            <span key={prereq._id || prereq}>
+                                                                {prereq.code || prereq}
+                                                                {idx < course.prerequisites.length - 1 ? ', ' : ''}
+                                                            </span>
+                                                        ))}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="mt-auto">
+                                            <Link
+                                                to={`/catalog/course/${course._id}`}
+                                                className="block w-full text-center bg-brand-500 hover:bg-brand-600 text-content-inverse px-4 py-2 rounded-lg transition-all no-underline font-medium shadow-button hover:shadow-button-hover"
+                                            >
+                                                View Details
+                                            </Link>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

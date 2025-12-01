@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+body {
+  margin: 0;
+  background-color: #f1f5f9;
+  color: #0f172a;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings - using brand color for consistency */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  color: #0066cc;
+}
+
+/* ============================================
+   FOCUS STYLES
+   Accessible focus indicators for keyboard navigation
+   ============================================ */
+*:focus-visible {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+/* Remove default focus for mouse users */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ============================================
+   LOADING SPINNER
+   ============================================ */
+.loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 4px solid #e2e8f0;
+  border-top-color: #0066cc;
+  border-radius: 9999px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   FORM ELEMENT ENHANCEMENTS
+   ============================================ */
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* Ensure disabled states are clearly visible */
+input:disabled,
+select:disabled,
+textarea:disabled,
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   SELECTION STYLES
+   ============================================ */
+::selection {
+  background-color: #0066cc;
+  color: #ffffff;
+}

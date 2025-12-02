@@ -10,9 +10,9 @@ These instructions will get a copy of the project up and running on your local m
 
 Ensure you have the following software installed on your machine:
 
-- **Node.js** (v18 or higher recommended)
-- **pnpm** (Package Manager)
-- **MongoDB** (Local instance or Atlas connection string)
+- **Docker** and **Docker Compose** - [Install Docker](https://docs.docker.com/desktop/setup/install/windows-install/)
+- **Node.js** (v22 or higher recommended)
+- **pnpm** (Package Manager) - for local development without Docker
 
 If you do not have `pnpm` installed, you can install it globally via npm:
 
@@ -29,48 +29,43 @@ npm install -g pnpm
    cd orchestrate-ums
    ```
 
-2. **Install dependencies**
+## Running with Docker
 
-   Since this is a monorepo, run the install command from the root directory. `pnpm` will handle dependencies for the root, server, and client simultaneously.
+The easiest way to run the project is using Docker Compose, which will set up all services automatically.
 
-   ```bash
-   pnpm install
-   ```
+### Start the Application
 
-### Configuration
+Run the following command in the **root directory**:
 
-You need to configure the environment variables for the backend server before running the application.
+```bash
+# First time or after Dockerfile/dependency changes
+docker-compose up --build
 
-**Server Configuration**
+# Subsequent runs
+docker-compose up
+```
 
-   Navigate to the server directory and create a `.env` file:
+This will start:
+- **Client (React):** `http://localhost:5173`
+- **Server (Express):** `http://localhost:5000`
+- **PostgreSQL Database:** `localhost:5433` (mapped from container port 5432)
 
-   ```bash
-   cd apps/server
-   cp .env.example .env
-   cd ../..
-   ```
+### Stop the Application
 
-### Running the Application
+```bash
+docker-compose down
+```
 
-We use **concurrently** to run both the client (React) and server (Express) from the root directory.
+To remove the database volume (this will delete all data):
 
-1. **Start Development Server**
+```bash
+docker-compose down -v
+```
 
-   Run the following command in the **root directory**:
 
-   ```bash
-   pnpm dev
-   ```
+## Tech Stack
 
-   This command executes the scripts defined in the root `package.json`, effectively running:
-    - **Server:** `http://localhost:5000`
-    - **Client:** `http://localhost:5173` (default Vite port)
-
-2. **Build for Production**
-
-   To build the frontend for production:
-
-   ```bash
-   pnpm build
-   ```
+- **Frontend:** React 19, Vite, Tailwind CSS, React Router
+- **Backend:** Express 5, TypeScript, MikroORM
+- **Database:** PostgreSQL 17
+- **Containerization:** Docker, Docker Compose

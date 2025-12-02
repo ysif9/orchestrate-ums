@@ -39,10 +39,10 @@ Run the following command in the **root directory**:
 
 ```bash
 # First time or after Dockerfile/dependency changes
-docker-compose up --build
+docker compose up --build
 
 # Subsequent runs
-docker-compose up
+docker compose up
 ```
 
 This will start:
@@ -53,13 +53,13 @@ This will start:
 ### Stop the Application
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 To remove the database volume (this will delete all data):
 
 ```bash
-docker-compose down -v
+docker compose down -v
 ```
 
 

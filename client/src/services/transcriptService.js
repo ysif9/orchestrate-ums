@@ -42,6 +42,36 @@ export const transcriptService = {
     viewTranscript: async (id) => {
         const response = await axios.get(`${API_BASE}/${id}`);
         return response.data;
+    },
+
+    /**
+     * Get all pending transcript requests (Staff only)
+     * @returns {Promise<Object>} Response with list of pending requests
+     */
+    getPendingRequests: async () => {
+        const response = await axios.get(`${API_BASE}/pending`);
+        return response.data;
+    },
+
+    /**
+     * Approve a transcript request (Staff only)
+     * @param {number} id - Request ID
+     * @returns {Promise<Object>} Response with approved request
+     */
+    approveRequest: async (id) => {
+        const response = await axios.put(`${API_BASE}/${id}/approve`);
+        return response.data;
+    },
+
+    /**
+     * Reject a transcript request (Staff only)
+     * @param {number} id - Request ID
+     * @param {string} reason - Rejection reason
+     * @returns {Promise<Object>} Response with rejected request
+     */
+    rejectRequest: async (id, reason) => {
+        const response = await axios.put(`${API_BASE}/${id}/reject`, { rejectionReason: reason });
+        return response.data;
     }
 };
 

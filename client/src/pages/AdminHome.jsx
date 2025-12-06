@@ -54,6 +54,13 @@ function AdminHome() {
             icon: BarChart3,
             path: '/admin/reports',
             color: '#dc2626' // error-600
+        },
+        {
+            title: 'Review Transcript Requests',
+            description: 'Review and approve student transcript requests',
+            icon: FileText,
+            path: '/admin/transcript-requests',
+            color: '#9333ea' // purple-600
         }
     ];
 

@@ -133,4 +133,8 @@ dist
 .idea/
 .vscode/
 
+# Uploaded files
+uploads/
+server/uploads/
+
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { authService } from '../services/authService.js';
-import { ClipboardCheck, BarChart3, BookOpen, Sparkles } from 'lucide-react';
+import { ClipboardCheck, BarChart3, BookOpen, Sparkles, FileText } from 'lucide-react';
 
 function StudentHome() {
     const navigate = useNavigate();
@@ -118,13 +118,22 @@ function StudentHome() {
                         )}
                         {/* Student Grades View Button */}
                         {!isAdminOrStaff && (
-                            <button
-                                onClick={() => navigate('/my-grades')}
-                                className="bg-info-600 hover:bg-info-700 text-content-inverse font-medium px-6 py-3 rounded-lg transition-colors flex items-center gap-2 shadow-button hover:shadow-button-hover"
-                            >
-                                <BarChart3 size={18} />
-                                View My Grades
-                            </button>
+                            <>
+                                <button
+                                    onClick={() => navigate('/my-grades')}
+                                    className="bg-info-600 hover:bg-info-700 text-content-inverse font-medium px-6 py-3 rounded-lg transition-colors flex items-center gap-2 shadow-button hover:shadow-button-hover"
+                                >
+                                    <BarChart3 size={18} />
+                                    View My Grades
+                                </button>
+                                <button
+                                    onClick={() => navigate('/transcript-requests')}
+                                    className="bg-accent-600 hover:bg-accent-700 text-content-inverse font-medium px-6 py-3 rounded-lg transition-colors flex items-center gap-2 shadow-button hover:shadow-button-hover"
+                                >
+                                    <FileText size={18} />
+                                    Request Transcript
+                                </button>
+                            </>
                         )}
                     </div>
                 </div>

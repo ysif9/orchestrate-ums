@@ -11,6 +11,8 @@ import { authService } from './services/authService.js';
 import GradebookPage from './pages/GradebookPage.jsx';
 import AssessmentCreationPage from './pages/AssessmentCreationPage.jsx';
 import MyGradesPage from './pages/MyGradesPage.jsx';
+import TranscriptRequestsPage from './pages/TranscriptRequestsPage.jsx';
+import ViewTranscriptPage from './pages/ViewTranscriptPage.jsx';
 
 /**
  * Protected Route Component
@@ -144,6 +146,24 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <CourseDetails />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Transcript Requests */}
+                <Route
+                    path="/transcript-requests"
+                    element={
+                        <ProtectedRoute>
+                            <TranscriptRequestsPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/transcript-requests/:id"
+                    element={
+                        <ProtectedRoute>
+                            <ViewTranscriptPage />
                         </ProtectedRoute>
                     }
                 />

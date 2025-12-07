@@ -11,6 +11,8 @@ import { authService } from './services/authService.js';
 import GradebookPage from './pages/GradebookPage.jsx';
 import AssessmentCreationPage from './pages/AssessmentCreationPage.jsx';
 import MyGradesPage from './pages/MyGradesPage.jsx';
+import ApplicationListPage from './pages/ApplicationListPage.jsx';
+import ApplicationReviewPage from './pages/ApplicationReviewPage.jsx';
 import TranscriptRequestsPage from './pages/TranscriptRequestsPage.jsx';
 import ViewTranscriptPage from './pages/ViewTranscriptPage.jsx';
 import StaffTranscriptManagementPage from './pages/StaffTranscriptManagementPage.jsx';
@@ -118,6 +120,24 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <AssessmentCreationPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Application Review Routes - Staff/Professor only */}
+                <Route
+                    path="/admin/applications"
+                    element={
+                        <ProtectedRoute>
+                            <ApplicationListPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/applications/:id/review"
+                    element={
+                        <ProtectedRoute>
+                            <ApplicationReviewPage />
                         </ProtectedRoute>
                     }
                 />

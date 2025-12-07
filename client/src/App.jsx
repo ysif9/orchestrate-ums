@@ -13,6 +13,7 @@ import AssessmentCreationPage from './pages/AssessmentCreationPage.jsx';
 import MyGradesPage from './pages/MyGradesPage.jsx';
 import TranscriptRequestsPage from './pages/TranscriptRequestsPage.jsx';
 import ViewTranscriptPage from './pages/ViewTranscriptPage.jsx';
+import StaffTranscriptManagementPage from './pages/StaffTranscriptManagementPage.jsx';
 
 /**
  * Protected Route Component
@@ -126,6 +127,16 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <GradebookPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Staff Transcript Management */}
+                <Route
+                    path="/admin/transcript-requests"
+                    element={
+                        <ProtectedRoute>
+                            <StaffTranscriptManagementPage />
                         </ProtectedRoute>
                     }
                 />

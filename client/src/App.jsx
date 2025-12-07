@@ -26,6 +26,24 @@ function ProtectedRoute({ children }) {
 }
 
 /**
+ * Staff Only Route Component
+ * Redirects to home if user is not staff
+ */
+function StaffOnlyRoute({ children }) {
+    const isAuthenticated = authService.isAuthenticated();
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+
+    const user = authService.getCurrentUser();
+    if (user?.role !== 'staff') {
+        return <Navigate to="/admin/home" replace />;
+    }
+
+    return children;
+}
+
+/**
  * Root Redirect Component
  * Redirects based on authentication status and user role
  * - Admin/Staff -> /admin/home
@@ -162,13 +180,13 @@ function App() {
                     }
                 />
 
-                {/* Room Management */}
+                {/* Room Management (Staff Only) */}
                 <Route
                     path="/admin/rooms"
                     element={
-                        <ProtectedRoute>
+                        <StaffOnlyRoute>
                             <AdminRoomManager />
-                        </ProtectedRoute>
+                        </StaffOnlyRoute>
                     }
                 />
 

@@ -11,6 +11,8 @@ function AdminHome() {
         navigate('/login');
     };
 
+    const isStaff = user?.role === 'staff';
+
     // Quick action cards configuration - using accessible colors
     const quickActions = [
         {
@@ -48,13 +50,16 @@ function AdminHome() {
             path: '/admin/room-booking',
             color: '#059669' // emerald-600
         },
-        {
-            title: 'Manage Rooms',
-            description: 'Add, edit, and manage classrooms and labs',
-            icon: Building,
-            path: '/admin/rooms',
-            color: '#7c3aed' // violet-600
-        },
+        // Staff-only actions
+        ...(isStaff ? [
+            {
+                title: 'Manage Rooms',
+                description: 'Add, edit, and manage classrooms and labs',
+                icon: Building,
+                path: '/admin/rooms',
+                color: '#7c3aed' // violet-600
+            }
+        ] : []),
         {
             title: 'View All Users',
             description: 'Manage students, staff, and administrators',

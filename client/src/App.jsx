@@ -14,6 +14,8 @@ import MyGradesPage from './pages/MyGradesPage.jsx';
 import TranscriptRequestsPage from './pages/TranscriptRequestsPage.jsx';
 import ViewTranscriptPage from './pages/ViewTranscriptPage.jsx';
 import StaffTranscriptManagementPage from './pages/StaffTranscriptManagementPage.jsx';
+import StudentRecordSearchPage from './pages/StudentRecordSearchPage.jsx';
+import StudentRecordSummaryPage from './pages/StudentRecordSummaryPage.jsx';
 
 /**
  * Protected Route Component
@@ -137,6 +139,24 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <StaffTranscriptManagementPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Student Record Management */}
+                <Route
+                    path="/admin/student-records"
+                    element={
+                        <ProtectedRoute>
+                            <StudentRecordSearchPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/student-records/:id/summary"
+                    element={
+                        <ProtectedRoute>
+                            <StudentRecordSummaryPage />
                         </ProtectedRoute>
                     }
                 />

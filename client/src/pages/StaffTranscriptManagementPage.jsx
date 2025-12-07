@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { transcriptService } from '../services/transcriptService';
-import { FileText, CheckCircle, Clock, ArrowLeft } from 'lucide-react';
+import { FileText, CheckCircle, Clock, ArrowLeft, XCircle } from 'lucide-react';
 
 function StaffTranscriptManagementPage() {
     const navigate = useNavigate();
@@ -10,6 +10,10 @@ function StaffTranscriptManagementPage() {
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const [approvingId, setApprovingId] = useState(null);
+    const [rejectingId, setRejectingId] = useState(null);
+    const [showRejectModal, setShowRejectModal] = useState(false);
+    const [rejectionReason, setRejectionReason] = useState('');
+    const [selectedRequestId, setSelectedRequestId] = useState(null);
 
     useEffect(() => {
         fetchPendingRequests();
@@ -46,6 +50,42 @@ function StaffTranscriptManagementPage() {
         } finally {
             setApprovingId(null);
         }
+    };
+
+    const handleRejectRequest = async () => {
+        if (!selectedRequestId) return;
+
+        try {
+            setRejectingId(selectedRequestId);
+            setMessage('');
+            setError('');
+            const response = await transcriptService.rejectRequest(selectedRequestId, rejectionReason);
+            if (response.success) {
+                setMessage(`Transcript request #${selectedRequestId} rejected.`);
+                setShowRejectModal(false);
+                setRejectionReason('');
+                setSelectedRequestId(null);
+                // Refresh the list to remove rejected request
+                await fetchPendingRequests();
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || `Failed to reject request #${selectedRequestId}. Please try again.`);
+            console.error(err);
+        } finally {
+            setRejectingId(null);
+        }
+    };
+
+    const openRejectModal = (id) => {
+        setSelectedRequestId(id);
+        setRejectionReason('');
+        setShowRejectModal(true);
+    };
+
+    const closeRejectModal = () => {
+        setShowRejectModal(false);
+        setRejectionReason('');
+        setSelectedRequestId(null);
     };
 
     const getStatusBadge = (status) => {
@@ -177,14 +217,24 @@ function StaffTranscriptManagementPage() {
                                                 </td>
                                                 <td className="px-4 py-3 border-b border-border-light text-sm text-center">
                                                     {request.status === 'pending_review' ? (
-                                                        <button
-                                                            onClick={() => handleApproveRequest(request.id)}
-                                                            disabled={approvingId === request.id}
-                                                            className="bg-success-600 hover:bg-success-700 text-content-inverse px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 mx-auto shadow-button hover:shadow-button-hover disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        >
-                                                            <CheckCircle size={16} />
-                                                            {approvingId === request.id ? 'Approving...' : 'Approve Request'}
-                                                        </button>
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            <button
+                                                                onClick={() => handleApproveRequest(request.id)}
+                                                                disabled={approvingId === request.id || rejectingId === request.id}
+                                                                className="bg-success-600 hover:bg-success-700 text-content-inverse px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-button hover:shadow-button-hover disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            >
+                                                                <CheckCircle size={16} />
+                                                                {approvingId === request.id ? 'Approving...' : 'Approve'}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => openRejectModal(request.id)}
+                                                                disabled={approvingId === request.id || rejectingId === request.id}
+                                                                className="bg-error-600 hover:bg-error-700 text-content-inverse px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-button hover:shadow-button-hover disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            >
+                                                                <XCircle size={16} />
+                                                                Reject
+                                                            </button>
+                                                        </div>
                                                     ) : (
                                                         <span className="text-content-tertiary text-sm">—</span>
                                                     )}
@@ -198,6 +248,47 @@ function StaffTranscriptManagementPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Reject Modal */}
+            {showRejectModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-surface rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
+                        <h3 className="text-xl font-bold text-brand-500 mb-4">Reject Transcript Request</h3>
+                        <p className="text-content-secondary mb-4">
+                            Are you sure you want to reject transcript request #{selectedRequestId}? Please provide a reason for rejection.
+                        </p>
+                        <div className="mb-4">
+                            <label className="block text-sm font-semibold text-content mb-2">
+                                Rejection Reason
+                            </label>
+                            <textarea
+                                value={rejectionReason}
+                                onChange={(e) => setRejectionReason(e.target.value)}
+                                placeholder="Enter reason for rejection..."
+                                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-content bg-surface"
+                                rows={4}
+                            />
+                        </div>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={closeRejectModal}
+                                disabled={rejectingId !== null}
+                                className="px-4 py-2 text-content-secondary hover:text-content border border-border rounded-lg transition-colors disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleRejectRequest}
+                                disabled={rejectingId !== null || !rejectionReason.trim()}
+                                className="bg-error-600 hover:bg-error-700 text-content-inverse px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <XCircle size={16} />
+                                {rejectingId !== null ? 'Rejecting...' : 'Reject Request'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

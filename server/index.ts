@@ -11,6 +11,7 @@ import courseRoutes from './routes/courseRoutes';
 import enrollmentRoutes from './routes/enrollmentRoutes';
 import assessmentRoutes from './routes/assessmentRoutes';
 import transcriptRoutes from './routes/transcriptRoutes';
+import studentRecordRoutes from './routes/studentRecordRoutes';
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ export const init = async () => {
     app.use('/api/enrollments', enrollmentRoutes);
     app.use('/api/assessments', assessmentRoutes);
     app.use('/api/transcript-requests', transcriptRoutes);
+    app.use('/api/student-records', studentRecordRoutes);
 
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);

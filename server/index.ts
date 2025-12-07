@@ -15,6 +15,8 @@ import applicationRoutes from './routes/applicationRoutes';
 import applicationReviewRoutes from './routes/applicationReviewRoutes';
 import decisionLetterRoutes from './routes/decisionLetterRoutes';
 import transcriptRoutes from './routes/transcriptRoutes';
+import roomRoutes from './routes/roomRoutes';
+import bookingRoutes from './routes/bookingRoutes';
 import studentRecordRoutes from './routes/studentRecordRoutes';
 
 dotenv.config();
@@ -50,6 +52,8 @@ export const init = async () => {
     app.use('/api/enrollments', enrollmentRoutes);
     app.use('/api/assessments', assessmentRoutes);
     app.use('/api/transcript-requests', transcriptRoutes);
+    app.use('/api/rooms', roomRoutes);
+    app.use('/api/bookings', bookingRoutes);
     app.use('/api/student-records', studentRecordRoutes);
     app.use('/api/applicants', applicantRoutes);
     app.use('/api/applications', applicationRoutes);

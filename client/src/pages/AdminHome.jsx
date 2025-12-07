@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService.js';
-import { BookOpen, Plus, Users, BarChart3, FileText, ClipboardCheck, User } from 'lucide-react';
+
+import { BookOpen, Plus, Users, BarChart3, FileText, ClipboardCheck, User , Calendar, Building  } from 'lucide-react';
+
 
 function AdminHome() {
     const navigate = useNavigate();
@@ -11,6 +13,8 @@ function AdminHome() {
         navigate('/login');
     };
 
+    const isStaff = user?.role === 'staff';
+
     // Quick action cards configuration - using accessible colors
     const quickActions = [
         {
@@ -20,13 +24,13 @@ function AdminHome() {
             path: '/admin/courses',
             color: '#0066cc' // brand-500
         },
-        {
-            title: 'Review Applications',
-            description: 'Review and score applications',
-            icon: Plus,
-            path: '/admin/applications',
-            color: '#c9a227' // accent-500
-        },
+        // {
+        //     title: 'Create Course',
+        //     description: 'Add a new course to the system',
+        //     icon: Plus,
+        //     path: '/admin/courses?action=create',
+        //     color: '#c9a227' // accent-500
+        // },
         {
             title: 'Create Assessment',
             description: 'Create quizzes, assignments, and exams',
@@ -42,13 +46,27 @@ function AdminHome() {
             color: '#0891b2' // course-elective
         },
         {
+            title: 'Book Rooms',
+            description: 'Reserve classrooms and labs for lectures',
+            icon: Calendar,
+            path: '/admin/room-booking',
+            color: '#059669' // emerald-600
+        },
+        // Staff-only actions
+        ...(isStaff ? [
+            {
+                title: 'Manage Rooms',
+                description: 'Add, edit, and manage classrooms and labs',
+                icon: Building,
+                path: '/admin/rooms',
+                color: '#7c3aed' // violet-600
+            },{
             title: 'View All Users',
             description: 'Manage students, staff, and administrators',
             icon: Users,
             path: '/admin/users',
             color: '#16a34a' // success-600
-        },
-        {
+        }, {
             title: 'Enrollment Reports',
             description: 'View enrollment statistics and reports',
             icon: BarChart3,
@@ -69,6 +87,9 @@ function AdminHome() {
             path: '/admin/student-records',
             color: '#ea580c' // orange-600
         }
+        ] : []),
+
+
     ];
 
     return (

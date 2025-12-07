@@ -15,6 +15,8 @@ import ApplicationListPage from './pages/ApplicationListPage.jsx';
 import ApplicationReviewPage from './pages/ApplicationReviewPage.jsx';
 import TranscriptRequestsPage from './pages/TranscriptRequestsPage.jsx';
 import ViewTranscriptPage from './pages/ViewTranscriptPage.jsx';
+import RoomBookingPage from './pages/RoomBookingPage.jsx';
+import AdminRoomManager from './pages/AdminRoomManager.jsx';
 import StaffTranscriptManagementPage from './pages/StaffTranscriptManagementPage.jsx';
 import StudentRecordSearchPage from './pages/StudentRecordSearchPage.jsx';
 import StudentRecordSummaryPage from './pages/StudentRecordSummaryPage.jsx';
@@ -26,6 +28,24 @@ import StudentRecordSummaryPage from './pages/StudentRecordSummaryPage.jsx';
 function ProtectedRoute({ children }) {
     const isAuthenticated = authService.isAuthenticated();
     return isAuthenticated ? children : <Navigate to="/login" replace />;
+}
+
+/**
+ * Staff Only Route Component
+ * Redirects to home if user is not staff
+ */
+function StaffOnlyRoute({ children }) {
+    const isAuthenticated = authService.isAuthenticated();
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+
+    const user = authService.getCurrentUser();
+    if (user?.role !== 'staff') {
+        return <Navigate to="/admin/home" replace />;
+    }
+
+    return children;
 }
 
 /**
@@ -198,6 +218,26 @@ function App() {
                         <ProtectedRoute>
                             <CourseDetails />
                         </ProtectedRoute>
+                    }
+                />
+
+                {/* Room Booking */}
+                <Route
+                    path="/admin/room-booking"
+                    element={
+                        <ProtectedRoute>
+                            <RoomBookingPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Room Management (Staff Only) */}
+                <Route
+                    path="/admin/rooms"
+                    element={
+                        <StaffOnlyRoute>
+                            <AdminRoomManager />
+                        </StaffOnlyRoute>
                     }
                 />
 

@@ -11,10 +11,15 @@ import { authService } from './services/authService.js';
 import GradebookPage from './pages/GradebookPage.jsx';
 import AssessmentCreationPage from './pages/AssessmentCreationPage.jsx';
 import MyGradesPage from './pages/MyGradesPage.jsx';
+import ApplicationListPage from './pages/ApplicationListPage.jsx';
+import ApplicationReviewPage from './pages/ApplicationReviewPage.jsx';
 import TranscriptRequestsPage from './pages/TranscriptRequestsPage.jsx';
 import ViewTranscriptPage from './pages/ViewTranscriptPage.jsx';
 import RoomBookingPage from './pages/RoomBookingPage.jsx';
 import AdminRoomManager from './pages/AdminRoomManager.jsx';
+import StaffTranscriptManagementPage from './pages/StaffTranscriptManagementPage.jsx';
+import StudentRecordSearchPage from './pages/StudentRecordSearchPage.jsx';
+import StudentRecordSummaryPage from './pages/StudentRecordSummaryPage.jsx';
 
 /**
  * Protected Route Component
@@ -139,6 +144,24 @@ function App() {
                     }
                 />
 
+                {/* Application Review Routes - Staff/Professor only */}
+                <Route
+                    path="/admin/applications"
+                    element={
+                        <ProtectedRoute>
+                            <ApplicationListPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/applications/:id/review"
+                    element={
+                        <ProtectedRoute>
+                            <ApplicationReviewPage />
+                        </ProtectedRoute>
+                    }
+                />
+
 
                 {/* Gradebook for Admin/Staff */}
                 <Route
@@ -146,6 +169,34 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <GradebookPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Staff Transcript Management */}
+                <Route
+                    path="/admin/transcript-requests"
+                    element={
+                        <ProtectedRoute>
+                            <StaffTranscriptManagementPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Student Record Management */}
+                <Route
+                    path="/admin/student-records"
+                    element={
+                        <ProtectedRoute>
+                            <StudentRecordSearchPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/student-records/:id/summary"
+                    element={
+                        <ProtectedRoute>
+                            <StudentRecordSummaryPage />
                         </ProtectedRoute>
                     }
                 />

@@ -7,6 +7,7 @@ services:
     volumes:
       - ./server:/app
       - /app/node_modules
+      - uploads-data:/app/uploads
     environment:
       - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_key_change_this_in_production}
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/orchestrate
@@ -40,3 +41,4 @@ services:
 
 volumes:
   postgres-data:
+  uploads-data:

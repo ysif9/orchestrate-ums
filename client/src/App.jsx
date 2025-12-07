@@ -17,9 +17,11 @@ import TranscriptRequestsPage from './pages/TranscriptRequestsPage.jsx';
 import ViewTranscriptPage from './pages/ViewTranscriptPage.jsx';
 import RoomBookingPage from './pages/RoomBookingPage.jsx';
 import AdminRoomManager from './pages/AdminRoomManager.jsx';
+import AdminLabStationManager from './pages/AdminLabStationManager.jsx';
 import StaffTranscriptManagementPage from './pages/StaffTranscriptManagementPage.jsx';
 import StudentRecordSearchPage from './pages/StudentRecordSearchPage.jsx';
 import StudentRecordSummaryPage from './pages/StudentRecordSummaryPage.jsx';
+import LabStationBookingPage from './pages/LabStationBookingPage.jsx';
 
 /**
  * Protected Route Component
@@ -238,6 +240,26 @@ function App() {
                         <StaffOnlyRoute>
                             <AdminRoomManager />
                         </StaffOnlyRoute>
+                    }
+                />
+
+                {/* Lab Station Management (Staff Only) */}
+                <Route
+                    path="/admin/rooms/:labId/stations"
+                    element={
+                        <StaffOnlyRoute>
+                            <AdminLabStationManager />
+                        </StaffOnlyRoute>
+                    }
+                />
+
+                {/* Lab Station Booking (Students) */}
+                <Route
+                    path="/lab-stations"
+                    element={
+                        <ProtectedRoute>
+                            <LabStationBookingPage />
+                        </ProtectedRoute>
                     }
                 />
 

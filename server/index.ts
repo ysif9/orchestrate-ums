@@ -18,6 +18,8 @@ import transcriptRoutes from './routes/transcriptRoutes';
 import roomRoutes from './routes/roomRoutes';
 import bookingRoutes from './routes/bookingRoutes';
 import studentRecordRoutes from './routes/studentRecordRoutes';
+import labStationRoutes from './routes/labStationRoutes';
+import labReservationRoutes from './routes/labReservationRoutes';
 
 dotenv.config();
 
@@ -59,6 +61,8 @@ export const init = async () => {
     app.use('/api/applications', applicationRoutes);
     app.use('/api/reviews', applicationReviewRoutes);
     app.use('/api/decision-letters', decisionLetterRoutes);
+    app.use('/api/lab-stations', labStationRoutes);
+    app.use('/api/lab-reservations', labReservationRoutes);
 
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);

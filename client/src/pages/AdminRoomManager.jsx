@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { roomService } from '../services/bookingService.js';
+import { Monitor } from 'lucide-react';
 
 const ROOM_TYPES = [
     { value: 'classroom', label: 'Classroom' },
@@ -251,6 +252,16 @@ const AdminRoomManager = () => {
                                             </td>
                                             <td className="px-6 py-4 border-b border-border align-middle">
                                                 <div className="flex gap-2 justify-end">
+                                                    {room.type === 'lab' && (
+                                                        <button
+                                                            className="h-8 px-3 flex items-center justify-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-content-inverse rounded transition-colors text-sm font-medium"
+                                                            onClick={() => navigate(`/admin/rooms/${room.id}/stations`)}
+                                                            title="Manage Lab Stations"
+                                                        >
+                                                            <Monitor size={14} />
+                                                            Stations
+                                                        </button>
+                                                    )}
                                                     <button
                                                         className="w-8 h-8 flex items-center justify-center bg-info-600 hover:bg-info-700 text-content-inverse rounded transition-colors text-lg"
                                                         onClick={() => handleOpenModal(room)}

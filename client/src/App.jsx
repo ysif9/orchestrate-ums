@@ -13,6 +13,8 @@ import AssessmentCreationPage from './pages/AssessmentCreationPage.jsx';
 import MyGradesPage from './pages/MyGradesPage.jsx';
 import TranscriptRequestsPage from './pages/TranscriptRequestsPage.jsx';
 import ViewTranscriptPage from './pages/ViewTranscriptPage.jsx';
+import RoomBookingPage from './pages/RoomBookingPage.jsx';
+import AdminRoomManager from './pages/AdminRoomManager.jsx';
 
 /**
  * Protected Route Component
@@ -146,6 +148,26 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <CourseDetails />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Room Booking */}
+                <Route
+                    path="/admin/room-booking"
+                    element={
+                        <ProtectedRoute>
+                            <RoomBookingPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Room Management */}
+                <Route
+                    path="/admin/rooms"
+                    element={
+                        <ProtectedRoute>
+                            <AdminRoomManager />
                         </ProtectedRoute>
                     }
                 />

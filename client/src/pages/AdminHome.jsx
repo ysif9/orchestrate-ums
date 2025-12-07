@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService.js';
-import { BookOpen, Plus, Users, BarChart3, FileText, ClipboardCheck } from 'lucide-react';
+import { BookOpen, Plus, Users, BarChart3, FileText, ClipboardCheck, Calendar, Building } from 'lucide-react';
 
 function AdminHome() {
     const navigate = useNavigate();
@@ -40,6 +40,20 @@ function AdminHome() {
             icon: ClipboardCheck,
             path: '/admin/gradebook',
             color: '#0891b2' // course-elective
+        },
+        {
+            title: 'Book Rooms',
+            description: 'Reserve classrooms and labs for lectures',
+            icon: Calendar,
+            path: '/admin/room-booking',
+            color: '#059669' // emerald-600
+        },
+        {
+            title: 'Manage Rooms',
+            description: 'Add, edit, and manage classrooms and labs',
+            icon: Building,
+            path: '/admin/rooms',
+            color: '#7c3aed' // violet-600
         },
         {
             title: 'View All Users',

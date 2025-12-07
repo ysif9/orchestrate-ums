@@ -22,13 +22,13 @@ function AdminHome() {
             path: '/admin/courses',
             color: '#0066cc' // brand-500
         },
-        {
-            title: 'Create Course',
-            description: 'Add a new course to the system',
-            icon: Plus,
-            path: '/admin/courses?action=create',
-            color: '#c9a227' // accent-500
-        },
+        // {
+        //     title: 'Create Course',
+        //     description: 'Add a new course to the system',
+        //     icon: Plus,
+        //     path: '/admin/courses?action=create',
+        //     color: '#c9a227' // accent-500
+        // },
         {
             title: 'Create Assessment',
             description: 'Create quizzes, assignments, and exams',
@@ -58,22 +58,22 @@ function AdminHome() {
                 icon: Building,
                 path: '/admin/rooms',
                 color: '#7c3aed' // violet-600
-            }
-        ] : []),
-        {
+            },{
             title: 'View All Users',
             description: 'Manage students, staff, and administrators',
             icon: Users,
             path: '/admin/users',
             color: '#16a34a' // success-600
-        },
-        {
+        }, {
             title: 'Enrollment Reports',
             description: 'View enrollment statistics and reports',
             icon: BarChart3,
             path: '/admin/reports',
             color: '#dc2626' // error-600
         }
+        ] : []),
+
+
     ];
 
     return (

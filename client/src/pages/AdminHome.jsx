@@ -21,10 +21,10 @@ function AdminHome() {
             color: '#0066cc' // brand-500
         },
         {
-            title: 'Create Course',
-            description: 'Add a new course to the system',
+            title: 'Review Applications',
+            description: 'Review and score applications',
             icon: Plus,
-            path: '/admin/courses?action=create',
+            path: '/admin/applications',
             color: '#c9a227' // accent-500
         },
         {

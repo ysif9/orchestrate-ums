@@ -14,6 +14,8 @@ import applicantRoutes from './routes/applicantRoutes';
 import applicationRoutes from './routes/applicationRoutes';
 import applicationReviewRoutes from './routes/applicationReviewRoutes';
 import decisionLetterRoutes from './routes/decisionLetterRoutes';
+import transcriptRoutes from './routes/transcriptRoutes';
+import studentRecordRoutes from './routes/studentRecordRoutes';
 
 dotenv.config();
 
@@ -47,8 +49,8 @@ export const init = async () => {
     app.use('/api/courses', courseRoutes);
     app.use('/api/enrollments', enrollmentRoutes);
     app.use('/api/assessments', assessmentRoutes);
-
-    // Admission application review routes (UMS-66)
+    app.use('/api/transcript-requests', transcriptRoutes);
+    app.use('/api/student-records', studentRecordRoutes);
     app.use('/api/applicants', applicantRoutes);
     app.use('/api/applications', applicationRoutes);
     app.use('/api/reviews', applicationReviewRoutes);

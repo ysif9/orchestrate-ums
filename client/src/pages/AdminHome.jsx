@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService.js';
-import { BookOpen, Plus, Users, BarChart3, FileText, ClipboardCheck } from 'lucide-react';
+import { BookOpen, Plus, Users, BarChart3, FileText, ClipboardCheck, User } from 'lucide-react';
 
 function AdminHome() {
     const navigate = useNavigate();
@@ -54,6 +54,20 @@ function AdminHome() {
             icon: BarChart3,
             path: '/admin/reports',
             color: '#dc2626' // error-600
+        },
+        {
+            title: 'Review Transcript Requests',
+            description: 'Review and approve student transcript requests',
+            icon: FileText,
+            path: '/admin/transcript-requests',
+            color: '#9333ea' // purple-600
+        },
+        {
+            title: 'Student Record Management',
+            description: 'Search students and generate record summaries',
+            icon: User,
+            path: '/admin/student-records',
+            color: '#ea580c' // orange-600
         }
     ];
 

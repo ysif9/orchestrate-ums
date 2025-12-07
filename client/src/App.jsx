@@ -13,6 +13,11 @@ import AssessmentCreationPage from './pages/AssessmentCreationPage.jsx';
 import MyGradesPage from './pages/MyGradesPage.jsx';
 import ApplicationListPage from './pages/ApplicationListPage.jsx';
 import ApplicationReviewPage from './pages/ApplicationReviewPage.jsx';
+import TranscriptRequestsPage from './pages/TranscriptRequestsPage.jsx';
+import ViewTranscriptPage from './pages/ViewTranscriptPage.jsx';
+import StaffTranscriptManagementPage from './pages/StaffTranscriptManagementPage.jsx';
+import StudentRecordSearchPage from './pages/StudentRecordSearchPage.jsx';
+import StudentRecordSummaryPage from './pages/StudentRecordSummaryPage.jsx';
 
 /**
  * Protected Route Component
@@ -148,6 +153,34 @@ function App() {
                     }
                 />
 
+                {/* Staff Transcript Management */}
+                <Route
+                    path="/admin/transcript-requests"
+                    element={
+                        <ProtectedRoute>
+                            <StaffTranscriptManagementPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Student Record Management */}
+                <Route
+                    path="/admin/student-records"
+                    element={
+                        <ProtectedRoute>
+                            <StudentRecordSearchPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/student-records/:id/summary"
+                    element={
+                        <ProtectedRoute>
+                            <StudentRecordSummaryPage />
+                        </ProtectedRoute>
+                    }
+                />
+
                 {/* Student Grades View */}
                 <Route
                     path="/my-grades"
@@ -164,6 +197,24 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <CourseDetails />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Transcript Requests */}
+                <Route
+                    path="/transcript-requests"
+                    element={
+                        <ProtectedRoute>
+                            <TranscriptRequestsPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/transcript-requests/:id"
+                    element={
+                        <ProtectedRoute>
+                            <ViewTranscriptPage />
                         </ProtectedRoute>
                     }
                 />

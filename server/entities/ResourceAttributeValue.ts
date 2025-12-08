@@ -1,8 +1,9 @@
 // entities/ResourceAttributeValue.ts
-import { Entity, Property, ManyToOne } from '@mikro-orm/core';
+import { Entity, Property, ManyToOne, Unique } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 
 @Entity()
+@Unique({ properties: ['resource', 'attribute'] })
 export class ResourceAttributeValue extends BaseEntity {
   @ManyToOne('Resource', { deleteRule: 'cascade' })
   resource!: any;
@@ -21,6 +22,4 @@ export class ResourceAttributeValue extends BaseEntity {
 
   @Property({ nullable: true })
   booleanValue?: boolean;
-
-  // REMOVE THE CONSTRUCTOR ENTIRELY — this was causing the TS2554 error!
 }

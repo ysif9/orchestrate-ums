@@ -11,12 +11,11 @@ export class Department extends BaseEntity {
   @Property({ nullable: true })
   description?: string;
 
-  // Use string reference to avoid circular dependency
   @OneToMany('Allocation', 'allocatedToDepartment')
   allocations = new Collection<Allocation>(this);
 
-  constructor(name: string) {
+  constructor(name?: string) {
     super();
-    this.name = name;
+    if (name) this.name = name;
   }
 }

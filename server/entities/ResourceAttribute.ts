@@ -12,18 +12,18 @@ export enum AttributeDataType {
 @Entity()
 export class ResourceAttribute extends BaseEntity {
   @Property({ unique: true })
-  key!: string; // e.g. g. "serial_number", "license_expiry"
+  key!: string;
 
   @Property()
-  label!: string; // e.g. "Serial Number", "License Expiry Date"
+  label!: string;
 
   @Enum({ items: () => AttributeDataType })
   dataType!: AttributeDataType;
 
-  constructor(key: string, label: string, dataType: AttributeDataType) {
+  constructor(key?: string, label?: string, dataType?: AttributeDataType) {
     super();
-    this.key = key;
-    this.label = label;
-    this.dataType = dataType;
+    if (key) this.key = key;
+    if (label) this.label = label;
+    if (dataType) this.dataType = dataType;
   }
 }

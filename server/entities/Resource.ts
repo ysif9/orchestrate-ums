@@ -1,6 +1,8 @@
 // entities/Resource.ts
-import { Entity, Property, Enum, OneToMany, Collection } from '@mikro-orm/core';
+import { Entity, Property, Enum, OneToMany, Collection, Index } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
+import { ResourceAttributeValue } from './ResourceAttributeValue';
+import { Allocation } from './Allocation';
 
 export enum ResourceType {
   Equipment = 'equipment',
@@ -9,6 +11,7 @@ export enum ResourceType {
 }
 
 @Entity()
+@Index({ properties: ['isAvailable'] })
 export class Resource extends BaseEntity {
   @Property()
   name!: string;
@@ -23,14 +26,14 @@ export class Resource extends BaseEntity {
   isAvailable: boolean = true;
 
   @OneToMany('Allocation', 'resource')
-  allocations = new Collection<any>(this);
+  allocations = new Collection<Allocation>(this);
 
   @OneToMany('ResourceAttributeValue', 'resource')
-  attributes = new Collection<any>(this);
+  attributes = new Collection<ResourceAttributeValue>(this);
 
-  constructor(name: string, type: ResourceType) {
+  constructor(name?: string, type?: ResourceType) {
     super();
-    this.name = name;
-    this.type = type;
+    if (name) this.name = name;
+    if (type) this.type = type;
   }
 }

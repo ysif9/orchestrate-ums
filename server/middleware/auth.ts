@@ -4,6 +4,7 @@ import { UserRole } from '../entities/User';
 
 export interface AuthRequest extends Request {
     user?: {
+        departmentId: any;
         id: string;
         role: UserRole;
     };

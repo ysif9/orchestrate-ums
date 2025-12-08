@@ -1,3 +1,4 @@
+// index.ts
 import express from 'express';
 import cors from 'cors';
 import { MikroORM, RequestContext } from '@mikro-orm/core';
@@ -30,21 +31,17 @@ const PORT = process.env.PORT || 5000;
 export const init = async () => {
     const orm = await MikroORM.init<PostgreSqlDriver>(mikroOrmConfig);
 
-    // Sync database schema (creates tables if they don't exist)
     const generator = orm.getSchemaGenerator();
     await generator.updateSchema();
     console.log('Database schema synchronized');
 
-    // Middleware
     app.use(cors());
     app.use(express.json());
 
-    // MikroORM RequestContext middleware
     app.use((req, res, next) => {
         RequestContext.create(orm.em, next);
     });
 
-    // Basic Route
     app.get('/', (req, res) => {
         res.json({ message: 'Hello from the Backend!' });
     });

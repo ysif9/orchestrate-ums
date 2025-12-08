@@ -4,6 +4,7 @@ import { MikroORM, RequestContext } from '@mikro-orm/core';
 import type { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import dotenv from 'dotenv';
 import mikroOrmConfig from './mikro-orm.config';
+import resourceRoutes from './routes/resourceRoutes';
 
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
@@ -64,6 +65,7 @@ export const init = async () => {
     app.use('/api/decision-letters', decisionLetterRoutes);
     app.use('/api/lab-stations', labStationRoutes);
     app.use('/api/lab-reservations', labReservationRoutes);
+    app.use('/api/resources', resourceRoutes);
     app.use('/api/admissions', admissionRoutes);
 
     app.listen(PORT, () => {

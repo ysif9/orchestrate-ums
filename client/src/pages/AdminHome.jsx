@@ -86,9 +86,15 @@ function AdminHome() {
             icon: User,
             path: '/admin/student-records',
             color: '#ea580c' // orange-600
+        },
+            {
+            title: 'Review Applications',
+            description: 'Review and manage student applications',
+            icon: Users,
+            path: '/admin/applications',
+            color: '#0066cc' // brand-500
         }
         ] : []),
-
 
     ];
 

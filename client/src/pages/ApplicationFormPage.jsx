@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { admissionService } from '../services/admissionService.js';
+import {useState, useEffect} from 'react';
+import {useNavigate, Link} from 'react-router-dom';
+import {admissionService} from '../services/admissionService.js';
 import {
     User,
     GraduationCap,
@@ -44,10 +44,10 @@ function ApplicationFormPage() {
     });
 
     const steps = [
-        { id: 1, title: 'Personal Information', icon: User },
-        { id: 2, title: 'Academic History', icon: GraduationCap },
-        { id: 3, title: 'Program Selection', icon: FileCheck },
-        { id: 4, title: 'Review & Submit', icon: CheckCircle },
+        {id: 1, title: 'Personal Information', icon: User},
+        {id: 2, title: 'Academic History', icon: GraduationCap},
+        {id: 3, title: 'Program Selection', icon: FileCheck},
+        {id: 4, title: 'Review & Submit', icon: CheckCircle},
     ];
 
     useEffect(() => {
@@ -69,11 +69,11 @@ function ApplicationFormPage() {
     }, []);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const {name, value} = e.target;
+        setFormData(prev => ({...prev, [name]: value}));
         // Clear error for this field
         if (errors[name]) {
-            setErrors(prev => ({ ...prev, [name]: '' }));
+            setErrors(prev => ({...prev, [name]: ''}));
         }
         if (apiError) {
             setApiError('');
@@ -183,7 +183,7 @@ function ApplicationFormPage() {
                         to="/admissions"
                         className="text-white/90 hover:text-white text-sm font-medium transition-colors flex items-center gap-2"
                     >
-                        <ArrowLeft size={16} />
+                        <ArrowLeft size={16}/>
                         Back to Admissions
                     </Link>
                 </div>
@@ -195,25 +195,27 @@ function ApplicationFormPage() {
                     <div className="flex items-center justify-between">
                         {steps.map((step, index) => (
                             <div key={step.id} className="flex items-center">
-                                <div className={`flex flex-col items-center ${index < steps.length - 1 ? 'flex-1' : ''}`}>
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${currentStep >= step.id
+                                <div
+                                    className={`flex flex-col items-center ${index < steps.length - 1 ? 'flex-1' : ''}`}>
+                                    <div
+                                        className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${currentStep >= step.id
                                             ? 'bg-brand-500 text-white'
                                             : 'bg-surface-tertiary text-content-secondary'
                                         }`}>
-                                        <step.icon size={20} />
+                                        <step.icon size={20}/>
                                     </div>
                                     <span className={`text-xs mt-2 text-center hidden sm:block ${currentStep >= step.id
-                                            ? 'text-brand-600 font-medium'
-                                            : 'text-content-tertiary'
-                                        }`}>
+                                        ? 'text-brand-600 font-medium'
+                                        : 'text-content-tertiary'
+                                    }`}>
                                         {step.title}
                                     </span>
                                 </div>
                                 {index < steps.length - 1 && (
                                     <div className={`h-1 flex-1 mx-2 rounded ${currentStep > step.id
-                                            ? 'bg-brand-500'
-                                            : 'bg-surface-tertiary'
-                                        }`} />
+                                        ? 'bg-brand-500'
+                                        : 'bg-surface-tertiary'
+                                    }`}/>
                                 )}
                             </div>
                         ))}
@@ -226,7 +228,8 @@ function ApplicationFormPage() {
                     </h2>
 
                     {apiError && (
-                        <div className="bg-error-100 text-error-700 px-4 py-3 rounded-lg mb-6 text-sm border border-error-200">
+                        <div
+                            className="bg-error-100 text-error-700 px-4 py-3 rounded-lg mb-6 text-sm border border-error-200">
                             {apiError}
                         </div>
                     )}
@@ -335,7 +338,8 @@ function ApplicationFormPage() {
                                     placeholder="e.g., High School Diploma, Bachelor's in Science"
                                     className={inputClassName}
                                 />
-                                {errors.previousDegree && <span className={errorClassName}>{errors.previousDegree}</span>}
+                                {errors.previousDegree &&
+                                    <span className={errorClassName}>{errors.previousDegree}</span>}
                             </div>
                             <div>
                                 <label className={labelClassName}>Institution / School Name *</label>
@@ -386,9 +390,9 @@ function ApplicationFormPage() {
                                         <label
                                             key={program.id}
                                             className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all ${formData.program === program.id
-                                                    ? 'border-brand-500 bg-brand-50'
-                                                    : 'border-border hover:border-brand-300'
-                                                }`}
+                                                ? 'border-brand-500 bg-brand-50'
+                                                : 'border-border hover:border-brand-300'
+                                            }`}
                                         >
                                             <input
                                                 type="radio"
@@ -398,17 +402,19 @@ function ApplicationFormPage() {
                                                 onChange={handleChange}
                                                 className="sr-only"
                                             />
-                                            <div className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${formData.program === program.id
+                                            <div
+                                                className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${formData.program === program.id
                                                     ? 'border-brand-500 bg-brand-500'
                                                     : 'border-border-dark'
                                                 }`}>
                                                 {formData.program === program.id && (
-                                                    <div className="w-2 h-2 rounded-full bg-white" />
+                                                    <div className="w-2 h-2 rounded-full bg-white"/>
                                                 )}
                                             </div>
                                             <div>
                                                 <span className="font-medium text-content">{program.name}</span>
-                                                <span className="text-content-secondary text-sm ml-2">({program.department})</span>
+                                                <span
+                                                    className="text-content-secondary text-sm ml-2">({program.department})</span>
                                             </div>
                                         </label>
                                     ))}
@@ -439,49 +445,68 @@ function ApplicationFormPage() {
                         <div className="space-y-6">
                             <div className="bg-surface-secondary rounded-lg p-6 border border-border">
                                 <h3 className="font-semibold text-content mb-4 flex items-center gap-2">
-                                    <User size={18} className="text-brand-500" />
+                                    <User size={18} className="text-brand-500"/>
                                     Personal Information
                                 </h3>
                                 <div className="grid md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-content-secondary">Name:</span> <span className="text-content font-medium">{formData.firstName} {formData.lastName}</span></div>
-                                    <div><span className="text-content-secondary">Email:</span> <span className="text-content font-medium">{formData.email}</span></div>
-                                    {formData.phone && <div><span className="text-content-secondary">Phone:</span> <span className="text-content font-medium">{formData.phone}</span></div>}
-                                    {formData.dateOfBirth && <div><span className="text-content-secondary">DOB:</span> <span className="text-content font-medium">{formData.dateOfBirth}</span></div>}
-                                    {formData.nationality && <div><span className="text-content-secondary">Nationality:</span> <span className="text-content font-medium">{formData.nationality}</span></div>}
-                                    {formData.address && <div><span className="text-content-secondary">Address:</span> <span className="text-content font-medium">{formData.address}</span></div>}
+                                    <div><span className="text-content-secondary">Name:</span> <span
+                                        className="text-content font-medium">{formData.firstName} {formData.lastName}</span>
+                                    </div>
+                                    <div><span className="text-content-secondary">Email:</span> <span
+                                        className="text-content font-medium">{formData.email}</span></div>
+                                    {formData.phone && <div><span className="text-content-secondary">Phone:</span> <span
+                                        className="text-content font-medium">{formData.phone}</span></div>}
+                                    {formData.dateOfBirth &&
+                                        <div><span className="text-content-secondary">DOB:</span> <span
+                                            className="text-content font-medium">{formData.dateOfBirth}</span></div>}
+                                    {formData.nationality &&
+                                        <div><span className="text-content-secondary">Nationality:</span> <span
+                                            className="text-content font-medium">{formData.nationality}</span></div>}
+                                    {formData.address &&
+                                        <div><span className="text-content-secondary">Address:</span> <span
+                                            className="text-content font-medium">{formData.address}</span></div>}
                                 </div>
                             </div>
 
                             <div className="bg-surface-secondary rounded-lg p-6 border border-border">
                                 <h3 className="font-semibold text-content mb-4 flex items-center gap-2">
-                                    <GraduationCap size={18} className="text-brand-500" />
+                                    <GraduationCap size={18} className="text-brand-500"/>
                                     Academic History
                                 </h3>
                                 <div className="grid md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-content-secondary">Degree:</span> <span className="text-content font-medium">{formData.previousDegree}</span></div>
-                                    <div><span className="text-content-secondary">Institution:</span> <span className="text-content font-medium">{formData.institution}</span></div>
-                                    {formData.gpa && <div><span className="text-content-secondary">GPA:</span> <span className="text-content font-medium">{formData.gpa}</span></div>}
-                                    {formData.graduationYear && <div><span className="text-content-secondary">Graduation:</span> <span className="text-content font-medium">{formData.graduationYear}</span></div>}
+                                    <div><span className="text-content-secondary">Degree:</span> <span
+                                        className="text-content font-medium">{formData.previousDegree}</span></div>
+                                    <div><span className="text-content-secondary">Institution:</span> <span
+                                        className="text-content font-medium">{formData.institution}</span></div>
+                                    {formData.gpa && <div><span className="text-content-secondary">GPA:</span> <span
+                                        className="text-content font-medium">{formData.gpa}</span></div>}
+                                    {formData.graduationYear &&
+                                        <div><span className="text-content-secondary">Graduation:</span> <span
+                                            className="text-content font-medium">{formData.graduationYear}</span></div>}
                                 </div>
                             </div>
 
                             <div className="bg-surface-secondary rounded-lg p-6 border border-border">
                                 <h3 className="font-semibold text-content mb-4 flex items-center gap-2">
-                                    <FileCheck size={18} className="text-brand-500" />
+                                    <FileCheck size={18} className="text-brand-500"/>
                                     Program Selection
                                 </h3>
                                 <div className="grid md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-content-secondary">Program:</span> <span className="text-content font-medium">
+                                    <div><span className="text-content-secondary">Program:</span> <span
+                                        className="text-content font-medium">
                                         {admissionInfo?.programs.find(p => p.id === formData.program)?.name || formData.program}
                                     </span></div>
-                                    <div><span className="text-content-secondary">Semester:</span> <span className="text-content font-medium">
+                                    <div><span className="text-content-secondary">Semester:</span> <span
+                                        className="text-content font-medium">
                                         {admissionInfo?.semesters.find(s => s.id === formData.semester)?.name || formData.semester}
                                     </span></div>
                                 </div>
                             </div>
 
-                            <div className="bg-info-50 text-info-700 px-4 py-3 rounded-lg text-sm border border-info-100">
-                                Please review all information carefully before submitting. You will receive a confirmation email once your application is submitted.
+                            <div
+                                className="bg-info-50 text-info-700 px-4 py-3 rounded-lg text-sm border border-info-100">
+                                Please review all information carefully before submitting. You will receive a
+                                confirmation email once your application is submitted.
                             </div>
                         </div>
                     )}
@@ -494,11 +519,11 @@ function ApplicationFormPage() {
                                 onClick={handleBack}
                                 className="flex items-center gap-2 px-6 py-3 text-content-secondary hover:text-content transition-colors"
                             >
-                                <ArrowLeft size={18} />
+                                <ArrowLeft size={18}/>
                                 Back
                             </button>
                         ) : (
-                            <div />
+                            <div/>
                         )}
 
                         {currentStep < 4 ? (
@@ -508,7 +533,7 @@ function ApplicationFormPage() {
                                 className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-button hover:shadow-button-hover"
                             >
                                 Next
-                                <ArrowRight size={18} />
+                                <ArrowRight size={18}/>
                             </button>
                         ) : (
                             <button
@@ -519,12 +544,12 @@ function ApplicationFormPage() {
                             >
                                 {submitting ? (
                                     <>
-                                        <Loader2 size={18} className="animate-spin" />
+                                        <Loader2 size={18} className="animate-spin"/>
                                         Submitting...
                                     </>
                                 ) : (
                                     <>
-                                        <CheckCircle size={18} />
+                                        <CheckCircle size={18}/>
                                         Submit Application
                                     </>
                                 )}

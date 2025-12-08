@@ -1,5 +1,5 @@
 // entities/Allocation.ts
-import { Entity, Property, ManyToOne, Enum } from '@mikro-orm/core';
+import { Entity, Property, ManyToOne, Enum, Index } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 
 export enum AllocationStatus {
@@ -9,9 +9,12 @@ export enum AllocationStatus {
 }
 
 @Entity()
+@Index({ properties: ['status'] })
+@Index({ properties: ['dueDate'] })
+@Index({ properties: ['allocatedAt'] })
 export class Allocation extends BaseEntity {
   @ManyToOne('Resource')
-  resource!: any; // will be resolved by MikroORM
+  resource!: any;
 
   @ManyToOne('User', { nullable: true })
   allocatedToUser?: any;

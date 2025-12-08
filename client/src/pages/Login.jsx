@@ -179,6 +179,9 @@ function Login() {
                 </form>
 
                 <div className="text-center mt-6">
+                    <p className="text-content-secondary text-sm mb-2">
+                        Prospective student? <Link to="/admissions" className="text-brand-500 hover:text-brand-600 font-medium underline">Apply for admission</Link>
+                    </p>
                     <p className="text-content-secondary text-sm">
                         Don&apos;t have an account? <Link to="/signup" className="text-brand-500 hover:text-brand-600 font-medium underline">Sign up here</Link>
                     </p>

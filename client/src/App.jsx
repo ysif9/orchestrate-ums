@@ -22,6 +22,9 @@ import StaffTranscriptManagementPage from './pages/StaffTranscriptManagementPage
 import StudentRecordSearchPage from './pages/StudentRecordSearchPage.jsx';
 import StudentRecordSummaryPage from './pages/StudentRecordSummaryPage.jsx';
 import LabStationBookingPage from './pages/LabStationBookingPage.jsx';
+import AdmissionsInfoPage from './pages/AdmissionsInfoPage.jsx';
+import ApplicationFormPage from './pages/ApplicationFormPage.jsx';
+import ApplicationConfirmationPage from './pages/ApplicationConfirmationPage.jsx';
 
 /**
  * Protected Route Component
@@ -80,6 +83,9 @@ function App() {
                 {/* Public Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+                <Route path="/admissions" element={<AdmissionsInfoPage />} />
+                <Route path="/apply" element={<ApplicationFormPage />} />
+                <Route path="/apply/confirmation/:id" element={<ApplicationConfirmationPage />} />
 
                 {/* Protected Routes */}
 

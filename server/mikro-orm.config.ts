@@ -7,8 +7,9 @@ dotenv.config();
 export default defineConfig({
     dbName: 'orchestrate',
     clientUrl: process.env.DATABASE_URL,
-    entities: ['dist/entities'],
-    entitiesTs: ['entities'],
+    entities: ['dist/entities/**/*.js'],
+    entitiesTs: ['entities/**/*.ts'],
+    
     metadataProvider: TsMorphMetadataProvider,
     debug: true,
 });

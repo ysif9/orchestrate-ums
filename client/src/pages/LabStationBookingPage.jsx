@@ -20,6 +20,14 @@ const STATION_STATUS_LABELS = {
 
 const MAX_RESERVATION_HOURS = 4;
 
+const getLocalDateString = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
 function LabStationBookingPage() {
     const navigate = useNavigate();
     const user = authService.getCurrentUser();
@@ -36,7 +44,7 @@ function LabStationBookingPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedStation, setSelectedStation] = useState(null);
     const [formData, setFormData] = useState({
-        date: new Date().toISOString().split('T')[0],
+        date: getLocalDateString(),
         startTime: '',
         endTime: '',
         purpose: '',
@@ -134,7 +142,7 @@ function LabStationBookingPage() {
         const now = new Date();
         const startHour = now.getHours() + 1;
         setFormData({
-            date: now.toISOString().split('T')[0],
+            date: getLocalDateString(),
             startTime: `${startHour.toString().padStart(2, '0')}:00`,
             endTime: `${(startHour + 1).toString().padStart(2, '0')}:00`,
             purpose: '',
@@ -278,7 +286,7 @@ function LabStationBookingPage() {
                         <div>
                             <p className="font-semibold">Your reservation is expiring soon!</p>
                             <p className="text-sm">
-                                Station {expirationAlert.station?.stationNumber} at {expirationAlert.station?.lab?.name} 
+                                Station {expirationAlert.station?.stationNumber} at {expirationAlert.station?.lab?.name}
                                 expires at {formatTime(expirationAlert.endTime)}
                             </p>
                         </div>
@@ -327,11 +335,10 @@ function LabStationBookingPage() {
                             <button
                                 key={lab.id}
                                 onClick={() => setSelectedLab(lab)}
-                                className={`px-4 py-3 rounded-lg border-2 transition-all ${
-                                    selectedLab?.id === lab.id
+                                className={`px-4 py-3 rounded-lg border-2 transition-all ${selectedLab?.id === lab.id
                                         ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
                                         : 'border-gray-200 hover:border-indigo-300 text-gray-700'
-                                }`}
+                                    }`}
                             >
                                 <div className="font-medium">{lab.name}</div>
                                 <div className="text-sm text-gray-500 flex items-center gap-1 mt-1">
@@ -377,9 +384,8 @@ function LabStationBookingPage() {
                                     <div
                                         key={station.id}
                                         onClick={() => openReservationModal(station)}
-                                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
-                                            STATION_STATUS_COLORS[station.status]
-                                        } ${station.status === 'available' ? 'hover:scale-105' : 'cursor-not-allowed opacity-75'}`}
+                                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${STATION_STATUS_COLORS[station.status]
+                                            } ${station.status === 'available' ? 'hover:scale-105' : 'cursor-not-allowed opacity-75'}`}
                                     >
                                         <div className="flex items-center justify-center mb-2">
                                             <Monitor size={32} />
@@ -465,7 +471,7 @@ function LabStationBookingPage() {
                                         value={formData.date}
                                         onChange={handleInputChange}
                                         required
-                                        min={new Date().toISOString().split('T')[0]}
+                                        min={getLocalDateString()}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     />
                                 </div>

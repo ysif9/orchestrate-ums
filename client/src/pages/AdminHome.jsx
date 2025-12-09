@@ -99,15 +99,22 @@ function AdminHome() {
             path: '/admin/student-records',
             color: '#ea580c' // orange-600
         },
+          {
+            title: 'Review Applications',
+            description: 'Review and manage student applications',
+            icon: Users,
+            path: '/admin/applications',
+            color: '#0066cc' // brand-500
+        },
             {
             title: 'View Maintenance Tickets',
             description: 'Review and manage maintenance tickets and requests',
             icon: Wrench ,
             path: '/admin/tickets',
             color: '#1D4ED8' // blue
-        }
+            }
+          
         ] : []),
-
 
     ];
 

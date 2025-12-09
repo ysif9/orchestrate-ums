@@ -1,18 +1,27 @@
 {
-  "name": "orchestrate-ums",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "dev": "concurrently \"pnpm --filter server dev\" \"pnpm --filter client dev\"",
-    "install:all": "pnpm install -r",
-    "build": "pnpm --filter client build"
+  "dependencies": {
+    "@mikro-orm/core": "^6.6.2",
+    "@mikro-orm/migrations": "^6.6.2",
+    "@mikro-orm/postgresql": "^6.6.2",
+    "@mikro-orm/reflection": "^6.6.2",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "express-validator": "^7.3.1",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.0.2",
+    "uuid": "^13.0.0"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.22.0",
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^10.0.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
   }
 }

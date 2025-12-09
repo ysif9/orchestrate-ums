@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Wrench, AlertCircle, Check, X, Clock, CheckCircle, PlayCircle, Eye } from 'lucide-react';
 import {ticketsService} from "../services/ticketsService.js";
+import { useNavigate } from 'react-router-dom';
 
 const TICKET_STATUS = [
     { value: 'open', label: 'Open' },
     { value: 'in_progress', label: 'In Progress' },
     { value: 'resolved', label: 'Resolved' }
 ];
+
 
 const TICKET_STATUS_COLORS = {
     open: 'bg-red-100 text-red-800',
@@ -38,7 +40,7 @@ const AdminTicketsManager = () => {
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
-
+    const navigate = useNavigate();
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTicket, setSelectedTicket] = useState(null);
@@ -135,7 +137,7 @@ const AdminTicketsManager = () => {
     };
 
     const handleBackToHome = () => {
-        navigate('/');
+        navigate('/admin/home');
 
     };
 

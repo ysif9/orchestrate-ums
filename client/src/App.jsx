@@ -22,6 +22,7 @@ import StaffTranscriptManagementPage from './pages/StaffTranscriptManagementPage
 import StudentRecordSearchPage from './pages/StudentRecordSearchPage.jsx';
 import StudentRecordSummaryPage from './pages/StudentRecordSummaryPage.jsx';
 import LabStationBookingPage from './pages/LabStationBookingPage.jsx';
+import MaintenanceTicketPage from './pages/ViewTicketsPage.jsx';
 
 /**
  * Protected Route Component
@@ -280,7 +281,14 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
-
+                <Route
+                    path="/tickets"
+                    element={
+                        <ProtectedRoute>
+                            <MaintenanceTicketPage />
+                        </ProtectedRoute>
+                    }
+                />
                 {/* Smart redirect based on authentication status */}
                 <Route path="/" element={<RootRedirect />} />
 

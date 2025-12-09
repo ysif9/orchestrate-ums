@@ -1,4 +1,6 @@
+// @ts-ignore
 import express, { Response } from 'express';
+// @ts-ignore
 import { RequestContext } from '@mikro-orm/core';
 import { LabStation, LabStationStatus } from '../entities/LabStation';
 import { LabStationReservation, ReservationStatus, MAX_RESERVATION_DURATION_HOURS } from '../entities/LabStationReservation';

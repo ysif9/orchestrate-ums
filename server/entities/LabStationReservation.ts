@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Entity, Property, Enum, ManyToOne, Ref } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 import { LabStation } from './LabStation';

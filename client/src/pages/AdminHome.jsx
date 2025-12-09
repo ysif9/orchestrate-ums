@@ -52,13 +52,16 @@ function AdminHome() {
             path: '/admin/room-booking',
             color: '#059669' // emerald-600
         },
+        ...(!isStaff ? [
         {
             title: 'Report Maintenance',
             description: 'submit a room maintenance report',
             icon: Wrench,
-            path: '/admin/room-booking',
+            path: '/tickets',
             color: '#dc2626' // error-600
-        },
+        } ]
+        :[])
+            ,
         // Staff-only actions
         ...(isStaff ? [
             {

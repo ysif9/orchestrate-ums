@@ -4,7 +4,7 @@ import { BaseEntity } from './BaseEntity';
 
 import { User } from './User';
 import {Room} from "./Room";
-import {LabStation} from "./LabStation";
+
 
 export enum ticket_status{
 
@@ -30,6 +30,8 @@ export class Maintenance_Ticket extends BaseEntity {
     issue_type: issue_type = issue_type.other;
     @Property({ nullable: true })
     description!: string | null;
+    @Property({ nullable: true })
+    created_by?: Date;
     @Property({ nullable: true })
     resolved_at?: Date;
 

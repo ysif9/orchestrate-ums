@@ -25,7 +25,7 @@ const tickets = await em.find(
     ,
     {
         populate: ['room', 'user'],
-        orderBy: { created_by: 'ASC'  }
+        orderBy: { created_by: 'DESC'  }
     }
 );
 
@@ -44,7 +44,7 @@ router.patch('/:id', authenticate, authorize(UserRole.Staff), async (req: AuthRe
 
         const { id } = req.params;
         const { status } = req.body;
-
+        const resolved_at = new Date();
         if (!status) {
             return res.status(400).json({ success: false, message: "Status is required" });
         }
@@ -55,7 +55,7 @@ router.patch('/:id', authenticate, authorize(UserRole.Staff), async (req: AuthRe
         }
 
         ticket.status = status as ticket_status;
-
+        ticket.resolved_at = resolved_at;
         await em.flush();
 
         return res.json({ success: true, ticket });

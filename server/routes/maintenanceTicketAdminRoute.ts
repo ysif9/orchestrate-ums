@@ -17,15 +17,15 @@ try {
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
 
-console.log('Getting all tickets');
+
 
 const tickets = await em.find(
     Maintenance_Ticket,
     {}
     ,
     {
-        populate: ['room'],
-        orderBy: { room: { name: 'ASC' } }
+        populate: ['room', 'user'],
+        orderBy: { created_by: 'ASC'  }
     }
 );
 

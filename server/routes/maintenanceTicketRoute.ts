@@ -44,6 +44,7 @@ router.post('/rooms/tickets', authenticate, async (req: AuthRequest, res: Respon
         if (!room) return res.status(404).json({ message: 'Room not found' });
 
         const user = await em.findOne(User, { id: Number(req.user.id) });
+
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         const ticket = new Maintenance_Ticket(room, user, description);
@@ -57,7 +58,22 @@ router.post('/rooms/tickets', authenticate, async (req: AuthRequest, res: Respon
     }
 });
 
-
+// GET /api/tickets/ - Get all tickets for the current user
+router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
+    try {
+        const em = RequestContext.getEntityManager();
+        if (!em) return res.status(500).json({ message: 'EntityManager not found' });
+        if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
+        const tickets = await em.find(Maintenance_Ticket, { user: { id: Number(req.user.id) } }, {
+            populate: ['room', 'user'],
+            orderBy: { created_by: 'DESC' }
+        });
+        res.json({ success: true, tickets });
+    }
+    catch (error: any) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 
 

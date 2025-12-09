@@ -30,6 +30,11 @@ export const ticketsService = {
     updateTicket: async (id, ticketData) => {
         const response = await axios.patch(`${API_URL}/admin/tickets/${id}`, ticketData);
         return response.data;
+    },
+
+    getUserTickets: async (id) => {
+        const response = await axios.get(`${API_URL}/tickets/`);
+        return response.data.tickets;
     }
 
 };

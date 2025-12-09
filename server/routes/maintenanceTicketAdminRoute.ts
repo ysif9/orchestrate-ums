@@ -6,23 +6,23 @@ import { Maintenance_Ticket ,ticket_status, issue_type} from '../entities/Mainte
 import { User, UserRole } from '../entities/User';
 import authenticate, { AuthRequest } from '../middleware/auth';
 import authorize from '../middleware/authorize';
-import {Room} from "../entities/Room";
 import express, { Response } from 'express';
 
 const router = express.Router();
 
 // GET /api/admin/tickets - Get all tickets
-router.get('/tickets/',authenticate, authorize(UserRole.Staff), async (req: AuthRequest, res: Response) => {
+router.get('/',authenticate, authorize(UserRole.Staff), async (req: AuthRequest, res: Response) => {
 try {
         const em = RequestContext.getEntityManager();
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
 
-
+console.log('Getting all tickets');
 
 const tickets = await em.find(
     Maintenance_Ticket,
-    {},
+    {}
+    ,
     {
         populate: ['room'],
         orderBy: { room: { name: 'ASC' } }
@@ -37,7 +37,7 @@ const tickets = await em.find(
 
 
 // PATCH /api/admin/tickets/:id - update ticket status
-router.patch('/tickets/:id', authenticate, authorize(UserRole.Staff), async (req: AuthRequest, res: Response) => {
+router.patch('/:id', authenticate, authorize(UserRole.Staff), async (req: AuthRequest, res: Response) => {
     try {
         const em = RequestContext.getEntityManager();
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });

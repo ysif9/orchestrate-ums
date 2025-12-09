@@ -98,6 +98,13 @@ function AdminHome() {
             icon: User,
             path: '/admin/student-records',
             color: '#ea580c' // orange-600
+        },
+            {
+            title: 'View Maintenance Tickets',
+            description: 'Review and manage maintenance tickets and requests',
+            icon: Wrench ,
+            path: '/admin/tickets',
+            color: '#1D4ED8' // blue
         }
         ] : []),
 

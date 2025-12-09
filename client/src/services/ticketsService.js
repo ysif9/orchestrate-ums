@@ -23,7 +23,8 @@ export const ticketsService = {
 
     viewTickets: async () => {
         const response = await axios.get(`${API_URL}/admin/tickets/`);
-        return response.data;
+        console.log('viewTickets response:', response.data);
+        return response.data.tickets;
     },
 
     updateTicket: async (id, ticketData) => {

@@ -31,7 +31,7 @@ export class Maintenance_Ticket extends BaseEntity {
     @Property({ nullable: true })
     description!: string | null;
     @Property({ nullable: true })
-    created_by?: Date;
+    created_by?: Date = new Date();
     @Property({ nullable: true })
     resolved_at?: Date;
 
@@ -40,5 +40,6 @@ export class Maintenance_Ticket extends BaseEntity {
         this.room = room as unknown as Ref<Room>;
         this.user = user as unknown as Ref<User>;
         this.description = description ?? null;
+
     }
 }

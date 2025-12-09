@@ -23,6 +23,7 @@ import StudentRecordSearchPage from './pages/StudentRecordSearchPage.jsx';
 import StudentRecordSummaryPage from './pages/StudentRecordSummaryPage.jsx';
 import LabStationBookingPage from './pages/LabStationBookingPage.jsx';
 import MaintenanceTicketPage from './pages/ViewTicketsPage.jsx';
+import AdminTicketsManager from "./pages/AdminTicketsPage.jsx";
 
 /**
  * Protected Route Component
@@ -287,6 +288,14 @@ function App() {
                         <ProtectedRoute>
                             <MaintenanceTicketPage />
                         </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/tickets"
+                    element={
+                        <StaffOnlyRoute>
+                            <AdminTicketsManager />
+                        </StaffOnlyRoute>
                     }
                 />
                 {/* Smart redirect based on authentication status */}

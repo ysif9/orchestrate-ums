@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { authService } from '../services/authService.js';
-import { ClipboardCheck, BarChart3, BookOpen, Sparkles, FileText, Monitor } from 'lucide-react';
+import { ClipboardCheck, BarChart3, BookOpen, Sparkles, FileText, Monitor, AlertCircle } from 'lucide-react';
 
 function StudentHome() {
     const navigate = useNavigate();
@@ -91,6 +91,8 @@ function StudentHome() {
                             <span className="text-3xl font-bold text-brand-500">{totalCredits}</span>
                             <span className="text-sm text-content-secondary mt-1">Total Credits</span>
                         </div>
+                        </div>
+                    <div className="mt-8 flex flex-wrap gap-4">
                         <button
                             onClick={() => navigate('/catalog')}
                             className="bg-brand-500 hover:bg-brand-600 text-content-inverse font-medium px-6 py-3 rounded-lg transition-colors shadow-button hover:shadow-button-hover"
@@ -139,6 +141,13 @@ function StudentHome() {
                                 >
                                     <Monitor size={18} />
                                     Reserve Lab Station
+                                </button>
+                                <button
+                                    onClick={() => navigate('/tickets')}
+                                    className="bg-error-600 hover:bg-error-700 text-content-inverse font-medium px-6 py-3 rounded-lg transition-colors flex items-center gap-2 shadow-button hover:shadow-button-hover"
+                                >
+                                    <AlertCircle size={18} />
+                                    Report a Maintenance ticket
                                 </button>
                             </>
                         )}

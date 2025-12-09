@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService.js';
 
-import { BookOpen, Plus, Users, BarChart3, FileText, ClipboardCheck, User , Calendar, Building  } from 'lucide-react';
+import { BookOpen, Plus, Users, BarChart3, FileText, ClipboardCheck, User , Calendar, Building, Wrench  } from 'lucide-react';
 
 
 function AdminHome() {
@@ -52,6 +52,16 @@ function AdminHome() {
             path: '/admin/room-booking',
             color: '#059669' // emerald-600
         },
+        ...(!isStaff ? [
+        {
+            title: 'Report Maintenance',
+            description: 'submit a room maintenance report',
+            icon: Wrench,
+            path: '/tickets',
+            color: '#dc2626' // error-600
+        } ]
+        :[])
+            ,
         // Staff-only actions
         ...(isStaff ? [
             {
@@ -60,19 +70,21 @@ function AdminHome() {
                 icon: Building,
                 path: '/admin/rooms',
                 color: '#7c3aed' // violet-600
-            },{
-            title: 'View All Users',
-            description: 'Manage students, staff, and administrators',
-            icon: Users,
-            path: '/admin/users',
-            color: '#16a34a' // success-600
-        }, {
-            title: 'Enrollment Reports',
-            description: 'View enrollment statistics and reports',
-            icon: BarChart3,
-            path: '/admin/reports',
-            color: '#dc2626' // error-600
-        },
+            },
+        //     {
+        //     title: 'View All Users',
+        //     description: 'Manage students, staff, and administrators',
+        //     icon: Users,
+        //     path: '/admin/users',
+        //     color: '#16a34a' // success-600
+        // }
+        //  {
+        //     title: 'Enrollment Reports',
+        //     description: 'View enrollment statistics and reports',
+        //     icon: BarChart3,
+        //     path: '/admin/reports',
+        //     color: '#dc2626' // error-600
+        // },
         {
             title: 'Review Transcript Requests',
             description: 'Review and approve student transcript requests',
@@ -87,13 +99,21 @@ function AdminHome() {
             path: '/admin/student-records',
             color: '#ea580c' // orange-600
         },
-            {
+          {
             title: 'Review Applications',
             description: 'Review and manage student applications',
             icon: Users,
             path: '/admin/applications',
             color: '#0066cc' // brand-500
-        }
+        },
+            {
+            title: 'View Maintenance Tickets',
+            description: 'Review and manage maintenance tickets and requests',
+            icon: Wrench ,
+            path: '/admin/tickets',
+            color: '#1D4ED8' // blue
+            }
+          
         ] : []),
 
     ];

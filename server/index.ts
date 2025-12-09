@@ -22,6 +22,8 @@ import bookingRoutes from './routes/bookingRoutes';
 import studentRecordRoutes from './routes/studentRecordRoutes';
 import labStationRoutes from './routes/labStationRoutes';
 import labReservationRoutes from './routes/labReservationRoutes';
+import maintenanceTicketAdminRoutes from './routes/maintenanceTicketAdminRoute';
+import maintenanceTicketRoutes from './routes/maintenanceTicketRoute';
 import admissionRoutes from './routes/admissionRoutes';
 
 dotenv.config();
@@ -62,6 +64,8 @@ export const init = async () => {
     app.use('/api/decision-letters', decisionLetterRoutes);
     app.use('/api/lab-stations', labStationRoutes);
     app.use('/api/lab-reservations', labReservationRoutes);
+    app.use('/api/tickets', maintenanceTicketRoutes);
+    app.use('/api/admin/tickets', maintenanceTicketAdminRoutes);
     app.use('/api/resources', resourceRoutes);
     app.use('/api/admissions', admissionRoutes);
 

@@ -62,6 +62,9 @@ export class Course extends BaseEntity {
     @Property()
     passingMarks: number = 40;
 
+    @ManyToOne(() => User, { nullable: true })
+    professor?: User;
+
     @Embedded(() => Lesson, { array: true })
     lessons: Lesson[] = [];
 

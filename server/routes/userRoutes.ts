@@ -59,7 +59,13 @@ router.get('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), asy
         const em = RequestContext.getEntityManager();
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
-        const users = await em.find(User, {});
+        const role = req.query.role as string;
+        const filter: any = {};
+        if (role) {
+            filter.role = role;
+        }
+
+        const users = await em.find(User, filter);
         res.json(users);
     } catch (error: any) {
         res.status(500).json({ message: error.message });

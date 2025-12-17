@@ -14,7 +14,7 @@ router.post('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), as
         const em = RequestContext.getEntityManager() as EntityManager;
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
-        const { code, title, description, type, credits, prerequisites, semester } = req.body;
+        const { code, title, description, type, credits, prerequisites, semester, professorId } = req.body;
 
         if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
 
@@ -25,6 +25,14 @@ router.post('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), as
         course.description = description;
         course.semester = semester;
         course.createdBy = creator;
+
+        if (professorId) {
+            const professor = await em.findOne(User, { id: parseInt(professorId), role: UserRole.Professor });
+            if (professor) {
+                course.professor = professor;
+                course.professorName = professor.name; // Keep legacy field in sync for now
+            }
+        }
 
         if (prerequisites && Array.isArray(prerequisites)) {
             for (const prereqId of prerequisites) {
@@ -50,7 +58,7 @@ router.put('/:id', authenticate, authorize(UserRole.Staff, UserRole.Professor), 
         const em = RequestContext.getEntityManager();
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
-        const { code, title, description, type, credits, prerequisites, semester } = req.body;
+        const { code, title, description, type, credits, prerequisites, semester, professorId } = req.body;
 
         const course = await em.findOne(Course, { id: parseInt(req.params.id) }, { populate: ['prerequisites'] });
 
@@ -64,6 +72,18 @@ router.put('/:id', authenticate, authorize(UserRole.Staff, UserRole.Professor), 
         course.type = type;
         course.credits = credits;
         course.semester = semester;
+
+        if (professorId) {
+            const professor = await em.findOne(User, { id: parseInt(professorId), role: UserRole.Professor });
+            if (professor) {
+                course.professor = professor;
+                course.professorName = professor.name;
+            }
+        } else if (professorId === null || professorId === "") {
+            // Explicitly unassign if sent as null/empty
+            course.professor = undefined;
+            course.professorName = "TBA";
+        }
 
         if (prerequisites && Array.isArray(prerequisites)) {
             course.prerequisites.removeAll();
@@ -151,7 +171,7 @@ router.get('/', authenticate, async (req: Request, res: Response) => {
         // MikroORM find supports operators like $in, $gte, etc.
         // But for 'difficulty', 'credits', 'type', they are direct matches.
 
-        const courses = await em.find(Course, filter, { populate: ['prerequisites'] });
+        const courses = await em.find(Course, filter, { populate: ['prerequisites', 'professor'] });
 
 
         // In-memory filtering for prerequisites if needed (not efficient but works for small datasets)
@@ -174,7 +194,7 @@ router.get('/:id', async (req: Request, res: Response) => {
         const em = RequestContext.getEntityManager();
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
-        const course = await em.findOne(Course, { id: parseInt(req.params.id) }, { populate: ['prerequisites'] });
+        const course = await em.findOne(Course, { id: parseInt(req.params.id) }, { populate: ['prerequisites', 'professor'] });
         if (!course) {
             return res.status(404).json({ message: 'Course not found' });
         }

@@ -1,12 +1,14 @@
-import { useNavigate } from 'react-router-dom';
-import { authService } from '../services/authService.js';
-import { BookOpen, Plus, Users, BarChart3, FileText, ClipboardCheck, User, Calendar, Building, Wrench } from 'lucide-react';
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import {useNavigate} from 'react-router-dom';
+import {useEffect, useState} from 'react';
+import {authService} from '@/services/authService';
+import {courseService} from '@/services/courseService';
+import {BookOpen, Building, Calendar, ClipboardCheck, FileText, User, Users, Wrench} from 'lucide-react';
+import {Button} from "@/components/ui/button"
+import {Card, CardContent} from "@/components/ui/card"
 
 function AdminHome() {
     const navigate = useNavigate();
-    const user = authService.getCurrentUser();
+    const user = authService.getCurrentUser() as any;
 
     const handleLogout = () => {
         authService.logout();
@@ -14,6 +16,33 @@ function AdminHome() {
     };
 
     const isStaff = user?.role === 'staff';
+    const isProfessor = user?.role === 'professor';
+
+    const [myCourses, setMyCourses] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (isProfessor && user?.id) {
+            fetchMyCourses();
+        }
+    }, [isProfessor, user]);
+
+    const fetchMyCourses = async () => {
+        try {
+            // Determine if we need a specific endpoint or just filter on client.
+            // For now, let's fetch all and filter, or assuming API supports filtering.
+            // Since we didn't add a specific "my courses" endpoint, we'll fetch all and filter.
+            // Ideally backend adds 'getMyCourses'.
+            // But wait, the courses table stores professorId (or relation).
+            // Let's assume we fetch all and filter for now as per plan, or use a new endpoint if I made one?
+            // I didn't make a specific endpoint. I'll fetch all.
+            const allCourses = await courseService.getAll();
+            // Filter where professor.id === user.id
+            const my = allCourses.filter((c: any) => c.professor?.id === user.id || c.professorName === user.name);
+            setMyCourses(my);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     // Quick action cards configuration - using accessible colors
     const quickActions = [
@@ -46,13 +75,13 @@ function AdminHome() {
             color: '#059669' // emerald-600
         },
         ...(!isStaff ? [
-            {
-                title: 'Report Maintenance',
-                description: 'submit a room maintenance report',
-                icon: Wrench,
-                path: '/tickets',
-                color: '#dc2626' // error-600
-            }]
+                {
+                    title: 'Report Maintenance',
+                    description: 'submit a room maintenance report',
+                    icon: Wrench,
+                    path: '/tickets',
+                    color: '#dc2626' // error-600
+                }]
             : [])
         ,
         // Staff-only actions
@@ -132,6 +161,48 @@ function AdminHome() {
                     </div>
                 </div>
 
+                {/* PROFESSOR: MY COURSES SECTION */}
+                {isProfessor && (
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-primary mb-4 flex items-center gap-2">
+                            <BookOpen className="h-6 w-6"/>
+                            My Teaching Courses
+                        </h2>
+                        {myCourses.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {myCourses.map(course => (
+                                    <Card key={course.id}
+                                          className="hover:shadow-md transition-shadow cursor-pointer border-t-4 border-t-primary"
+                                          onClick={() => navigate(`/admin/courses`)}>
+                                        <CardContent className="p-6">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h3 className="font-bold text-lg">{course.code}</h3>
+                                                <span
+                                                    className="text-xs font-semibold bg-primary/10 text-primary px-2 py-1 rounded-full">
+                                                    {course.semester || 'Current'}
+                                                </span>
+                                            </div>
+                                            <h4 className="font-medium mb-4 line-clamp-1">{course.title}</h4>
+                                            <div
+                                                className="flex justify-between items-center text-sm text-muted-foreground">
+                                                <span>{course.credits} Credits</span>
+                                                <span>{course.type}</span>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        ) : (
+                            <Card className="bg-muted/30 border-dashed">
+                                <CardContent className="p-8 text-center text-muted-foreground">
+                                    <BookOpen className="h-8 w-8 mx-auto mb-2 opacity-50"/>
+                                    <p>You have not been assigned to any courses yet.</p>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
+                )}
+
                 {/* QUICK ACTIONS GRID */}
                 <div className="mb-8">
                     <h2 className="text-2xl font-bold text-primary mb-6">Quick Actions</h2>
@@ -145,20 +216,22 @@ function AdminHome() {
                                     key={index}
                                     className="border-l-4 shadow-sm hover:shadow-lg transition-all cursor-pointer group"
                                     onClick={() => navigate(action.path)}
-                                    style={{ borderLeftColor: action.color }}
+                                    style={{borderLeftColor: action.color}}
                                 >
                                     <CardContent className="p-6 flex items-start gap-4">
                                         <div
                                             className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
-                                            style={{ backgroundColor: action.color }}
+                                            style={{backgroundColor: action.color}}
                                         >
-                                            <IconComponent size={24} color="white" strokeWidth={2} />
+                                            <IconComponent size={24} color="white" strokeWidth={2}/>
                                         </div>
                                         <div className="flex-grow">
                                             <h3 className="text-lg font-semibold text-primary mb-1">{action.title}</h3>
                                             <p className="text-sm text-muted-foreground">{action.description}</p>
                                         </div>
-                                        <div className="text-2xl text-muted-foreground group-hover:text-primary transition-colors">→</div>
+                                        <div
+                                            className="text-2xl text-muted-foreground group-hover:text-primary transition-colors">→
+                                        </div>
                                     </CardContent>
                                 </Card>
                             );

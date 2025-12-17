@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { courseService } from '../services/courseService.js';
+import { courseService } from '@/services/courseService';
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Search, Plus, Trash2, Edit2, X } from 'lucide-react'
+import { userService } from '@/services/userService';
 
 // Define interfaces for data structures if we were fully strict, but for now we'll use 'any' or loose typing to match JS migration style
 // or inferred types.
@@ -44,17 +45,36 @@ const AdminCourseManager = () => {
         type: 'Core',
         credits: 3,
         semester: '',
-        prerequisites: [] as string[]
+        prerequisites: [] as string[],
+        professorId: ''
     };
     const [formData, setFormData] = useState(initialFormState);
+    const [professors, setProfessors] = useState<any[]>([]);
 
     // Multi-select state
     const [searchTerm, setSearchTerm] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     useEffect(() => {
-        fetchCourses();
+        fetchData();
     }, []);
+
+    const fetchData = async () => {
+        try {
+            const [coursesData, professorsData] = await Promise.all([
+                courseService.getAll(),
+                userService.getProfessors()
+            ]);
+            setCourses(Array.isArray(coursesData) ? coursesData : []);
+            setProfessors(Array.isArray(professorsData) ? professorsData : []);
+        } catch (error) {
+            console.error('Failed to fetch data', error);
+            setCourses([]);
+            setProfessors([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const fetchCourses = async () => {
         try {
@@ -62,8 +82,6 @@ const AdminCourseManager = () => {
             setCourses(data);
         } catch (error) {
             console.error('Failed to fetch courses', error);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -72,7 +90,8 @@ const AdminCourseManager = () => {
             setCurrentCourse(course);
             setFormData({
                 ...course,
-                prerequisites: course.prerequisites || []
+                prerequisites: course.prerequisites ? course.prerequisites.map((p: any) => p.id || p) : [],
+                professorId: course.professor?.id || ''
             });
         } else {
             setCurrentCourse(null);
@@ -101,9 +120,11 @@ const AdminCourseManager = () => {
     };
 
     const handleSelectChange = (name: string, value: string) => {
+        // Special handling for unassigned/TBA value
+        const finalValue = (name === 'professorId' && value === 'unassigned') ? '' : value;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: finalValue
         }));
     };
 
@@ -231,6 +252,7 @@ const AdminCourseManager = () => {
                                         <th className="px-6 py-4 font-medium">Type</th>
                                         <th className="px-6 py-4 font-medium">Credits</th>
                                         <th className="px-6 py-4 font-medium">Semester</th>
+                                        <th className="px-6 py-4 font-medium">Professor</th>
                                         <th className="px-6 py-4 font-medium">Prerequisites</th>
                                         <th className="px-6 py-4 font-medium text-right">Actions</th>
                                     </tr>
@@ -254,6 +276,18 @@ const AdminCourseManager = () => {
                                                 </td>
                                                 <td className="px-6 py-4">{course.credits}</td>
                                                 <td className="px-6 py-4">{course.semester || 'Not set'}</td>
+                                                <td className="px-6 py-4">
+                                                    {course.professor ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs text-primary">
+                                                                {course.professor.name.charAt(0)}
+                                                            </div>
+                                                            <span>{course.professor.name}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-muted-foreground italic">TBA</span>
+                                                    )}
+                                                </td>
                                                 <td className="px-6 py-4 text-muted-foreground">
                                                     {course.prerequisites?.length > 0
                                                         ? course.prerequisites
@@ -342,6 +376,26 @@ const AdminCourseManager = () => {
                                 />
                             </div>
 
+                            <div className="space-y-2">
+                                <Label htmlFor="professorId">Assigned Professor</Label>
+                                <Select
+                                    value={formData.professorId ? formData.professorId.toString() : "unassigned"}
+                                    onValueChange={(value) => handleSelectChange('professorId', value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select professor (Optional)" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="unassigned">TBA (Unassigned)</SelectItem>
+                                        {Array.isArray(professors) && professors.map(prof => (
+                                            <SelectItem key={prof?.id || Math.random()} value={prof?.id ? prof.id.toString() : "invalid"}>
+                                                {prof?.name || "Unknown"}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
                             <div className="space-y-2 col-span-2">
                                 <Label htmlFor="title">Course Title</Label>
                                 <Input
@@ -397,7 +451,7 @@ const AdminCourseManager = () => {
                                 <Label>Prerequisites</Label>
                                 <div className="relative border rounded-md p-4 space-y-4">
                                     {/* Selected Prerequisites */}
-                                    <div className="min-h-[40px]">
+                                    <div className="min-h-10">
                                         {getSelectedPrerequisites().length > 0 ? (
                                             <div className="flex flex-wrap gap-2">
                                                 {getSelectedPrerequisites().map(course => (

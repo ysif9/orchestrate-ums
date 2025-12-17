@@ -22,7 +22,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { Search, Plus, Trash2, Edit2, X } from 'lucide-react'
+import { Search, Plus, Trash2, Edit2, X, Users } from 'lucide-react'
 import { userService } from '@/services/userService';
 
 // Define interfaces for data structures if we were fully strict, but for now we'll use 'any' or loose typing to match JS migration style
@@ -54,6 +54,13 @@ const AdminCourseManager = () => {
     // Multi-select state
     const [searchTerm, setSearchTerm] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+    // TA Management State
+    const [isTaModalOpen, setIsTaModalOpen] = useState(false);
+    const [courseTas, setCourseTas] = useState<any[]>([]);
+    const [availableTas, setAvailableTas] = useState<any[]>([]);
+    const [loadingTas, setLoadingTas] = useState(false);
+    const [taForm, setTaForm] = useState({ taId: '', responsibilities: '' });
 
     useEffect(() => {
         fetchData();
@@ -217,6 +224,50 @@ const AdminCourseManager = () => {
         }
     };
 
+    const handleManageTas = async (course: any) => {
+        setCurrentCourse(course);
+        setLoadingTas(true);
+        setIsTaModalOpen(true);
+        try {
+            const [tasData, availableTasData] = await Promise.all([
+                courseService.getTAs(course.id),
+                userService.getTeachingAssistants()
+            ]);
+            setCourseTas(tasData);
+            setAvailableTas(availableTasData);
+        } catch (error) {
+            console.error("Failed to fetch TA data", error);
+        } finally {
+            setLoadingTas(false);
+        }
+    };
+
+    const handleAssignTa = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!taForm.taId || !currentCourse) return;
+
+        try {
+            await courseService.assignTA(currentCourse.id, taForm);
+            // Refresh list
+            const updatedTas = await courseService.getTAs(currentCourse.id);
+            setCourseTas(updatedTas);
+            // Reset form
+            setTaForm({ taId: '', responsibilities: '' });
+        } catch (error: any) {
+            alert(error.response?.data?.message || "Failed to assign TA");
+        }
+    };
+
+    const handleRemoveTa = async (taId: string) => {
+        if (!currentCourse || !window.confirm("Are you sure?")) return;
+        try {
+            await courseService.removeTA(currentCourse.id, taId);
+            setCourseTas((prev: any[]) => prev.filter((t: any) => t.ta.id !== parseInt(taId) && t.ta.id !== taId));
+        } catch (error) {
+            console.error("Failed to remove TA", error);
+        }
+    };
+
     if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>;
 
     return (
@@ -260,7 +311,7 @@ const AdminCourseManager = () => {
                                 <tbody className="divide-y divide-border">
                                     {courses.length === 0 ? (
                                         <tr>
-                                            <td colSpan={7} className="text-center p-8 text-muted-foreground">
+                                            <td colSpan={8} className="text-center p-8 text-muted-foreground">
                                                 No courses found. Add one to get started.
                                             </td>
                                         </tr>
@@ -303,6 +354,15 @@ const AdminCourseManager = () => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex gap-2 justify-end">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50 border-purple-200"
+                                                            onClick={() => handleManageTas(course)}
+                                                            title="Manage TAs"
+                                                        >
+                                                            <Users className="h-4 w-4" />
+                                                        </Button>
                                                         <Button
                                                             variant="outline"
                                                             size="icon"
@@ -531,6 +591,85 @@ const AdminCourseManager = () => {
                             </Button>
                         </DialogFooter>
                     </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Manage TAs Modal */}
+            <Dialog open={isTaModalOpen} onOpenChange={setIsTaModalOpen}>
+                <DialogContent className="max-w-xl">
+                    <DialogHeader>
+                        <DialogTitle>Manage Teaching Assistants</DialogTitle>
+                        <DialogDescription>
+                            Assign TAs to {currentCourse?.code} - {currentCourse?.title}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-6">
+                        {/* List Existing TAs */}
+                        <div className="space-y-2">
+                            <h3 className="text-sm font-medium">Assigned TAs</h3>
+                            {loadingTas ? (
+                                <p className="text-sm text-muted-foreground">Loading...</p>
+                            ) : courseTas.length === 0 ? (
+                                <p className="text-sm text-muted-foreground italic">No TAs assigned yet.</p>
+                            ) : (
+                                <div className="space-y-2 border rounded-md p-2 max-h-40 overflow-y-auto">
+                                    {courseTas.map((taItem: any) => (
+                                        <div key={taItem.id} className="flex justify-between items-center p-2 bg-muted/40 rounded">
+                                            <div>
+                                                <p className="font-medium text-sm">{taItem.ta?.name}</p>
+                                                <p className="text-xs text-muted-foreground">{taItem.responsibilities}</p>
+                                            </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-6 text-destructive hover:bg-destructive/10"
+                                                onClick={() => handleRemoveTa(taItem.ta?.id)}
+                                            >
+                                                Remove
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Assign New TA Form */}
+                        <form onSubmit={handleAssignTa} className="space-y-4 border-t pt-4">
+                            <h3 className="text-sm font-medium">Assign New TA</h3>
+                            <div className="grid gap-4">
+                                <div className="space-y-2">
+                                    <Label>Select Teaching Assistant</Label>
+                                    <Select
+                                        value={taForm.taId}
+                                        onValueChange={(val) => setTaForm(prev => ({ ...prev, taId: val }))}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select TA..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableTas.map(ta => (
+                                                <SelectItem key={ta.id} value={ta.id.toString()}>
+                                                    {ta.name} ({ta.email})
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Responsibilities</Label>
+                                    <Textarea
+                                        placeholder="e.g. Grading, Office Hours..."
+                                        value={taForm.responsibilities}
+                                        onChange={(e) => setTaForm(prev => ({ ...prev, responsibilities: e.target.value }))}
+                                    />
+                                </div>
+                                <Button type="submit" disabled={!taForm.taId}>
+                                    Assign TA
+                                </Button>
+                            </div>
+                        </form>
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>

@@ -24,8 +24,12 @@ function Signup() {
     useEffect(() => {
         if (authService.isAuthenticated()) {
             const user = authService.getCurrentUser();
-            const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
-            navigate(isAdminOrStaff ? '/admin/home' : '/home', { replace: true });
+            if (user?.role === 'teaching_assistant') {
+                navigate('/ta-dashboard', { replace: true });
+            } else {
+                const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
+                navigate(isAdminOrStaff ? '/admin/home' : '/home', { replace: true });
+            }
         }
     }, [navigate]);
 
@@ -143,8 +147,12 @@ function Signup() {
 
             if (response.success) {
                 const user = response.user;
-                const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
-                navigate(isAdminOrStaff ? '/admin/home' : '/home');
+                if (user?.role === 'teaching_assistant') {
+                    navigate('/ta-dashboard');
+                } else {
+                    const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
+                    navigate(isAdminOrStaff ? '/admin/home' : '/home');
+                }
             }
         } catch (error: any) {
             console.error('Signup error:', error);
@@ -220,6 +228,7 @@ function Signup() {
                                     <SelectItem value="student">Student</SelectItem>
                                     <SelectItem value="staff">Staff</SelectItem>
                                     <SelectItem value="professor">Professor</SelectItem>
+                                    <SelectItem value="teaching_assistant">Teaching Assistant</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

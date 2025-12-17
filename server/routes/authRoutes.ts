@@ -6,6 +6,7 @@ import { User, UserRole } from '../entities/User';
 import { Student } from '../entities/Student';
 import { Staff } from '../entities/Staff';
 import { Professor } from '../entities/Professor';
+import { TeachingAssistant } from '../entities/TeachingAssistant';
 import authenticate, { AuthRequest } from '../middleware/auth';
 
 const router = express.Router();
@@ -36,7 +37,7 @@ router.post('/signup', [
         }
         return true;
     }),
-    body('role').optional().isIn(['staff', 'professor', 'student']).withMessage('Valid role is required'),
+    body('role').optional().isIn(['staff', 'professor', 'student', 'teaching_assistant']).withMessage('Valid role is required'),
     body('maxCredits').optional().isInt({ min: 0 }).withMessage('Max credits must be a positive integer'),
 ], async (req: Request, res: Response) => {
     const errors = validationResult(req);
@@ -71,6 +72,8 @@ router.post('/signup', [
             user = new Staff(name, email, password);
         } else if (userRole === 'professor') {
             user = new Professor(name, email, password);
+        } else if (userRole === 'teaching_assistant') {
+            user = new TeachingAssistant(name, email, password);
         } else {
             return res.status(400).json({ message: 'Invalid role' });
         }

@@ -6,6 +6,7 @@ export enum UserRole {
   Student = "student",
   Staff = "staff",
   Professor = "professor",
+  TeachingAssistant = "teaching_assistant",
 }
 
 @Entity({ discriminatorColumn: 'role', abstract: true })

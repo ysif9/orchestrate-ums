@@ -20,8 +20,12 @@ function Login() {
     useEffect(() => {
         if (authService.isAuthenticated()) {
             const user = authService.getCurrentUser();
-            const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
-            navigate(isAdminOrStaff ? '/admin/home' : '/home', { replace: true });
+            if (user?.role === 'teaching_assistant') {
+                navigate('/ta-dashboard', { replace: true });
+            } else {
+                const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
+                navigate(isAdminOrStaff ? '/admin/home' : '/home', { replace: true });
+            }
         }
     }, [navigate]);
 
@@ -83,8 +87,12 @@ function Login() {
             if (response.success) {
                 // Redirect based on user role
                 const user = response.user;
-                const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
-                navigate(isAdminOrStaff ? '/admin/home' : '/home');
+                if (user?.role === 'teaching_assistant') {
+                    navigate('/ta-dashboard');
+                } else {
+                    const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
+                    navigate(isAdminOrStaff ? '/admin/home' : '/home');
+                }
             }
         } catch (error: any) {
             console.error('Login error:', error);

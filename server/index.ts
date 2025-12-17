@@ -10,6 +10,7 @@ import resourceRoutes from './routes/resourceRoutes';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import courseRoutes from './routes/courseRoutes';
+import courseTaRoutes from './routes/courseTaRoutes';
 import enrollmentRoutes from './routes/enrollmentRoutes';
 import assessmentRoutes from './routes/assessmentRoutes';
 import applicantRoutes from './routes/applicantRoutes';
@@ -51,6 +52,7 @@ export const init = async () => {
 
     app.use('/api/auth', authRoutes);
     app.use('/api/users', userRoutes);
+    app.use('/api/courses', courseTaRoutes); // Register under /api/courses so it matches /api/courses/:courseId/tas
     app.use('/api/courses', courseRoutes);
     app.use('/api/enrollments', enrollmentRoutes);
     app.use('/api/assessments', assessmentRoutes);

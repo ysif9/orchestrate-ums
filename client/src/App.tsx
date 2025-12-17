@@ -4,6 +4,7 @@ import Signup from './pages/Signup';
 import StudentHome from './pages/StudentHome';
 import AdminHome from './pages/AdminHome';
 import AdminCourseManager from './pages/AdminCourseManager';
+import TADashboard from './pages/TADashboard';
 import CourseCatalog from './pages/CourseCatalog';
 import CatalogCourseDetails from './pages/CatalogCourseDetails';
 import CourseDetails from './components/CourseDetails.jsx';
@@ -68,6 +69,11 @@ function RootRedirect() {
     }
 
     const user = authService.getCurrentUser();
+
+    if (user?.role === 'teaching_assistant') {
+        return <Navigate to="/ta-dashboard" replace />;
+    }
+
     const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
 
     return <Navigate to={isAdminOrStaff ? "/admin/home" : "/home"} replace />;
@@ -137,6 +143,9 @@ function App() {
 
                 {/* Course Management (Admin) */}
                 <Route path="/admin/courses" element={<ProtectedRoute><AdminCourseManager /></ProtectedRoute>} />
+
+                {/* TA Dashboard */}
+                <Route path="/ta-dashboard" element={<ProtectedRoute><TADashboard /></ProtectedRoute>} />
 
                 {/* NEW ROUTE: Assessment Creation */}
                 <Route path="/admin/assessments/create" element={<ProtectedRoute><AssessmentCreationPage /></ProtectedRoute>} />

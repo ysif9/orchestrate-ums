@@ -19,5 +19,11 @@ export const userService = {
         const users = await getAll({ role: 'professor' });
         if (!Array.isArray(users)) return [];
         return users;
+    },
+
+    getTeachingAssistants: async () => {
+        const users = await getAll({ role: 'teaching_assistant' });
+        if (!Array.isArray(users)) return [];
+        return users;
     }
 };

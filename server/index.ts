@@ -26,6 +26,7 @@ import labReservationRoutes from './routes/labReservationRoutes';
 import maintenanceTicketAdminRoutes from './routes/maintenanceTicketAdminRoute';
 import maintenanceTicketRoutes from './routes/maintenanceTicketRoute';
 import admissionRoutes from './routes/admissionRoutes';
+import pdRoutes from './routes/pdRoutes';
 
 dotenv.config();
 
@@ -70,6 +71,7 @@ export const init = async () => {
     app.use('/api/admin/tickets', maintenanceTicketAdminRoutes);
     app.use('/api/resources', resourceRoutes);
     app.use('/api/admissions', admissionRoutes);
+    app.use('/api/pd', pdRoutes);
 
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);

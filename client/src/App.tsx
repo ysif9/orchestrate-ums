@@ -31,12 +31,14 @@ import StudentResources from './pages/StudentResources';
 import AdmissionsInfoPage from './pages/AdmissionsInfoPage';
 import ApplicationFormPage from './pages/ApplicationFormPage';
 import ApplicationConfirmationPage from './pages/ApplicationConfirmationPage';
+import StaffPDTrackingPage from './pages/StaffPDTrackingPage';
+import ProfessorPDHistoryPage from './pages/ProfessorPDHistoryPage';
 import StudentLayout from './components/StudentLayout';
 
 /**
  * Protected Route Component
  */
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const isAuthenticated = authService.isAuthenticated();
     return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
@@ -44,13 +46,13 @@ function ProtectedRoute({ children }) {
 /**
  * Staff Only Route Component
  */
-function StaffOnlyRoute({ children }) {
+function StaffOnlyRoute({ children }: { children: React.ReactNode }) {
     const isAuthenticated = authService.isAuthenticated();
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
 
-    const user = authService.getCurrentUser();
+    const user: any = authService.getCurrentUser();
     if (user?.role !== 'staff') {
         return <Navigate to="/admin/home" replace />;
     }
@@ -68,7 +70,7 @@ function RootRedirect() {
         return <Navigate to="/login" replace />;
     }
 
-    const user = authService.getCurrentUser();
+    const user: any = authService.getCurrentUser();
 
     if (user?.role === 'teaching_assistant') {
         return <Navigate to="/ta-dashboard" replace />;
@@ -163,6 +165,12 @@ function App() {
                 {/* Student Record Management */}
                 <Route path="/admin/student-records" element={<ProtectedRoute><StudentRecordSearchPage /></ProtectedRoute>} />
                 <Route path="/admin/student-records/:id/summary" element={<ProtectedRoute><StudentRecordSummaryPage /></ProtectedRoute>} />
+
+                {/* Professional Development Tracking (Staff) */}
+                <Route path="/admin/pd-tracking" element={<StaffOnlyRoute><StaffPDTrackingPage /></StaffOnlyRoute>} />
+
+                {/* Professional Development History (Professor) */}
+                <Route path="/faculty/pd-history" element={<ProtectedRoute><ProfessorPDHistoryPage /></ProtectedRoute>} />
 
                 {/* Room Booking (Student/Staff access to page) */}
                 <Route path="/admin/room-booking" element={<ProtectedRoute><RoomBookingPage /></ProtectedRoute>} />

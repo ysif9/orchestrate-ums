@@ -1,0 +1,184 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import StudentHome from './pages/StudentHome';
+import AdminHome from './pages/AdminHome';
+import AdminCourseManager from './pages/AdminCourseManager';
+import CourseCatalog from './pages/CourseCatalog';
+import CatalogCourseDetails from './pages/CatalogCourseDetails';
+import CourseDetails from './components/CourseDetails.jsx';
+import { authService } from './services/authService.js';
+import GradebookPage from './pages/GradebookPage';
+import AssessmentCreationPage from './pages/AssessmentCreationPage';
+import MyGradesPage from './pages/MyGradesPage';
+import ApplicationListPage from './pages/ApplicationListPage';
+import ApplicationReviewPage from './pages/ApplicationReviewPage';
+import TranscriptRequestsPage from './pages/TranscriptRequestsPage';
+import ViewTranscriptPage from './pages/ViewTranscriptPage';
+import RoomBookingPage from './pages/RoomBookingPage.jsx';
+import AdminRoomManager from './pages/AdminRoomManager';
+import AdminLabStationManager from './pages/AdminLabStationManager';
+import StaffTranscriptManagementPage from './pages/StaffTranscriptManagementPage.jsx';
+import StudentRecordSearchPage from './pages/StudentRecordSearchPage.jsx';
+import StudentRecordSummaryPage from './pages/StudentRecordSummaryPage.jsx';
+import LabStationBookingPage from './pages/LabStationBookingPage.jsx';
+import MaintenanceTicketPage from './pages/ViewTicketsPage.jsx';
+import AdminTicketsManager from "./pages/AdminTicketsPage";
+import AllocateResources from './pages/AllocateResources';
+import ProfessorResources from './pages/ProfessorResources';
+import StudentResources from './pages/StudentResources';
+import AdmissionsInfoPage from './pages/AdmissionsInfoPage';
+import ApplicationFormPage from './pages/ApplicationFormPage';
+import ApplicationConfirmationPage from './pages/ApplicationConfirmationPage';
+import StudentLayout from './components/StudentLayout';
+
+/**
+ * Protected Route Component
+ */
+function ProtectedRoute({ children }) {
+    const isAuthenticated = authService.isAuthenticated();
+    return isAuthenticated ? children : <Navigate to="/login" replace />;
+}
+
+/**
+ * Staff Only Route Component
+ */
+function StaffOnlyRoute({ children }) {
+    const isAuthenticated = authService.isAuthenticated();
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+
+    const user = authService.getCurrentUser();
+    if (user?.role !== 'staff') {
+        return <Navigate to="/admin/home" replace />;
+    }
+
+    return children;
+}
+
+/**
+ * Root Redirect Component
+ */
+function RootRedirect() {
+    const isAuthenticated = authService.isAuthenticated();
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+
+    const user = authService.getCurrentUser();
+    const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
+
+    return <Navigate to={isAdminOrStaff ? "/admin/home" : "/home"} replace />;
+}
+
+function MyResourcesPage() {
+    const user = authService.getCurrentUser();
+
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+
+    if (user.role === 'professor') {
+        return <ProfessorResources />;
+    } else if (user.role === 'student') {
+        return <StudentResources />;
+    } else {
+        // Staff/admin view
+        return <Navigate to="/facilities/allocate" replace />;
+    }
+}
+
+function App() {
+    return (
+        <BrowserRouter>
+            <Routes>
+                {/* Public Routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+
+                {/* New Public/Admissions Routes from dev */}
+                <Route path="/admissions" element={<AdmissionsInfoPage />} />
+                <Route path="/apply" element={<ApplicationFormPage />} />
+                <Route path="/apply/confirmation/:id" element={<ApplicationConfirmationPage />} />
+
+                {/* Protected Student Routes wrapped in Layout */}
+                <Route element={<ProtectedRoute><StudentLayout /></ProtectedRoute>}>
+                    {/* Student Home / Dashboard (My Courses) */}
+                    <Route path="/home" element={<StudentHome />} />
+
+                    {/* Course Catalog (Browsing new courses) */}
+                    <Route path="/courses" element={<CourseCatalog />} />
+                    <Route path="/catalog" element={<CourseCatalog />} />
+                    <Route path="/catalog/course/:id" element={<CatalogCourseDetails />} />
+
+                    {/* Student Grades View */}
+                    <Route path="/my-grades" element={<MyGradesPage />} />
+
+                    {/* Enrolled Course Detail View */}
+                    <Route path="/course/:id" element={<CourseDetails />} />
+
+                    {/* Transcript Requests (Student View) */}
+                    <Route path="/transcript-requests" element={<TranscriptRequestsPage />} />
+                    <Route path="/transcript-requests/:id" element={<ViewTranscriptPage />} />
+
+                    {/* Lab Station Booking (Students) */}
+                    <Route path="/lab-stations" element={<LabStationBookingPage />} />
+
+                    {/* Student Maintenance Tickets */}
+                    <Route path="/tickets" element={<MaintenanceTicketPage />} />
+                </Route>
+
+                {/* --- Admin/Staff Routes --- */}
+
+                {/* Admin Dashboard */}
+                <Route path="/admin/home" element={<ProtectedRoute><AdminHome /></ProtectedRoute>} />
+
+                {/* Course Management (Admin) */}
+                <Route path="/admin/courses" element={<ProtectedRoute><AdminCourseManager /></ProtectedRoute>} />
+
+                {/* NEW ROUTE: Assessment Creation */}
+                <Route path="/admin/assessments/create" element={<ProtectedRoute><AssessmentCreationPage /></ProtectedRoute>} />
+
+                {/* Application Review Routes - Staff/Professor only */}
+                <Route path="/admin/applications" element={<ProtectedRoute><ApplicationListPage /></ProtectedRoute>} />
+                <Route path="/admin/applications/:id/review" element={<ProtectedRoute><ApplicationReviewPage /></ProtectedRoute>} />
+
+                {/* Gradebook for Admin/Staff */}
+                <Route path="/admin/gradebook" element={<ProtectedRoute><GradebookPage /></ProtectedRoute>} />
+
+                {/* Staff Transcript Management */}
+                <Route path="/admin/transcript-requests" element={<ProtectedRoute><StaffTranscriptManagementPage /></ProtectedRoute>} />
+
+                {/* Student Record Management */}
+                <Route path="/admin/student-records" element={<ProtectedRoute><StudentRecordSearchPage /></ProtectedRoute>} />
+                <Route path="/admin/student-records/:id/summary" element={<ProtectedRoute><StudentRecordSummaryPage /></ProtectedRoute>} />
+
+                {/* Room Booking (Student/Staff access to page) */}
+                <Route path="/admin/room-booking" element={<ProtectedRoute><RoomBookingPage /></ProtectedRoute>} />
+
+                {/* Room Management (Staff Only) - Retaining StaffOnlyRoute where specified */}
+                <Route path="/admin/rooms" element={<StaffOnlyRoute><AdminRoomManager /></StaffOnlyRoute>} />
+
+                {/* Lab Station Management (Staff Only) - Retaining StaffOnlyRoute where specified */}
+                <Route path="/admin/rooms/:labId/stations" element={<StaffOnlyRoute><AdminLabStationManager /></StaffOnlyRoute>} />
+
+                {/* Admin Maintenance Tickets (Staff Only) - Retaining StaffOnlyRoute where specified */}
+                <Route path="/admin/tickets" element={<StaffOnlyRoute><AdminTicketsManager /></StaffOnlyRoute>} />
+
+                {/* Resources/Facilities Routes (from dev) */}
+                <Route path="/facilities/allocate" element={<StaffOnlyRoute><AllocateResources /></StaffOnlyRoute>} />
+                <Route path="/facilities/my-resources" element={<ProtectedRoute><MyResourcesPage /></ProtectedRoute>} />
+
+                {/* Root redirect */}
+                <Route path="/" element={<RootRedirect />} />
+
+                {/* Catch all - smart redirect */}
+                <Route path="*" element={<RootRedirect />} />
+            </Routes>
+        </BrowserRouter>
+    );
+}
+
+export default App;

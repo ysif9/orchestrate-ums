@@ -1,19 +1,37 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ticketsService } from "../services/ticketsService";
-import { authService } from "../services/authService";
-import { AlertCircle, Check, X, Wrench, Building2, MapPin, Users, Clock, CheckCircle, PlayCircle, Eye, Ticket } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ticketsService } from "@/services/ticketsService";
+import {
+    AlertCircle,
+    Building2,
+    Check,
+    CheckCircle,
+    Clock,
+    Eye,
+    MapPin,
+    PlayCircle,
+    Ticket,
+    Users,
+    Wrench
+} from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 const ISSUE_TYPES = [
     { value: 'hardware', label: 'Hardware' },
@@ -46,8 +64,7 @@ const ISSUE_TYPE_LABELS: Record<string, string> = {
 };
 
 export default function ViewTicketsPage() {
-    const navigate = useNavigate();
-    const user = authService.getCurrentUser();
+    // const navigate = useNavigate(); // Removed unused
 
     // State
     const [rooms, setRooms] = useState<any[]>([]);
@@ -107,7 +124,7 @@ export default function ViewTicketsPage() {
         try {
             setTicketsLoading(true);
             const response = await ticketsService.getUserTickets();
-            setMyTickets(response.tickets || response || []);
+            setMyTickets((response as any).tickets || response || []);
         } catch (err) {
             setError('Failed to load your tickets');
             console.error(err);
@@ -209,19 +226,6 @@ export default function ViewTicketsPage() {
         }
     };
 
-    const handleLogout = () => {
-        authService.logout();
-        navigate('/login');
-    };
-
-    const handleBackToDashboard = () => {
-        if (user?.role === 'student') {
-            navigate('/home');
-        } else {
-            navigate('/admin/home');
-        }
-    };
-
     const filteredRooms = rooms.filter(room => {
         const searchLower = searchTerm.toLowerCase();
         return (
@@ -233,44 +237,15 @@ export default function ViewTicketsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+            <div className="flex items-center justify-center p-12 text-muted-foreground">
                 Loading rooms...
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            {/* Header */}
-            <nav className="bg-primary text-primary-foreground px-8 py-4 shadow-md">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">
-                        AIN SHAMS
-                        <span className="block text-xs font-normal text-primary-foreground/80 tracking-wider mt-1">
-                            UNIVERSITY | FACULTY OF ENGINEERING
-                        </span>
-                    </h1>
-                    <div className="flex items-center gap-6">
-                        <Button
-                            variant="ghost"
-                            onClick={handleBackToDashboard}
-                            className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
-                        >
-                            ← Back to Dashboard
-                        </Button>
-                        <span className="text-sm font-medium text-primary-foreground/80">
-                            {user?.name}
-                        </span>
-                        <Button
-                            variant="ghost"
-                            onClick={handleLogout}
-                            className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
-                        >
-                            Sign Out
-                        </Button>
-                    </div>
-                </div>
-            </nav>
+        <div className="space-y-6">
+
 
             <div className="max-w-7xl mx-auto px-8 py-8 w-full flex-1">
                 {/* Page Title */}
@@ -292,7 +267,7 @@ export default function ViewTicketsPage() {
                     </TabsList>
 
                     {successMessage && !isModalOpen && (
-                        <Alert variant="success" className="bg-green-50 border-green-200 text-green-800">
+                        <Alert className="bg-green-50 border-green-200 text-green-800">
                             <Check className="h-4 w-4" />
                             <AlertTitle>Success</AlertTitle>
                             <AlertDescription>{successMessage}</AlertDescription>
@@ -468,7 +443,7 @@ export default function ViewTicketsPage() {
                     </DialogHeader>
 
                     {successMessage && (
-                        <Alert variant="success" className="bg-green-50 border-green-200 text-green-800">
+                        <Alert className="bg-green-50 border-green-200 text-green-800">
                             <Check className="h-4 w-4" />
                             <AlertTitle>Success</AlertTitle>
                             <AlertDescription>{successMessage}</AlertDescription>

@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../services/authService';
 import { labStationService, labReservationService } from '../services/labStationService';
-import { MapPin, Monitor, AlertCircle, Check, X } from 'lucide-react';
+import { MapPin, Monitor, AlertCircle, Check } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 
@@ -38,9 +36,7 @@ const getLocalDateString = () => {
 };
 
 export default function LabStationBookingPage() {
-    const navigate = useNavigate();
-    const user = authService.getCurrentUser();
-
+    useNavigate();
     // State
     const [labs, setLabs] = useState<any[]>([]);
     const [selectedLab, setSelectedLab] = useState<any>(null);
@@ -237,51 +233,17 @@ export default function LabStationBookingPage() {
         }
     };
 
-    const handleLogout = () => {
-        authService.logout();
-        navigate('/login');
-    };
-
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
+            <div className="flex items-center justify-center p-12">
                 <div className="text-muted-foreground">Loading labs...</div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            {/* Header */}
-            <nav className="bg-primary text-primary-foreground px-8 py-4 shadow-md">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">
-                        AIN SHAMS
-                        <span className="block text-xs font-normal text-primary-foreground/80 tracking-wider mt-1">
-                            UNIVERSITY | FACULTY OF ENGINEERING
-                        </span>
-                    </h1>
-                    <div className="flex items-center gap-6">
-                        <Button
-                            variant="ghost"
-                            onClick={() => navigate('/admin/home')}
-                            className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
-                        >
-                            ← Back to Dashboard
-                        </Button>
-                        <span className="text-sm font-medium text-primary-foreground/80">
-                            {user?.name}
-                        </span>
-                        <Button
-                            variant="ghost"
-                            onClick={handleLogout}
-                            className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
-                        >
-                            Sign Out
-                        </Button>
-                    </div>
-                </div>
-            </nav>
+        <div className="space-y-6">
+
 
             <div className="max-w-7xl mx-auto px-8 py-8 w-full flex-1">
                 {/* Page Title */}

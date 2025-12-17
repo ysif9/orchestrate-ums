@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { authService } from '../services/authService.js';
+import { authService } from '@/services/authService';
 import { AlertTriangle, Lock } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator"
 function CatalogCourseDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const user = authService.getCurrentUser();
+    const user: any = authService.getCurrentUser();
     const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
 
     const [course, setCourse] = useState<any>(null);
@@ -94,10 +94,10 @@ function CatalogCourseDetails() {
         }
     };
 
-    const handleLogout = () => {
-        authService.logout();
-        navigate('/login');
-    };
+    // const handleLogout = () => {
+    //     authService.logout();
+    //     navigate('/login');
+    // };
 
     if (loading) {
         return (
@@ -124,51 +124,15 @@ function CatalogCourseDetails() {
     const hasPrerequisites = course.prerequisites && course.prerequisites.length > 0;
 
     return (
-        <div className="min-h-screen bg-background">
-            {/* Header */}
-            <header className="bg-primary text-primary-foreground px-8 py-6 shadow-md">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold m-0 text-primary-foreground">Course Details</h1>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <span className="text-primary-foreground/80 text-sm">Welcome, {user?.name}</span>
-                        <Button
-                            onClick={() => navigate('/catalog')}
-                            variant="secondary"
-                            className="bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30 border-none"
-                            size="sm"
-                        >
-                            Back to Catalog
-                        </Button>
-                        <Button
-                            onClick={() => navigate(isAdminOrStaff ? '/admin/home' : '/home')}
-                            variant="secondary"
-                            className="bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30 border-none"
-                            size="sm"
-                        >
-                            Home
-                        </Button>
-                        <Button
-                            onClick={handleLogout}
-                            variant="destructive"
-                            size="sm"
-                            className="bg-red-600 hover:bg-red-700 border-none"
-                        >
-                            Logout
-                        </Button>
-                    </div>
-                </div>
-            </header>
-
+        <div className="space-y-6">
             {/* Course Hero Section */}
-            <div className="bg-primary/95 text-primary-foreground px-8 py-12">
-                <div className="max-w-7xl mx-auto">
+            <div className="bg-primary text-primary-foreground rounded-lg p-8 shadow-sm">
+                <div>
                     <Badge variant="outline" className="text-primary-foreground border-primary-foreground/30 mb-4 text-sm font-bold bg-primary-foreground/10">
                         {course.code}
                     </Badge>
-                    <h1 className="text-4xl font-bold mb-4 text-primary-foreground">{course.title}</h1>
-                    <p className="text-xl text-primary-foreground/80 mb-6">{course.description}</p>
+                    <h1 className="text-3xl font-bold mb-4 text-primary-foreground">{course.title}</h1>
+                    <p className="text-lg text-primary-foreground/80 mb-6">{course.description}</p>
 
                     <div className="flex flex-wrap gap-4 text-primary-foreground">
                         <Badge variant="secondary" className="text-sm">
@@ -190,7 +154,7 @@ function CatalogCourseDetails() {
             </div>
 
             {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-8 py-8">
+            <div>
                 {/* Enrollment Status Messages */}
                 {enrollmentSuccess && (
                     <div className="bg-green-100 text-green-700 px-6 py-4 rounded-lg mb-6 border border-green-200">

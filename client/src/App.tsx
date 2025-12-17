@@ -30,6 +30,7 @@ import StudentResources from './pages/StudentResources';
 import AdmissionsInfoPage from './pages/AdmissionsInfoPage';
 import ApplicationFormPage from './pages/ApplicationFormPage';
 import ApplicationConfirmationPage from './pages/ApplicationConfirmationPage';
+import StudentLayout from './components/StudentLayout';
 
 /**
  * Protected Route Component
@@ -102,31 +103,32 @@ function App() {
                 <Route path="/apply" element={<ApplicationFormPage />} />
                 <Route path="/apply/confirmation/:id" element={<ApplicationConfirmationPage />} />
 
-                {/* Protected Routes */}
+                {/* Protected Student Routes wrapped in Layout */}
+                <Route element={<ProtectedRoute><StudentLayout /></ProtectedRoute>}>
+                    {/* Student Home / Dashboard (My Courses) */}
+                    <Route path="/home" element={<StudentHome />} />
 
-                {/* Student Home / Dashboard (My Courses) */}
-                <Route path="/home" element={<ProtectedRoute><StudentHome /></ProtectedRoute>} />
+                    {/* Course Catalog (Browsing new courses) */}
+                    <Route path="/courses" element={<CourseCatalog />} />
+                    <Route path="/catalog" element={<CourseCatalog />} />
+                    <Route path="/catalog/course/:id" element={<CatalogCourseDetails />} />
 
-                {/* Course Catalog (Browsing new courses) */}
-                <Route path="/courses" element={<ProtectedRoute><CourseCatalog /></ProtectedRoute>} />
-                <Route path="/catalog" element={<ProtectedRoute><CourseCatalog /></ProtectedRoute>} />
-                <Route path="/catalog/course/:id" element={<ProtectedRoute><CatalogCourseDetails /></ProtectedRoute>} />
+                    {/* Student Grades View */}
+                    <Route path="/my-grades" element={<MyGradesPage />} />
 
-                {/* Student Grades View */}
-                <Route path="/my-grades" element={<ProtectedRoute><MyGradesPage /></ProtectedRoute>} />
+                    {/* Enrolled Course Detail View */}
+                    <Route path="/course/:id" element={<CourseDetails />} />
 
-                {/* Enrolled Course Detail View */}
-                <Route path="/course/:id" element={<ProtectedRoute><CourseDetails /></ProtectedRoute>} />
+                    {/* Transcript Requests (Student View) */}
+                    <Route path="/transcript-requests" element={<TranscriptRequestsPage />} />
+                    <Route path="/transcript-requests/:id" element={<ViewTranscriptPage />} />
 
-                {/* Transcript Requests (Student View) */}
-                <Route path="/transcript-requests" element={<ProtectedRoute><TranscriptRequestsPage /></ProtectedRoute>} />
-                <Route path="/transcript-requests/:id" element={<ProtectedRoute><ViewTranscriptPage /></ProtectedRoute>} />
+                    {/* Lab Station Booking (Students) */}
+                    <Route path="/lab-stations" element={<LabStationBookingPage />} />
 
-                {/* Lab Station Booking (Students) */}
-                <Route path="/lab-stations" element={<ProtectedRoute><LabStationBookingPage /></ProtectedRoute>} />
-
-                {/* Student Maintenance Tickets */}
-                <Route path="/tickets" element={<ProtectedRoute><MaintenanceTicketPage /></ProtectedRoute>} />
+                    {/* Student Maintenance Tickets */}
+                    <Route path="/tickets" element={<MaintenanceTicketPage />} />
+                </Route>
 
                 {/* --- Admin/Staff Routes --- */}
 

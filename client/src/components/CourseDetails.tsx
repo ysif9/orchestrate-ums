@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { authService } from '../services/authService.js';
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,8 +8,6 @@ import { Separator } from "@/components/ui/separator"
 
 const CourseDetails = () => {
     const { id } = useParams();
-    const user = authService.getCurrentUser();
-    const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
     const [course, setCourse] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
@@ -38,33 +35,20 @@ const CourseDetails = () => {
     if (!course) return <div className="text-center text-muted-foreground py-8">Course not found.</div>;
 
     return (
-        <>
-            <nav className="bg-primary text-primary-foreground px-8 py-6 shadow-md">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <h1 className="text-2xl font-bold m-0 text-primary-foreground">
-                        AIN SHAMS
-                        <span className="block text-xs font-normal tracking-wider text-primary-foreground/80 mt-1">UNIVERSITY | FACULTY OF ENGINEERING</span>
-                    </h1>
-                    <div className="flex gap-6">
-                        {/* UPDATED: Link back to My Courses (Home) based on user role */}
-                        <Link to={isAdminOrStaff ? '/admin/home' : '/home'} className="text-primary-foreground hover:text-accent-foreground/80 transition-colors no-underline">← Back to My Courses</Link>
-                    </div>
-                </div>
-            </nav>
-
+        <div className="space-y-6">
             {/* Hero Section */}
-            <div className="bg-primary/95 text-primary-foreground text-center py-16 px-8">
+            <div className="bg-primary text-primary-foreground rounded-lg p-8 text-center shadow-sm">
                 <Badge variant="secondary" className="mb-3">
                     {course.code}
                 </Badge>
-                <h1 className="text-4xl font-bold m-0 mb-4 text-primary-foreground">{course.title}</h1>
-                <p className="text-xl max-w-3xl mx-auto text-primary-foreground/80">
+                <h1 className="text-3xl font-bold m-0 mb-2 text-primary-foreground">{course.title}</h1>
+                <p className="text-lg text-primary-foreground/90">
                     {course.semester || 'Fall 2024'} | {course.type} Course
                 </p>
             </div>
 
             {/* Two Column Layout */}
-            <div className="max-w-7xl mx-auto px-8 py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                 {/* LEFT SIDEBAR */}
                 <div className="lg:col-span-1 h-fit sticky top-8">
@@ -159,7 +143,7 @@ const CourseDetails = () => {
                     </Card>
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 

@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { transcriptService } from '../services/transcriptService.js';
+import { transcriptService } from '@/services/transcriptService';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { FileText, ArrowLeft, Download, Award, BookOpen, Calendar, Printer } from 'lucide-react';
+import { FileText, ArrowLeft, Award, BookOpen, Printer } from 'lucide-react';
 
 function ViewTranscriptPage() {
     const navigate = useNavigate();
@@ -24,7 +24,7 @@ function ViewTranscriptPage() {
             setLoading(true);
             setError('');
             if (!id) return;
-            const response = await transcriptService.viewTranscript(parseInt(id));
+            const response: any = await transcriptService.viewTranscript(parseInt(id));
 
             if (!response.success) {
                 setError(response.message || 'Failed to load transcript');
@@ -87,7 +87,7 @@ function ViewTranscriptPage() {
     const student = request.student;
 
     return (
-        <div className="min-h-screen bg-muted/20 print:bg-white p-6 print:p-0">
+        <div className="space-y-6 print:p-0">
             {/* Action Bar - Hidden when printing */}
             <div className="max-w-5xl mx-auto mb-6 flex justify-between print:hidden">
                 <Button variant="outline" onClick={() => navigate('/transcript-requests')}>

@@ -4,6 +4,7 @@ import { Assessment, AssessmentType } from '../entities/Assessment';
 import { Grade } from '../entities/Grade';
 import { Enrollment } from '../entities/Enrollment';
 import { Course } from '../entities/Course';
+import { Semester, SemesterStatus } from '../entities/Semester';
 import { User, UserRole } from '../entities/User';
 import authenticate, { AuthRequest } from '../middleware/auth';
 import authorize from '../middleware/authorize';
@@ -130,12 +131,28 @@ router.post('/grade', authenticate, authorize(UserRole.Staff, UserRole.Professor
     const enrollment = await em.findOne(Enrollment, {
       student: { id: studentId },
       course: assessment.course
+    }, {
+      populate: ['semester']
     });
 
     if (!enrollment) {
       return res.status(400).json({
         success: false,
         message: 'Student is not enrolled in this course'
+      });
+    }
+
+    // Prevent grade changes for finalized semesters
+    if (!enrollment.semester) {
+      return res.status(400).json({
+        success: false,
+        message: 'Enrollment is missing semester information'
+      });
+    }
+    if (enrollment.semester.status === SemesterStatus.Finalized) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot modify grades for a finalized semester'
       });
     }
 

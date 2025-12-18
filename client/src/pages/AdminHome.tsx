@@ -120,6 +120,13 @@ function AdminHome() {
                 icon: Wrench,
                 path: '/admin/tickets',
                 color: '#1D4ED8' // blue
+            },
+            {
+                title: 'Manage Semesters',
+                description: 'Create, activate, and finalize academic semesters',
+                icon: Calendar,
+                path: '/admin/semesters',
+                color: '#059669' // emerald-600
             }
         ] : []),
 

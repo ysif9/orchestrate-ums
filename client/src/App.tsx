@@ -22,6 +22,7 @@ import AdminLabStationManager from './pages/AdminLabStationManager';
 import StaffTranscriptManagementPage from './pages/StaffTranscriptManagementPage.jsx';
 import StudentRecordSearchPage from './pages/StudentRecordSearchPage.jsx';
 import StudentRecordSummaryPage from './pages/StudentRecordSummaryPage.jsx';
+import StaffSemesterManagementPage from './pages/StaffSemesterManagementPage';
 import LabStationBookingPage from './pages/LabStationBookingPage.jsx';
 import MaintenanceTicketPage from './pages/ViewTicketsPage.jsx';
 import AdminTicketsManager from "./pages/AdminTicketsPage";
@@ -168,6 +169,9 @@ function App() {
 
                 {/* Professional Development Tracking (Staff) */}
                 <Route path="/admin/pd-tracking" element={<StaffOnlyRoute><StaffPDTrackingPage /></StaffOnlyRoute>} />
+
+                {/* Semester Management (Staff Only) */}
+                <Route path="/admin/semesters" element={<StaffOnlyRoute><StaffSemesterManagementPage /></StaffOnlyRoute>} />
 
                 {/* Professional Development History (Professor) */}
                 <Route path="/faculty/pd-history" element={<ProtectedRoute><ProfessorPDHistoryPage /></ProtectedRoute>} />

@@ -1,12 +1,22 @@
-import { Entity, Property, Enum, Unique, BeforeCreate, BeforeUpdate, EventArgs } from '@mikro-orm/core';
+import {
+  Entity,
+  Property,
+  Enum,
+  Unique,
+  BeforeCreate,
+  BeforeUpdate,
+  EventArgs,
+  ManyToOne,
+} from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 import * as bcrypt from 'bcrypt';
+import { Department } from './Department';
 
 export enum UserRole {
-  Student = "student",
-  Staff = "staff",
-  Professor = "professor",
-  TeachingAssistant = "teaching_assistant",
+  Student = 'student',
+  Staff = 'staff',
+  Professor = 'professor',
+  TeachingAssistant = 'teaching_assistant',
 }
 
 @Entity({ discriminatorColumn: 'role', abstract: true })
@@ -31,6 +41,17 @@ export abstract class User extends BaseEntity {
 
   @Enum({ items: () => UserRole })
   role!: UserRole;
+
+  // --- NEW profile fields shared by Professor / Staff / TA ---
+
+  @Property({ nullable: true })
+  phone?: string;
+
+  @Property({ nullable: true })
+  officeLocation?: string;
+
+  @ManyToOne(() => Department, { nullable: true })
+  department?: Department;
 
   constructor(name: string, email: string, password: string, role: UserRole) {
     super();

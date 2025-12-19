@@ -120,6 +120,14 @@ function AdminHome() {
                 icon: Wrench,
                 path: '/admin/tickets',
                 color: '#1D4ED8' // blue
+            },
+
+            {
+                title: 'Staff Directory',
+                description: 'View and manage professors and TAs',
+                icon: Users,
+                path: '/admin/staff-directory',
+                color: '#16a34a' // green-600
             }
         ] : []),
 

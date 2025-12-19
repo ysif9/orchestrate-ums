@@ -27,7 +27,7 @@ import maintenanceTicketAdminRoutes from './routes/maintenanceTicketAdminRoute';
 import maintenanceTicketRoutes from './routes/maintenanceTicketRoute';
 import admissionRoutes from './routes/admissionRoutes';
 import pdRoutes from './routes/pdRoutes';
-
+import staffDirectoryRoutes from './routes/staffDirectoryRoutes';
 dotenv.config();
 
 const app = express();
@@ -72,7 +72,8 @@ export const init = async () => {
     app.use('/api/resources', resourceRoutes);
     app.use('/api/admissions', admissionRoutes);
     app.use('/api/pd', pdRoutes);
-
+    app.use('/api/staff-directory', staffDirectoryRoutes);
+    app.use('/api/staff-directory', staffDirectoryRoutes);
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);
     });
@@ -80,4 +81,4 @@ export const init = async () => {
 
 init().catch(err => {
     console.error('Error starting server:', err);
-});
+}); 

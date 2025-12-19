@@ -31,6 +31,7 @@ import admissionRoutes from './routes/admissionRoutes';
 import pdRoutes from './routes/pdRoutes';
 import semesterRoutes from './routes/semesterRoutes';
 
+import staffDirectoryRoutes from './routes/staffDirectoryRoutes';
 dotenv.config();
 
 const app = express();
@@ -40,7 +41,7 @@ const PORT = process.env.PORT || 5000;
 async function migrateEnrollmentsToSemesters(em: any) {
     try {
         const connection = em.getConnection();
-        
+
         // Check if old semester column (string) still exists
         const hasOldColumn = await connection.execute(`
             SELECT column_name 
@@ -64,10 +65,10 @@ async function migrateEnrollmentsToSemesters(em: any) {
 
         // Create Semester entities for each unique semester string
         const semesterMap: { [key: string]: Semester } = {};
-        
+
         for (const semesterName of semesterStrings) {
             let semester = await em.findOne(Semester, { name: semesterName });
-            
+
             if (!semester) {
                 // Create a semester with default dates based on the name
                 const now = new Date();
@@ -77,7 +78,7 @@ async function migrateEnrollmentsToSemesters(em: any) {
                 // Try to parse semester name (e.g., "Fall 2024", "Spring 2025")
                 const yearMatch = semesterName.match(/(\d{4})/);
                 const year = yearMatch ? parseInt(yearMatch[1]) : now.getFullYear();
-                
+
                 if (semesterName.toLowerCase().includes('fall')) {
                     startDate = new Date(year, 8, 1); // September
                     endDate = new Date(year, 11, 31); // December
@@ -98,7 +99,7 @@ async function migrateEnrollmentsToSemesters(em: any) {
                 await em.persistAndFlush(semester);
                 console.log(`Created semester: ${semesterName}`);
             }
-            
+
             semesterMap[semesterName] = semester;
         }
 
@@ -112,7 +113,7 @@ async function migrateEnrollmentsToSemesters(em: any) {
 
         // Drop the old semester column
         await connection.execute(`ALTER TABLE enrollment DROP COLUMN IF EXISTS semester`);
-        
+
         console.log('Enrollment migration completed successfully');
     } catch (error: any) {
         console.error('Error during enrollment migration:', error.message);
@@ -163,6 +164,8 @@ export const init = async () => {
     app.use('/api/resources', resourceRoutes);
     app.use('/api/admissions', admissionRoutes);
     app.use('/api/pd', pdRoutes);
+    app.use('/api/staff-directory', staffDirectoryRoutes);
+    app.use('/api/staff-directory', staffDirectoryRoutes);
     app.use('/api/semesters', semesterRoutes);
 
     app.listen(PORT, () => {

@@ -140,6 +140,14 @@ function AdminHome() {
                 icon: Calendar,
                 path: '/admin/semesters',
                 color: '#059669' // emerald-600
+            },
+
+            {
+                title: 'Staff Directory',
+                description: 'View and manage professors and TAs',
+                icon: Users,
+                path: '/admin/staff-directory',
+                color: '#16a34a' // green-600
             }
         ] : []),
 

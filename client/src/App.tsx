@@ -35,6 +35,8 @@ import ApplicationConfirmationPage from './pages/ApplicationConfirmationPage';
 import StaffPDTrackingPage from './pages/StaffPDTrackingPage';
 import ProfessorPDHistoryPage from './pages/ProfessorPDHistoryPage';
 import StudentLayout from './components/StudentLayout';
+import StaffDirectoryPage from './pages/StaffDirectoryPage';
+import StaffProfileDetailPage from './pages/StaffProfileDetailPage';
 
 /**
  * Protected Route Component
@@ -83,21 +85,31 @@ function RootRedirect() {
 }
 
 function MyResourcesPage() {
-    const user = authService.getCurrentUser();
+  const user: any = authService.getCurrentUser();
 
-    if (!user) {
-        return <Navigate to="/login" replace />;
-    }
+  if (!user) {
+    // Not logged in: send to login
+    return <Navigate to="/login" replace />;
+  }
 
-    if (user.role === 'professor') {
-        return <ProfessorResources />;
-    } else if (user.role === 'student') {
-        return <StudentResources />;
-    } else {
-        // Staff/admin view
-        return <Navigate to="/facilities/allocate" replace />;
-    }
+  if (user.role === 'professor') {
+    return <ProfessorResources />;
+  } else if (user.role === 'student') {
+    return (
+      <StudentLayout>
+        <StudentResources />
+      </StudentLayout>
+    );
+  } else {
+    // Staff/admin view: use allocation/management page
+    return (
+      <StaffOnlyRoute>
+        <AllocateResources />
+      </StaffOnlyRoute>
+    );
+  }
 }
+
 
 function App() {
     return (
@@ -195,8 +207,23 @@ function App() {
                 {/* Root redirect */}
                 <Route path="/" element={<RootRedirect />} />
 
+                {/* Staff Directory Page */}
+                <Route path="/admin/staff-directory" element={<ProtectedRoute><StaffDirectoryPage /></ProtectedRoute>} />
+
+                 {/* Staff profile detail (Staff Only) */}
+                <Route
+                    path="/admin/staff-directory/:id"
+                    element={
+                        <StaffOnlyRoute>
+                        <StaffProfileDetailPage />
+                        </StaffOnlyRoute>
+                    }
+                    />
+
                 {/* Catch all - smart redirect */}
                 <Route path="*" element={<RootRedirect />} />
+                
+                
             </Routes>
         </BrowserRouter>
     );

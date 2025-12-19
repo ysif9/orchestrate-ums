@@ -41,6 +41,7 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
         { path: '/transcript-requests', label: 'Transcript Requests', icon: FileText },
         { path: '/lab-stations', label: 'Lab Stations', icon: Monitor },
         { path: '/tickets', label: 'Support Tickets', icon: AlertCircle },
+        { path: '/staff-directory', label: 'Staff Directory', icon: User },
     ];
 
     return (

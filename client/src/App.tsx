@@ -37,6 +37,7 @@ import ProfessorPDHistoryPage from './pages/ProfessorPDHistoryPage';
 import StudentLayout from './components/StudentLayout';
 import StaffDirectoryPage from './pages/StaffDirectoryPage';
 import StaffProfileDetailPage from './pages/StaffProfileDetailPage';
+import ProfessorOfficeHoursPage from './pages/ProfessorOfficeHoursPage';
 
 /**
  * Protected Route Component
@@ -149,6 +150,10 @@ function App() {
 
                     {/* Student Maintenance Tickets */}
                     <Route path="/tickets" element={<MaintenanceTicketPage />} />
+
+                    {/* Student routes inside StudentLayout */}
+                    <Route path="staff-directory" element={<StaffDirectoryPage />} />
+                    <Route path="staff-directory/:id" element={<StaffProfileDetailPage />} />
                 </Route>
 
                 {/* --- Admin/Staff Routes --- */}
@@ -187,6 +192,16 @@ function App() {
 
                 {/* Professional Development History (Professor) */}
                 <Route path="/faculty/pd-history" element={<ProtectedRoute><ProfessorPDHistoryPage /></ProtectedRoute>} />
+
+                {/* Professor Office Hours (Professor) */}
+                <Route
+                path="/faculty/office-hours"
+                element={
+                    <ProtectedRoute>
+                    <ProfessorOfficeHoursPage />
+                    </ProtectedRoute>
+                }
+                />
 
                 {/* Room Booking (Student/Staff access to page) */}
                 <Route path="/admin/room-booking" element={<ProtectedRoute><RoomBookingPage /></ProtectedRoute>} />

@@ -1,11 +1,20 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { authService } from '@/services/authService';
 
 interface Department {
   id: number;
   name: string;
+}
+
+interface OfficeHourSlot {
+  id: number;
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+  location: string;
 }
 
 interface StaffProfile {
@@ -17,6 +26,7 @@ interface StaffProfile {
   officeLocation?: string;
   department?: Department | null;
   assignedCourses: any[];
+  officeHours?: OfficeHourSlot[]; // new
 }
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -24,6 +34,10 @@ const API_BASE_URL = 'http://localhost:5000/api';
 export default function StaffProfileDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const user: any = authService.getCurrentUser();
+  const isStaff = user?.role === 'staff';
 
   const [profile, setProfile] = useState<StaffProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -140,12 +154,22 @@ export default function StaffProfileDetailPage() {
         <p className="mb-4 text-sm text-destructive">
           {error || 'Staff member not found.'}
         </p>
-        <Button variant="outline" onClick={() => navigate('/admin/staff-directory')}>
+        <Button
+          variant="outline"
+          onClick={() =>
+            navigate(isStaff ? '/admin/staff-directory' : '/staff-directory')
+          }
+        >
           Back to directory
         </Button>
       </div>
     );
   }
+
+  const backPath =
+    location.pathname.startsWith('/admin')
+      ? '/admin/staff-directory'
+      : '/staff-directory';
 
   return (
     <div className="px-6 py-6 space-y-4">
@@ -158,7 +182,7 @@ export default function StaffProfileDetailPage() {
             {profile.role.replace('_', ' ')}
           </p>
         </div>
-        <Button variant="outline" onClick={() => navigate('/admin/staff-directory')}>
+        <Button variant="outline" onClick={() => navigate(backPath)}>
           Back to directory
         </Button>
       </div>
@@ -178,6 +202,7 @@ export default function StaffProfileDetailPage() {
                 className="w-full rounded-md border px-3 py-2 text-sm"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={!isStaff}
               />
             </div>
 
@@ -188,6 +213,7 @@ export default function StaffProfileDetailPage() {
                 className="w-full rounded-md border px-3 py-2 text-sm"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                disabled={!isStaff}
               />
             </div>
 
@@ -198,6 +224,7 @@ export default function StaffProfileDetailPage() {
                 className="w-full rounded-md border px-3 py-2 text-sm"
                 value={officeLocation}
                 onChange={(e) => setOfficeLocation(e.target.value)}
+                disabled={!isStaff}
               />
             </div>
 
@@ -213,9 +240,11 @@ export default function StaffProfileDetailPage() {
             </div>
           </div>
 
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving...' : 'Save changes'}
-          </Button>
+          {isStaff && (
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving...' : 'Save changes'}
+            </Button>
+          )}
         </CardContent>
       </Card>
 
@@ -235,6 +264,31 @@ export default function StaffProfileDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      {profile.role === 'professor' && (
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="text-lg font-semibold mb-2">Office hours</h2>
+            {profile.officeHours && profile.officeHours.length > 0 ? (
+              <ul className="text-sm space-y-1">
+                {profile.officeHours.map((slot) => (
+                  <li key={slot.id}>
+                    <span className="font-medium">
+                      {slot.dayOfWeek.charAt(0).toUpperCase() +
+                        slot.dayOfWeek.slice(1)}
+                    </span>{' '}
+                    {slot.startTime}–{slot.endTime} · {slot.location}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No office hours set.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

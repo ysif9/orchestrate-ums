@@ -51,6 +51,7 @@ const StaffSemesterManagementPage = () => {
     const [finalizeError, setFinalizeError] = useState<any>(null);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
 
     const initialFormState = {
         name: '',
@@ -102,6 +103,7 @@ const StaffSemesterManagementPage = () => {
         setFormData(initialFormState);
         setCurrentSemester(null);
         setError('');
+        setSuccessMessage('');
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,16 +124,21 @@ const StaffSemesterManagementPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setSuccessMessage('');
         setSubmitting(true);
 
         try {
             if (currentSemester) {
                 await semesterService.update(currentSemester.id, formData);
+                setSuccessMessage('Semester updated successfully');
             } else {
                 await semesterService.create(formData);
+                setSuccessMessage('Semester created and automatically activated successfully');
             }
             await fetchData();
             handleCloseModal();
+            // Clear success message after 5 seconds
+            setTimeout(() => setSuccessMessage(''), 5000);
         } catch (err: any) {
             console.error('Error saving semester:', err);
             const errorMessage = err.response?.data?.message || err.message || 'Failed to save semester';
@@ -230,6 +237,12 @@ const StaffSemesterManagementPage = () => {
                 </div>
             )}
 
+            {successMessage && (
+                <div className="bg-green-500/15 text-green-700 dark:text-green-400 px-4 py-3 rounded-md">
+                    {successMessage}
+                </div>
+            )}
+
             <Card>
                 <CardHeader>
                     <CardTitle>All Semesters</CardTitle>
@@ -254,8 +267,18 @@ const StaffSemesterManagementPage = () => {
                                 </TableRow>
                             ) : (
                                 semesters.map((semester) => (
-                                    <TableRow key={semester.id}>
-                                        <TableCell className="font-medium">{semester.name}</TableCell>
+                                    <TableRow 
+                                        key={semester.id}
+                                        className={semester.status === 'active' ? 'bg-green-50 dark:bg-green-950/20' : ''}
+                                    >
+                                        <TableCell className="font-medium">
+                                            {semester.name}
+                                            {semester.status === 'active' && (
+                                                <span className="ml-2 text-xs text-green-600 dark:text-green-400 font-semibold">
+                                                    (Currently Active)
+                                                </span>
+                                            )}
+                                        </TableCell>
                                         <TableCell>
                                             {new Date(semester.startDate).toLocaleDateString()}
                                         </TableCell>
@@ -312,7 +335,7 @@ const StaffSemesterManagementPage = () => {
                         <DialogDescription>
                             {currentSemester
                                 ? 'Update semester information below.'
-                                : 'Create a new academic semester with start and end dates.'}
+                                : 'Create a new academic semester with start and end dates. The new semester will be automatically activated and will deactivate any currently active semester.'}
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSubmit}>

@@ -38,7 +38,7 @@ async function generateTranscriptData(studentId: number) {
         student: { id: studentId },
         status: EnrollmentStatus.Completed
     }, {
-        populate: ['course', 'student']
+        populate: ['course', 'student', 'semester']
     });
 
     const courses = [];
@@ -109,7 +109,7 @@ async function generateTranscriptData(studentId: number) {
             courseCode: course.code,
             courseTitle: course.title,
             credits: course.credits,
-            semester: enrollment.semester,
+            semester: enrollment.semester?.name || 'Unknown',
             enrollmentDate: enrollment.createdAt,
             completedDate: enrollment.updatedAt,
             assessments: assessmentGrades,

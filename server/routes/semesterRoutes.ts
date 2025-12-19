@@ -74,24 +74,33 @@ router.post('/', authenticate, authorize(UserRole.Staff), async (req: AuthReques
             return res.status(400).json({ message: 'Semester with this name already exists' });
         }
 
-        // Check for date overlaps with active semesters
+        // Check for date overlaps with ALL existing semesters (not just active ones)
         // Overlap occurs when: newStart <= existingEnd AND newEnd >= existingStart
-        const activeSemesters = await em.find(Semester, {
-            status: SemesterStatus.Active
-        });
+        const allSemesters = await em.find(Semester, {});
         
-        const overlappingSemester = activeSemesters.find(s => {
+        const overlappingSemester = allSemesters.find(s => {
             return start <= s.endDate && end >= s.startDate;
         });
 
         if (overlappingSemester) {
             return res.status(400).json({ 
-                message: 'Date range overlaps with an existing active semester',
+                message: 'Date range overlaps with an existing semester',
                 overlappingSemester: overlappingSemester.name
             });
         }
 
+        // Deactivate all existing active semesters before creating new one
+        // This ensures only one active semester exists at a time
+        const activeSemesters = await em.find(Semester, {
+            status: SemesterStatus.Active
+        });
+        for (const active of activeSemesters) {
+            active.status = SemesterStatus.Inactive;
+        }
+
+        // Create new semester and automatically set it as Active
         const semester = new Semester(name, start, end);
+        semester.status = SemesterStatus.Active;
         await em.persistAndFlush(semester);
 
         res.status(201).json(semester);

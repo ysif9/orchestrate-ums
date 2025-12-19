@@ -2,6 +2,7 @@ import { Entity, Property, ManyToOne, Enum, Unique } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 import { User } from './User';
 import { Course } from './Course';
+import { Semester } from './Semester';
 
 export enum EnrollmentStatus {
     Enrolled = "enrolled",
@@ -18,13 +19,13 @@ export class Enrollment extends BaseEntity {
     @ManyToOne(() => Course)
     course!: Course;
 
-    @Property()
-    semester!: string;
+    @ManyToOne(() => Semester, { nullable: true })
+    semester?: Semester;
 
     @Enum({ items: () => EnrollmentStatus })
     status: EnrollmentStatus = EnrollmentStatus.Enrolled;
 
-    constructor(student: User, course: Course, semester: string) {
+    constructor(student: User, course: Course, semester: Semester) {
         super();
         this.student = student;
         this.course = course;

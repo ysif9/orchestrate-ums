@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { authService } from '@/services/authService';
 import { courseService } from '@/services/courseService';
+import { semesterService } from '@/services/semesterService';
 import { BookOpen, Building, Calendar, ClipboardCheck, FileText, User, Users, Wrench } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -19,11 +20,13 @@ function AdminHome() {
     const isProfessor = user?.role === 'professor';
 
     const [myCourses, setMyCourses] = useState<any[]>([]);
+    const [activeSemester, setActiveSemester] = useState<string | null>(null);
 
     useEffect(() => {
         if (isProfessor && user?.id) {
             fetchMyCourses();
         }
+        fetchActiveSemester();
     }, [isProfessor, user]);
 
     const fetchMyCourses = async () => {
@@ -41,6 +44,16 @@ function AdminHome() {
             setMyCourses(my);
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const fetchActiveSemester = async () => {
+        try {
+            const semester = await semesterService.getActive();
+            setActiveSemester(semester ? semester.name : null);
+        } catch (error) {
+            console.error('Failed to fetch active semester:', error);
+            setActiveSemester(null);
         }
     };
 
@@ -120,6 +133,13 @@ function AdminHome() {
                 icon: Wrench,
                 path: '/admin/tickets',
                 color: '#1D4ED8' // blue
+            },
+            {
+                title: 'Manage Semesters',
+                description: 'Create, activate, and finalize academic semesters',
+                icon: Calendar,
+                path: '/admin/semesters',
+                color: '#059669' // emerald-600
             },
 
             {
@@ -281,7 +301,9 @@ function AdminHome() {
                     <Card>
                         <CardContent className="p-6">
                             <h3 className="text-lg font-semibold text-primary mb-3">Current Semester</h3>
-                            <p className="text-xl font-bold text-foreground">Fall 2024</p>
+                            <p className="text-xl font-bold text-foreground">
+                                {activeSemester || 'No active semester'}
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>

@@ -43,7 +43,7 @@ const CourseDetails = () => {
                 </Badge>
                 <h1 className="text-3xl font-bold m-0 mb-2 text-primary-foreground">{course.title}</h1>
                 <p className="text-lg text-primary-foreground/90">
-                    {course.semester || 'Fall 2024'} | {course.type} Course
+                    {typeof course.semester === 'object' ? (course.semester as any).name : (course.semester || 'Fall 2024')} | {course.type} Course
                 </p>
             </div>
 
@@ -105,10 +105,19 @@ const CourseDetails = () => {
                         <CardContent>
                             <div className="flex items-center">
                                 <div className="w-16 h-16 bg-primary text-primary-foreground rounded-full mr-4 flex items-center justify-center text-2xl font-bold">
-                                    {course.professor ? course.professor.charAt(0) : "T"}
+                                    {(() => {
+                                        if (!course.professor) return "T";
+                                        const name = typeof course.professor === 'object' ? (course.professor as any).name : course.professor;
+                                        return name ? name.charAt(0) : "T";
+                                    })()}
                                 </div>
                                 <div>
-                                    <strong className="text-foreground text-lg">{course.professor || "To Be Announced"}</strong>
+                                    <strong className="text-foreground text-lg">
+                                        {(() => {
+                                            if (!course.professor) return "To Be Announced";
+                                            return typeof course.professor === 'object' ? (course.professor as any).name : course.professor;
+                                        })()}
+                                    </strong>
                                     <p className="text-muted-foreground text-sm">Faculty of Engineering</p>
                                 </div>
                             </div>
@@ -143,7 +152,7 @@ const CourseDetails = () => {
                     </Card>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

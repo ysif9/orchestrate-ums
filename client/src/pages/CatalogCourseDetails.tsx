@@ -72,9 +72,13 @@ function CatalogCourseDetails() {
         setEnrollmentSuccess(false);
 
         try {
+            const semesterValue = typeof course.semester === 'object'
+                ? (course.semester as any).name
+                : (course.semester || 'Fall 2024');
+
             await axios.post('http://localhost:5000/api/enrollments', {
                 course_code: course.code,
-                semester: course.semester || 'Fall 2024'
+                semester: semesterValue
             });
 
             setEnrollmentSuccess(true);
@@ -146,7 +150,10 @@ function CatalogCourseDetails() {
                         </span>
                         {course.professor && (
                             <span className="bg-primary-foreground/10 px-4 py-2 rounded-full text-sm flex items-center">
-                                <strong className="mr-1">Professor:</strong> {course.professor}
+                                <strong className="mr-1">Professor:</strong>
+                                {typeof course.professor === 'object'
+                                    ? (course.professor as any).name
+                                    : course.professor}
                             </span>
                         )}
                     </div>
@@ -310,7 +317,11 @@ function CatalogCourseDetails() {
                                     {course.semester && (
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">Semester</span>
-                                            <span className="font-semibold text-foreground">{course.semester}</span>
+                                            <span className="font-semibold text-foreground">
+                                                {typeof course.semester === 'object'
+                                                    ? (course.semester as any).name
+                                                    : course.semester}
+                                            </span>
                                         </div>
                                     )}
                                 </div>

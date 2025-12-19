@@ -6,14 +6,14 @@ import authenticate, { AuthRequest } from '../middleware/auth';
 import authorize from '../middleware/authorize';
 import { User, UserRole } from '../entities/User';
 import { Department } from '../entities/Department';
+import { OfficeHours } from '../entities/OfficeHours';
 
 const router = express.Router();
 
 // GET /api/staff-directory?search=...
 router.get(
   '/',
-  authenticate,
-  authorize(UserRole.Staff),
+  authenticate, // now: any authenticated user (student, professor, staff)
   async (req: AuthRequest, res: Response) => {
     const em = RequestContext.getEntityManager() as EntityManager;
     const search = String(req.query.search || '').trim().toLowerCase();
@@ -62,8 +62,7 @@ router.get(
 // GET /api/staff-directory/:id
 router.get(
   '/:id',
-  authenticate,
-  authorize(UserRole.Staff),
+  authenticate, // now: any authenticated user can view a profile
   async (req: AuthRequest, res: Response) => {
     const em = RequestContext.getEntityManager() as EntityManager;
     const id = Number(req.params.id);
@@ -84,6 +83,24 @@ router.get(
       // TODO: populate assigned courses once your Course entity is available.
       const assignedCourses: any[] = [];
 
+      // New: office hours for professors
+      let officeHours: any[] = [];
+      if (user.role === UserRole.Professor) {
+        const slots = await em.find(
+          OfficeHours,
+          { professor: user.id },
+          { orderBy: { dayOfWeek: 'ASC', startTime: 'ASC' } },
+        );
+
+        officeHours = slots.map((s) => ({
+          id: s.id,
+          dayOfWeek: s.dayOfWeek,
+          startTime: s.startTime,
+          endTime: s.endTime,
+          location: s.location,
+        }));
+      }
+
       return res.json({
         success: true,
         data: {
@@ -97,6 +114,7 @@ router.get(
             ? { id: user.department.id, name: user.department.name }
             : null,
           assignedCourses,
+          officeHours, // new field
         },
       });
     } catch (err) {
@@ -119,7 +137,7 @@ const sendValidationErrors = (res: Response, errorsArray: any[]) =>
 router.post(
   '/',
   authenticate,
-  authorize(UserRole.Staff),
+  authorize(UserRole.Staff), // unchanged: only staff can create
   body('name').notEmpty(),
   body('email').isEmail(),
   body('password').isLength({ min: 6 }),
@@ -182,7 +200,7 @@ router.post(
 router.put(
   '/:id',
   authenticate,
-  authorize(UserRole.Staff),
+  authorize(UserRole.Staff), // unchanged: only staff can edit
   body('email').optional().isEmail(),
   body('phone').optional().isString(),
   body('officeLocation').optional().isString(),
@@ -250,4 +268,5 @@ router.put(
     }
   },
 );
+
 export default router;

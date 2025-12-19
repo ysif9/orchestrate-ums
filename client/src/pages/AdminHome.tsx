@@ -163,15 +163,25 @@ function AdminHome() {
             color: '#0ea5e9' // sky-500
         }] : []),
 
-        ...(isProfessor ? [{
+        ...(isProfessor ? [
+        {
             title: 'My PD History',
             description: 'View your professional development history',
             icon: FileText,
             path: '/faculty/pd-history',
-            color: '#0ea5e9' // sky-500
-        }] : []),
-
+            color: '#0ea5e9', // sky-500
+        },
+        {
+            title: 'My Office Hours',
+            description: 'Manage when students can meet with you',
+            icon: Calendar,
+            path: '/faculty/office-hours',
+            color: '#16a34a', // green-600
+        },
+        ] : []),
     ];
+
+    
 
     return (
         <div className="min-h-screen bg-background">

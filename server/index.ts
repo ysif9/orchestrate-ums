@@ -30,7 +30,7 @@ import maintenanceTicketRoutes from './routes/maintenanceTicketRoute';
 import admissionRoutes from './routes/admissionRoutes';
 import pdRoutes from './routes/pdRoutes';
 import semesterRoutes from './routes/semesterRoutes';
-
+import officeHoursRoutes from './routes/officeHoursRoutes';
 import staffDirectoryRoutes from './routes/staffDirectoryRoutes';
 dotenv.config();
 
@@ -167,7 +167,7 @@ export const init = async () => {
     app.use('/api/staff-directory', staffDirectoryRoutes);
     app.use('/api/staff-directory', staffDirectoryRoutes);
     app.use('/api/semesters', semesterRoutes);
-
+    app.use('/api/office-hours', officeHoursRoutes);
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);
     });

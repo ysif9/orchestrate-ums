@@ -1,7 +1,7 @@
 // entities/Allocation.ts
 import { Entity, Property, ManyToOne, Enum, Index } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
-
+import { Resource } from './Resource';
 // @Observation
 // Append Heavy, EAV is a bad choice
 // can be split by ID

@@ -6,6 +6,9 @@ import { Course } from './Course';
 import { Department } from './Department';
 import { Applicant } from './Applicant';
 import { Program } from './Program';
+import { ApplicationReview } from './ApplicationReview';
+import { Assessment } from './Assessment';
+import { Attachment } from './Attachment';
 
 @Entity()
 @Unique({ properties: ['entityId', 'entityType', 'attribute'] })
@@ -33,6 +36,15 @@ export class EntityAttributeValue extends BaseEntity {
 
     @ManyToOne(() => Program, { nullable: true, deleteRule: 'cascade' })
     program?: Program;
+
+    @ManyToOne(() => ApplicationReview, { nullable: true, deleteRule: 'cascade' })
+    applicationReview?: ApplicationReview;
+
+    @ManyToOne(() => Assessment, { nullable: true, deleteRule: 'cascade' })
+    assessment?: Assessment;
+
+    @ManyToOne(() => Attachment, { nullable: true, deleteRule: 'cascade' })
+    attachment?: Attachment;
 
     @Property({ nullable: true })
     stringValue?: string;

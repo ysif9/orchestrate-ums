@@ -23,6 +23,9 @@ export async function updateEntityAttributes(
             else if (entityType === 'Department') where.department = entity;
             else if (entityType === 'Applicant') where.applicant = entity;
             else if (entityType === 'Program') where.program = entity;
+            else if (entityType === 'ApplicationReview') where.applicationReview = entity;
+            else if (entityType === 'Assessment') where.assessment = entity;
+            else if (entityType === 'Attachment') where.attachment = entity;
             else where.entityId = entity.id;
 
             let eav = await em.findOne(EntityAttributeValue, where);
@@ -34,6 +37,9 @@ export async function updateEntityAttributes(
                 else if (entityType === 'Department') eav.department = entity;
                 else if (entityType === 'Applicant') eav.applicant = entity;
                 else if (entityType === 'Program') eav.program = entity;
+                else if (entityType === 'ApplicationReview') eav.applicationReview = entity;
+                else if (entityType === 'Assessment') eav.assessment = entity;
+                else if (entityType === 'Attachment') eav.attachment = entity;
                 em.persist(eav);
             }
 

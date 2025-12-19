@@ -6,6 +6,16 @@ import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 
 
+const ATTACHMENT_TYPE_LABELS: Record<number, string> = {
+    1: 'Transcript',
+    2: 'Essay',
+    3: 'Recommendation',
+    4: 'Certificate',
+    5: 'ID Document',
+    6: 'Photo',
+    7: 'Other'
+};
+
 function InfoRow({ label, value, icon: Icon }: any) {
     return (
         <div className="flex items-start gap-3 py-3 border-b border-border last:border-0">
@@ -151,7 +161,7 @@ function ApplicationViewer({ application }: any) {
                             <div className="flex-1">
                                 <p className="font-medium text-foreground">{attachment.originalName}</p>
                                 <p className="text-xs text-muted-foreground">
-                                    {attachment.mimeType} • {(attachment.size / 1024).toFixed(1)} KB
+                                    {ATTACHMENT_TYPE_LABELS[attachment.type] || 'Other'} • {attachment.mimeType} • {(attachment.size / 1024).toFixed(1)} KB
                                 </p>
                             </div>
                             <Button variant="link" size="sm" asChild>

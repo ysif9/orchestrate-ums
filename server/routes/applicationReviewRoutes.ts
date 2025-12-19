@@ -7,6 +7,7 @@ import { Application, ApplicationStatus } from '../entities/Application';
 import { User, UserRole } from '../entities/User';
 import authenticate, { AuthRequest } from '../middleware/auth';
 import authorize from '../middleware/authorize';
+import { updateEntityAttributes, toFlatObject } from '../utils/eavHelpers';
 
 const router = express.Router();
 
@@ -23,11 +24,11 @@ router.get('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), asy
         const { applicationId, reviewerId, limit = 50, offset = 0 } = req.query;
 
         let where: any = {};
-        
+
         if (applicationId) {
             where.application = { id: Number(applicationId) };
         }
-        
+
         if (reviewerId) {
             where.reviewer = { id: Number(reviewerId) };
         }
@@ -36,12 +37,12 @@ router.get('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), asy
             limit: Number(limit),
             offset: Number(offset),
             orderBy: { reviewedAt: 'DESC' },
-            populate: ['application', 'application.applicant', 'reviewer'],
+            populate: ['application', 'application.applicant', 'reviewer', 'attributes', 'attributes.attribute'],
         });
 
         res.json({
             success: true,
-            data: reviews,
+            data: reviews.map(r => toFlatObject(r)),
             pagination: {
                 total,
                 limit: Number(limit),
@@ -76,11 +77,11 @@ router.get('/application/:applicationId', authenticate, authorize(UserRole.Staff
             { application: { id: parseInt(req.params.applicationId) } },
             {
                 orderBy: { reviewedAt: 'DESC' },
-                populate: ['reviewer'],
+                populate: ['reviewer', 'attributes', 'attributes.attribute'],
             }
         );
 
-        res.json({ success: true, data: reviews });
+        res.json({ success: true, data: reviews.map(r => toFlatObject(r)) });
     } catch (error: any) {
         console.error('Error fetching reviews for application:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -105,14 +106,14 @@ router.get('/:id', authenticate, authorize(UserRole.Staff, UserRole.Professor), 
         if (!em) return res.status(500).json({ success: false, message: 'EntityManager not found' });
 
         const review = await em.findOne(ApplicationReview, { id: parseInt(req.params.id) }, {
-            populate: ['application', 'application.applicant', 'reviewer'],
+            populate: ['application', 'application.applicant', 'reviewer', 'attributes', 'attributes.attribute'],
         });
 
         if (!review) {
             return res.status(404).json({ success: false, message: 'Review not found' });
         }
 
-        res.json({ success: true, data: review });
+        res.json({ success: true, data: toFlatObject(review) });
     } catch (error: any) {
         console.error('Error fetching review:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -127,7 +128,7 @@ router.get('/:id', authenticate, authorize(UserRole.Staff, UserRole.Professor), 
  */
 router.post('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), [
     body('applicationId').isInt().withMessage('Application ID is required and must be an integer'),
-    body('finalDecision').isIn(Object.values(FinalDecision)).withMessage('Valid final decision is required'),
+    body('finalDecision').isInt().withMessage('Valid final decision (integer) is required'),
     body('scoringRubric').optional().isObject().withMessage('Scoring rubric must be an object'),
     body('comments').optional().trim(),
 ], async (req: AuthRequest, res: Response) => {
@@ -159,23 +160,32 @@ router.post('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), [
         }
 
         // Create the review
-        const review = new ApplicationReview(application, reviewer, finalDecision);
-        if (scoringRubric) review.scoringRubric = scoringRubric;
-        if (comments) review.comments = comments;
+        const review = new ApplicationReview(application, reviewer, Number(finalDecision));
+        await em.persist(review);
+
+        // Update EAV attributes
+        const eavData: any = {};
+        if (scoringRubric) Object.assign(eavData, scoringRubric);
+        if (comments) eavData.comments = comments;
+
+        if (Object.keys(eavData).length > 0) {
+            await updateEntityAttributes(em, review, 'ApplicationReview', eavData);
+        }
 
         // Update application status based on decision
-        const statusMap: Record<FinalDecision, ApplicationStatus> = {
+        const statusMap: Record<number, ApplicationStatus> = {
             [FinalDecision.Accepted]: ApplicationStatus.Accepted,
             [FinalDecision.Rejected]: ApplicationStatus.Rejected,
             [FinalDecision.Waitlisted]: ApplicationStatus.Waitlisted,
         };
-        application.status = statusMap[finalDecision as FinalDecision];
+        application.status = statusMap[Number(finalDecision)];
 
-        await em.persistAndFlush(review);
+        await em.flush();
+        await em.populate(review, ['attributes', 'attributes.attribute']);
 
         res.status(201).json({
             success: true,
-            data: review,
+            data: toFlatObject(review),
             message: `Review submitted successfully. Application status updated to ${application.status}`,
         });
     } catch (error: any) {
@@ -192,7 +202,7 @@ router.post('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), [
  */
 router.put('/:id', authenticate, authorize(UserRole.Staff, UserRole.Professor), [
     param('id').isInt().withMessage('Review ID must be an integer'),
-    body('finalDecision').optional().isIn(Object.values(FinalDecision)).withMessage('Invalid final decision'),
+    body('finalDecision').optional().isInt().withMessage('Invalid final decision (must be integer)'),
     body('scoringRubric').optional().isObject().withMessage('Scoring rubric must be an object'),
     body('comments').optional().trim(),
 ], async (req: AuthRequest, res: Response) => {
@@ -215,25 +225,33 @@ router.put('/:id', authenticate, authorize(UserRole.Staff, UserRole.Professor), 
         const { finalDecision, scoringRubric, comments } = req.body;
 
         if (finalDecision !== undefined) {
-            review.finalDecision = finalDecision;
+            review.finalDecision = Number(finalDecision);
 
             // Update application status based on new decision
-            const statusMap: Record<FinalDecision, ApplicationStatus> = {
+            const statusMap: Record<number, ApplicationStatus> = {
                 [FinalDecision.Accepted]: ApplicationStatus.Accepted,
                 [FinalDecision.Rejected]: ApplicationStatus.Rejected,
                 [FinalDecision.Waitlisted]: ApplicationStatus.Waitlisted,
             };
-            review.application.status = statusMap[finalDecision as FinalDecision];
+            review.application.status = statusMap[Number(finalDecision)];
         }
-        if (scoringRubric !== undefined) review.scoringRubric = scoringRubric;
-        if (comments !== undefined) review.comments = comments;
+
+        // Update EAV attributes
+        const eavData: any = {};
+        if (scoringRubric) Object.assign(eavData, scoringRubric);
+        if (comments) eavData.comments = comments;
+
+        if (Object.keys(eavData).length > 0) {
+            await updateEntityAttributes(em, review, 'ApplicationReview', eavData);
+        }
 
         // Update the reviewed timestamp
         review.reviewedAt = new Date();
 
         await em.flush();
+        await em.populate(review, ['attributes', 'attributes.attribute']);
 
-        res.json({ success: true, data: review, message: 'Review updated successfully' });
+        res.json({ success: true, data: toFlatObject(review), message: 'Review updated successfully' });
     } catch (error: any) {
         console.error('Error updating review:', error);
         res.status(400).json({ success: false, message: error.message });

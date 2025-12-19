@@ -19,14 +19,18 @@ export class Semester extends BaseEntity {
     @Property()
     endDate!: Date;
     
+    @Property({ nullable: true })
+    dropDate?: Date; // Last date students can drop courses for this semester
+    
     @Enum({ items: () => SemesterStatus })
     status: SemesterStatus = SemesterStatus.Inactive;
 
-    constructor(name: string, startDate: Date, endDate: Date) {
+    constructor(name: string, startDate: Date, endDate: Date, dropDate?: Date) {
         super();
         this.name = name;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.dropDate = dropDate;
     }
 }
 

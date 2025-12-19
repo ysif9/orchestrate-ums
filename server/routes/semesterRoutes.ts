@@ -50,7 +50,7 @@ router.post('/', authenticate, authorize(UserRole.Staff), async (req: AuthReques
         const em = RequestContext.getEntityManager();
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
-        const { name, startDate, endDate } = req.body;
+        const { name, startDate, endDate, dropDate } = req.body;
 
         if (!name || !startDate || !endDate) {
             return res.status(400).json({ message: 'Name, startDate, and endDate are required' });
@@ -59,13 +59,22 @@ router.post('/', authenticate, authorize(UserRole.Staff), async (req: AuthReques
         // Validate dates
         const start = new Date(startDate);
         const end = new Date(endDate);
+        const drop = dropDate ? new Date(dropDate) : null;
 
         if (isNaN(start.getTime()) || isNaN(end.getTime())) {
             return res.status(400).json({ message: 'Invalid date format' });
         }
 
+        if (drop && isNaN(drop.getTime())) {
+            return res.status(400).json({ message: 'Invalid drop date format' });
+        }
+
         if (end <= start) {
             return res.status(400).json({ message: 'End date must be after start date' });
+        }
+
+        if (drop && (drop < start || drop > end)) {
+            return res.status(400).json({ message: 'Drop date must be between start date and end date' });
         }
 
         // Check if name already exists
@@ -99,7 +108,7 @@ router.post('/', authenticate, authorize(UserRole.Staff), async (req: AuthReques
         }
 
         // Create new semester and automatically set it as Active
-        const semester = new Semester(name, start, end);
+        const semester = new Semester(name, start, end, drop || undefined);
         semester.status = SemesterStatus.Active;
         await em.persistAndFlush(semester);
 
@@ -134,7 +143,7 @@ router.put('/:id', authenticate, authorize(UserRole.Staff), async (req: AuthRequ
             return res.status(400).json({ message: 'Cannot modify a finalized semester' });
         }
 
-        const { name, startDate, endDate, status } = req.body;
+        const { name, startDate, endDate, dropDate, status } = req.body;
 
         if (name !== undefined) {
             // Check if name already exists (excluding current semester)
@@ -161,9 +170,28 @@ router.put('/:id', authenticate, authorize(UserRole.Staff), async (req: AuthRequ
             semester.endDate = end;
         }
 
+        if (dropDate !== undefined) {
+            if (dropDate === null || dropDate === '') {
+                semester.dropDate = undefined;
+            } else {
+                const drop = new Date(dropDate);
+                if (isNaN(drop.getTime())) {
+                    return res.status(400).json({ message: 'Invalid drop date format' });
+                }
+                semester.dropDate = drop;
+            }
+        }
+
         // Validate date order
         if (semester.endDate <= semester.startDate) {
             return res.status(400).json({ message: 'End date must be after start date' });
+        }
+
+        // Validate drop date is within semester range
+        if (semester.dropDate) {
+            if (semester.dropDate < semester.startDate || semester.dropDate > semester.endDate) {
+                return res.status(400).json({ message: 'Drop date must be between start date and end date' });
+            }
         }
 
         // Only allow status changes to Inactive or Active (not Finalized via this endpoint)

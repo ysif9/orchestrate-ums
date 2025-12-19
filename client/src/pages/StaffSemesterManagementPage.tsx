@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { semesterService } from '@/services/semesterService';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -42,7 +41,6 @@ import {
 import { Plus, Edit2, Play, CheckCircle, AlertCircle } from 'lucide-react'
 
 const StaffSemesterManagementPage = () => {
-    const navigate = useNavigate();
     const [semesters, setSemesters] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -57,6 +55,7 @@ const StaffSemesterManagementPage = () => {
         name: '',
         startDate: '',
         endDate: '',
+        dropDate: '',
         status: 'inactive'
     };
     const [formData, setFormData] = useState(initialFormState);
@@ -84,10 +83,12 @@ const StaffSemesterManagementPage = () => {
             // Format dates for input fields (YYYY-MM-DD)
             const startDate = new Date(semester.startDate).toISOString().split('T')[0];
             const endDate = new Date(semester.endDate).toISOString().split('T')[0];
+            const dropDate = semester.dropDate ? new Date(semester.dropDate).toISOString().split('T')[0] : '';
             setFormData({
                 name: semester.name,
                 startDate,
                 endDate,
+                dropDate,
                 status: semester.status
             });
         } else {
@@ -372,6 +373,20 @@ const StaffSemesterManagementPage = () => {
                                     onChange={handleInputChange}
                                     required
                                 />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="dropDate">Drop Date (Optional)</Label>
+                                <Input
+                                    id="dropDate"
+                                    name="dropDate"
+                                    type="date"
+                                    value={formData.dropDate}
+                                    onChange={handleInputChange}
+                                    placeholder="Last date students can drop courses"
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Last date students can drop courses for this semester. Leave empty if not set.
+                                </p>
                             </div>
                             {currentSemester && currentSemester.status !== 'finalized' && (
                                 <div className="space-y-2">

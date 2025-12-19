@@ -7,24 +7,28 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 
 /**
+ * Numeric mapping for programs (must match backend)
+ */
+
+/**
  * Status badge component for displaying application status
  */
-function StatusBadge({ status }: any) {
+function StatusBadge({ status }: { status: number | string }) {
     const statusConfig: any = {
-        pending: { label: 'Pending', variant: 'secondary', icon: Clock },
-        under_review: { label: 'Under Review', variant: 'outline', icon: AlertCircle }, // Using outline as closest match for "blue" feeling (custom variants in Badge if needed)
-        accepted: { label: 'Accepted', variant: 'default', icon: CheckCircle }, // Default is usually primary/green/brand
-        rejected: { label: 'Rejected', variant: 'destructive', icon: XCircle },
-        waitlisted: { label: 'Waitlisted', variant: 'secondary', icon: AlertCircle },
+        1: { label: 'Pending', variant: 'secondary', icon: Clock },
+        2: { label: 'Under Review', variant: 'outline', icon: AlertCircle },
+        3: { label: 'Accepted', variant: 'default', icon: CheckCircle },
+        4: { label: 'Rejected', variant: 'destructive', icon: XCircle },
+        5: { label: 'Waitlisted', variant: 'secondary', icon: AlertCircle },
     };
 
-    const config = statusConfig[status] || statusConfig.pending;
+    const config = statusConfig[status] || statusConfig[1];
     const IconComponent = config.icon;
 
     // We can also override classNames if needed to match exact colors
     let className = "gap-1";
-    if (status === 'accepted') className += " bg-green-100 text-green-800 hover:bg-green-100";
-    if (status === 'under_review') className += " bg-blue-100 text-blue-800 hover:bg-blue-100 border-none";
+    if (status === 3 || status === 'accepted') className += " bg-green-100 text-green-800 hover:bg-green-100";
+    if (status === 2 || status === 'under_review') className += " bg-blue-100 text-blue-800 hover:bg-blue-100 border-none";
 
     return (
         <Badge variant={config.variant} className={className}>
@@ -70,12 +74,13 @@ function ApplicationList({ onSelectApplication, showPendingOnly = false }: any) 
     // Filter and sort applications
     const filteredApplications = applications
         .filter(app => {
+            const programName = typeof app.program === 'object' ? app.program.name : '';
             const matchesSearch = searchTerm === '' ||
                 app.applicant?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 app.applicant?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 app.applicant?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                app.program?.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
+                programName?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesStatus = statusFilter === 'all' || String(app.status) === statusFilter;
             return matchesSearch && matchesStatus;
         })
         .sort((a, b) => {
@@ -87,7 +92,9 @@ function ApplicationList({ onSelectApplication, showPendingOnly = false }: any) 
                     `${b.applicant?.lastName} ${b.applicant?.firstName}`
                 );
             } else if (sortBy === 'program') {
-                comparison = (a.program || '').localeCompare(b.program || '');
+                const nameA = typeof a.program === 'object' ? a.program.name : '';
+                const nameB = typeof b.program === 'object' ? b.program.name : '';
+                comparison = nameA.localeCompare(nameB);
             }
             return sortOrder === 'asc' ? comparison : -comparison;
         });
@@ -135,11 +142,11 @@ function ApplicationList({ onSelectApplication, showPendingOnly = false }: any) 
                                 className="px-3 py-2 border border-input rounded-md text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                             >
                                 <option value="all">All Status</option>
-                                <option value="pending">Pending</option>
-                                <option value="under_review">Under Review</option>
-                                <option value="accepted">Accepted</option>
-                                <option value="rejected">Rejected</option>
-                                <option value="waitlisted">Waitlisted</option>
+                                <option value="1">Pending</option>
+                                <option value="2">Under Review</option>
+                                <option value="3">Accepted</option>
+                                <option value="4">Rejected</option>
+                                <option value="5">Waitlisted</option>
                             </select>
                         </div>
 
@@ -203,7 +210,7 @@ function ApplicationList({ onSelectApplication, showPendingOnly = false }: any) 
                                             <p className="text-sm text-muted-foreground">{application.applicant?.email}</p>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-foreground">{application.program}</td>
+                                    <td className="px-6 py-4 text-sm text-foreground">{typeof application.program === 'object' ? application.program.name : application.program}</td>
                                     <td className="px-6 py-4 text-sm text-muted-foreground">
                                         {new Date(application.submissionDate).toLocaleDateString()}
                                     </td>

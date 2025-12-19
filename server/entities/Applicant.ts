@@ -1,16 +1,14 @@
-import { Entity, Property, Unique, OneToMany, Collection } from "@mikro-orm/core";
+import { Entity, Property, Unique, OneToMany, Collection, Cascade } from "@mikro-orm/core";
 import { BaseEntity } from "./BaseEntity";
 import type { Attachment } from "./Attachment";
+import { EntityAttributeValue } from "./EntityAttributeValue";
 
 /**
  * Represents an applicant to the university.
- * Contains personal information and embedded application data fields
- * (academicHistory, personalInfo, documents) that were originally planned
- * as a separate ApplicantData entity.
+ * Uses EAV model for sparse/optional fields like academic history and personal info.
  */
 @Entity()
 export class Applicant extends BaseEntity {
-    // Personal Information
     @Property()
     firstName!: string;
 
@@ -21,46 +19,23 @@ export class Applicant extends BaseEntity {
     @Unique()
     email!: string;
 
-    @Property({ nullable: true })
-    phone?: string;
+    @Property({ nullable: false })
+    phone!: string;
 
-    @Property({ nullable: true })
-    address?: string;
+    @Property()
+    address: string = "123 Street";
 
-    /**
-     * Academic history including previous education, GPA, transcripts, etc.
-     * Stored as JSON for flexibility in data structure.
-     */
-    @Property({ type: 'json', nullable: true })
-    academicHistory?: Record<string, any>;
+    @OneToMany(() => EntityAttributeValue, (eav) => eav.applicant, { cascade: [Cascade.ALL], orphanRemoval: true })
+    attributes = new Collection<EntityAttributeValue>(this);
 
-    /**
-     * Additional personal information beyond basic contact details.
-     * May include demographics, emergency contacts, etc.
-     * Stored as JSON for flexibility in data structure.
-     */
-    @Property({ type: 'json', nullable: true })
-    personalInfo?: Record<string, any>;
-
-    /**
-     * Document references and metadata for uploaded documents.
-     * May include essays, recommendations, certificates, etc.
-     * Stored as JSON for flexibility in data structure.
-     */
-    @Property({ type: 'json', nullable: true })
-    documents?: Record<string, any>;
-
-    /**
-     * File attachments uploaded by or for this applicant.
-     * Includes transcripts, essays, recommendations, certificates, etc.
-     */
     @OneToMany('Attachment', 'applicant')
     attachments = new Collection<Attachment>(this);
 
-    constructor(firstName: string, lastName: string, email: string) {
+    constructor(firstName: string, lastName: string, email: string, phone: string) {
         super();
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.phone = phone;
     }
 }

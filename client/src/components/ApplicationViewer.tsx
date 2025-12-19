@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 
+
 function InfoRow({ label, value, icon: Icon }: any) {
     return (
         <div className="flex items-start gap-3 py-3 border-b border-border last:border-0">
@@ -51,7 +52,7 @@ function ApplicationViewer({ application }: any) {
             </Section>
 
             <Section title="Application Details">
-                <InfoRow label="Program" value={application.program} icon={GraduationCap} />
+                <InfoRow label="Program" value={typeof application.program === 'object' ? application.program.name : application.program} icon={GraduationCap} />
                 <InfoRow label="Semester" value={application.semester} icon={Calendar} />
                 <InfoRow
                     label="Submission Date"
@@ -178,7 +179,7 @@ function ApplicationViewer({ application }: any) {
                 <h2 className="text-xl font-bold mb-1">
                     {applicant?.firstName} {applicant?.lastName}
                 </h2>
-                <p className="text-primary-foreground/80">{application.program} • {application.semester || 'No semester specified'}</p>
+                <p className="text-primary-foreground/80">{typeof application.program === 'object' ? application.program.name : application.program} • {application.semester || 'No semester specified'}</p>
             </div>
 
             {/* Tabs */}

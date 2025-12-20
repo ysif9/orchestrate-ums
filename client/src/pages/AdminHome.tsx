@@ -152,16 +152,22 @@ function AdminHome() {
         ] : []),
 
         // PD Actions
-        ...(isStaff ? [{
-            title: 'PD Tracking',
-            description: 'Track faculty professional development',
-            icon: BookOpen, // Reusing BookOpen or similar if no better icon imported. 
-            // Better to import new icon but for now reuse or use existing imports. 
-            // Existing imports: BookOpen, Building, Calendar, ClipboardCheck, FileText, User, Users, Wrench.
-            // Let's use FileText or ClipboardCheck.
-            path: '/admin/pd-tracking',
-            color: '#0ea5e9' // sky-500
-        }] : []),
+        ...(isStaff ? [
+            {
+                title: 'PD Tracking',
+                description: 'Track faculty professional development',
+                icon: BookOpen,
+                path: '/admin/pd-tracking',
+                color: '#0ea5e9' // sky-500
+            },
+            {
+                title: 'Performance Management',
+                description: 'Evaluate professors and TAs',
+                icon: ClipboardCheck,
+                path: '/admin/performance',
+                color: '#be185d' // pink-700
+            }
+        ] : []),
 
         ...(isProfessor ? [
             {
@@ -177,6 +183,13 @@ function AdminHome() {
                 icon: MessageSquare,
                 path: '/admin/messages',
                 color: '#2563eb', // blue-600
+            },
+            {
+                title: 'My Performance',
+                description: 'View your evaluations',
+                icon: ClipboardCheck,
+                path: '/faculty/performance',
+                color: '#be185d', // pink-700
             },
             {
                 title: 'My PD History',

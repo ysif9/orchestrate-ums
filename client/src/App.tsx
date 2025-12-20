@@ -41,6 +41,8 @@ import ProfessorOfficeHoursPage from './pages/ProfessorOfficeHoursPage';
 import MessagesPage from './pages/MessagesPage';
 import ParentHome from './pages/ParentHome';
 import ParentLogin from './pages/ParentLogin';
+import StaffPerformanceManagementPage from './pages/StaffPerformanceManagementPage';
+import ProfessorPerformancePage from './pages/ProfessorPerformancePage';
 
 /**
  * Protected Route Component
@@ -198,8 +200,14 @@ function App() {
         {/* Professional Development Tracking (Staff) */}
         <Route path="/admin/pd-tracking" element={<StaffOnlyRoute><StaffPDTrackingPage /></StaffOnlyRoute>} />
 
+        {/* Performance Management (Staff Only) */}
+        <Route path="/admin/performance" element={<StaffOnlyRoute><StaffPerformanceManagementPage /></StaffOnlyRoute>} />
+
         {/* Semester Management (Staff Only) */}
         <Route path="/admin/semesters" element={<StaffOnlyRoute><StaffSemesterManagementPage /></StaffOnlyRoute>} />
+
+        {/* My Performance (Professor) */}
+        <Route path="/faculty/performance" element={<ProtectedRoute><ProfessorPerformancePage /></ProtectedRoute>} />
 
         {/* Professional Development History (Professor) */}
         <Route path="/faculty/pd-history" element={<ProtectedRoute><ProfessorPDHistoryPage /></ProtectedRoute>} />

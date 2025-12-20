@@ -33,6 +33,8 @@ import semesterRoutes from './routes/semesterRoutes';
 import officeHoursRoutes from './routes/officeHoursRoutes';
 import staffDirectoryRoutes from './routes/staffDirectoryRoutes';
 import messageRoutes from './routes/messageRoutes';
+import parentRoutes from './routes/parentRoutes';
+import studentRoutes from './routes/studentRoutes';
 dotenv.config();
 
 const app = express();
@@ -170,6 +172,8 @@ export const init = async () => {
     app.use('/api/semesters', semesterRoutes);
     app.use('/api/office-hours', officeHoursRoutes);
     app.use('/api/messages', messageRoutes);
+    app.use('/api/parents', parentRoutes);
+    app.use('/api/students', studentRoutes);
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);
     });

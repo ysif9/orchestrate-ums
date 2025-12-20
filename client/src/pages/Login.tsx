@@ -22,6 +22,8 @@ function Login() {
             const user = authService.getCurrentUser();
             if (user?.role === 'teaching_assistant') {
                 navigate('/ta-dashboard', { replace: true });
+            } else if (user?.role === 'parent') {
+                navigate('/parent/home', { replace: true });
             } else {
                 const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
                 navigate(isAdminOrStaff ? '/admin/home' : '/home', { replace: true });
@@ -89,6 +91,8 @@ function Login() {
                 const user = response.user;
                 if (user?.role === 'teaching_assistant') {
                     navigate('/ta-dashboard');
+                } else if (user?.role === 'parent') {
+                    navigate('/parent/home');
                 } else {
                     const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
                     navigate(isAdminOrStaff ? '/admin/home' : '/home');
@@ -173,6 +177,9 @@ function Login() {
                     </form>
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-2 text-center text-sm text-muted-foreground">
+                    <p>
+                        Parent? <Link to="/parent-login" className="text-primary hover:underline font-medium">Access Parent Portal</Link>
+                    </p>
                     <p>
                         Prospective student? <Link to="/admissions" className="text-primary hover:underline font-medium">Apply for admission</Link>
                     </p>

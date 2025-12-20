@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { authService } from '@/services/authService';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Users, Copy, Check, AlertCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 
 function StudentHome() {
     const navigate = useNavigate();
@@ -14,6 +15,9 @@ function StudentHome() {
     const [enrollments, setEnrollments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [linkingCode, setLinkingCode] = useState('');
+    const [linkingCodeLoading, setLinkingCodeLoading] = useState(false);
+    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         const fetchEnrollments = async () => {
@@ -29,8 +33,27 @@ function StudentHome() {
             }
         };
 
+        const fetchLinkingCode = async () => {
+            try {
+                setLinkingCodeLoading(true);
+                const response = await axios.get('http://localhost:5000/api/students/linking-code');
+                setLinkingCode(response.data.linkingCode);
+            } catch (err) {
+                console.error("Error fetching linking code:", err);
+            } finally {
+                setLinkingCodeLoading(false);
+            }
+        };
+
         fetchEnrollments();
+        fetchLinkingCode();
     }, []);
+
+    const handleCopyCode = () => {
+        navigator.clipboard.writeText(linkingCode);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
 
     if (loading) return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
@@ -89,6 +112,60 @@ function StudentHome() {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* PARENT LINKING SECTION */}
+            <Card className="mb-8 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Users className="h-5 w-5 text-primary" />
+                        Parent Account Linking
+                    </CardTitle>
+                    <CardDescription>
+                        Share this code with your parent to link their account and allow them to view your academic information
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {linkingCodeLoading ? (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                            <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            Loading linking code...
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-3">
+                            <div className="flex-1">
+                                <Input
+                                    value={linkingCode}
+                                    readOnly
+                                    className="font-mono text-lg tracking-wider bg-white"
+                                />
+                            </div>
+                            <Button
+                                onClick={handleCopyCode}
+                                variant={copied ? "default" : "outline"}
+                                className="min-w-[100px]"
+                            >
+                                {copied ? (
+                                    <>
+                                        <Check className="mr-2 h-4 w-4" />
+                                        Copied!
+                                    </>
+                                ) : (
+                                    <>
+                                        <Copy className="mr-2 h-4 w-4" />
+                                        Copy
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    )}
+                    <div className="mt-4 flex items-start gap-2 text-sm text-muted-foreground bg-blue-50 p-3 rounded-md">
+                        <AlertCircle className="h-4 w-4 mt-0.5 text-blue-600 flex-shrink-0" />
+                        <p>
+                            Keep this code private. Only share it with your parent or guardian. They will use this code to link their parent account to yours.
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* ACTION BAR */}
             <div className="flex justify-between items-center mb-6">

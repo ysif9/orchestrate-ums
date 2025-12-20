@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { authService } from '@/services/authService';
 import { courseService } from '@/services/courseService';
 import { semesterService } from '@/services/semesterService';
-import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, User, Users, Wrench } from 'lucide-react';
+import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, Package, User, Users, Wrench } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -148,6 +148,13 @@ function AdminHome() {
                 icon: Users,
                 path: '/admin/staff-directory',
                 color: '#16a34a' // green-600
+            },
+            {
+                title: 'Allocate Resources',
+                description: 'Allocate facilities and resources',
+                icon: Package,
+                path: '/facilities/allocate',
+                color: '#ec4899' // pink-500
             }
         ] : []),
 
@@ -191,6 +198,13 @@ function AdminHome() {
                 icon: Calendar,
                 path: '/faculty/office-hours',
                 color: '#16a34a', // green-600
+            },
+            {
+                title: 'My Resources',
+                description: 'View your allocated equipment',
+                icon: Package,
+                path: '/facilities/my-resources',
+                color: '#db2777', // pink-600
             },
         ] : []),
     ];

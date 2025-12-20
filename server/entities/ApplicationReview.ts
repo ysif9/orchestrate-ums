@@ -2,13 +2,8 @@ import { Entity, Property, ManyToOne, Enum, Collection, OneToMany } from "@mikro
 import { BaseEntity } from "./BaseEntity";
 import { Application } from "./Application";
 import { User } from "./User";
-import { EntityAttributeValue } from "./EntityAttributeValue";
-//@Observation
-//Final Decision can be switched to INT
-// JSON used which is not recommended
+import { ApplicationReviewAttributeValue } from "./ApplicationReviewAttributeValue";
 
-//@Solution
-// Switch to EAV and INT
 
 /**
  * Final decision enum for application reviews.
@@ -40,8 +35,8 @@ export class ApplicationReview extends BaseEntity {
     @Property()
     reviewedAt: Date = new Date();
 
-    @OneToMany(() => EntityAttributeValue, (eav) => eav.applicationReview, { cascade: ["all" as any] })
-    attributes = new Collection<EntityAttributeValue>(this);
+    @OneToMany(() => ApplicationReviewAttributeValue, (eav) => eav.applicationReview, { cascade: ["all" as any] })
+    attributes = new Collection<ApplicationReviewAttributeValue>(this);
 
     constructor(application: Application, reviewer: User, finalDecision: FinalDecision) {
         super();

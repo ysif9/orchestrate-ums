@@ -1,12 +1,18 @@
 import { Entity, Property, Enum } from '@mikro-orm/core';
 import { User, UserRole } from './User';
 
+//@Observation
+// Student status can be replaced with int
+
+// @Solution
+// Switch to INT
+
 export enum StudentStatus {
-    Active = "active",
-    Inactive = "inactive",
-    OnHold = "on_hold",
-    Suspended = "suspended",
-    Graduated = "graduated",
+    Active = 1,
+    Inactive = 2,
+    OnHold = 3,
+    Suspended = 4,
+    Graduated = 5,
 }
 
 @Entity({ discriminatorValue: 'student' })

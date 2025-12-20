@@ -3,6 +3,9 @@ import { BaseEntity } from './BaseEntity';
 import { Assessment } from './Assessment';
 import { User } from './User';
 
+
+
+
 @Entity()
 @Unique({ properties: ['assessment', 'student'] })
 export class Grade extends BaseEntity {
@@ -12,11 +15,11 @@ export class Grade extends BaseEntity {
     @ManyToOne(() => User)
     student!: User;
 
-    @Property({ nullable: true })
-    score?: number;
+    @Property()
+    score = 0;
 
-    @Property({ nullable: true })
-    feedback?: string;
+    @Property()
+    feedback = "Keep up the good work";
 
     @ManyToOne(() => User, { nullable: true })
     gradedBy?: User;

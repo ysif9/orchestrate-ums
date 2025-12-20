@@ -62,17 +62,25 @@ router.post('/signup', [
             });
         }
 
+        // Map string role to integer enum
+        let roleEnum: UserRole;
         let user: User;
-        const userRole = role || 'student';
+        switch (role) {
+            case 'staff': roleEnum = UserRole.Staff; break;
+            case 'professor': roleEnum = UserRole.Professor; break;
+            case 'teaching_assistant': roleEnum = UserRole.TeachingAssistant; break;
+            case 'student':
+            default: roleEnum = UserRole.Student; break;
+        }
 
-        if (userRole === 'student') {
+        if (roleEnum === UserRole.Student) {
             user = new Student(name, email, password);
             if (maxCredits) (user as Student).maxCredits = maxCredits;
-        } else if (userRole === 'staff') {
+        } else if (roleEnum === UserRole.Staff) {
             user = new Staff(name, email, password);
-        } else if (userRole === 'professor') {
+        } else if (roleEnum === UserRole.Professor) {
             user = new Professor(name, email, password);
-        } else if (userRole === 'teaching_assistant') {
+        } else if (roleEnum === UserRole.TeachingAssistant) {
             user = new TeachingAssistant(name, email, password);
         } else {
             return res.status(400).json({ message: 'Invalid role' });
@@ -91,7 +99,7 @@ router.post('/signup', [
                 name: user.name,
                 email: user.email,
                 role: user.role,
-                maxCredits: userRole === 'student' ? (user as Student).maxCredits : undefined
+                maxCredits: user instanceof Student ? user.maxCredits : undefined
             }
         });
     } catch (error) {

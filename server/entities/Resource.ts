@@ -5,9 +5,9 @@ import { ResourceAttributeValue } from './ResourceAttributeValue';
 import { Allocation } from './Allocation';
 
 export enum ResourceType {
-  Equipment = 'equipment',
-  SoftwareLicense = 'software_license',
-  Other = 'other',
+  Equipment = 1,
+  SoftwareLicense = 2,
+  Other = 3,
 }
 
 @Entity()
@@ -28,7 +28,7 @@ export class Resource extends BaseEntity {
   @OneToMany('Allocation', 'resource')
   allocations = new Collection<Allocation>(this);
 
-  @OneToMany('ResourceAttributeValue', 'resource')
+  @OneToMany(() => ResourceAttributeValue, (rav) => rav.resource)
   attributes = new Collection<ResourceAttributeValue>(this);
 
   constructor(name?: string, type?: ResourceType) {

@@ -14,6 +14,12 @@ import {
 } from "@/components/ui/table"
 import { FileText, Plus, Eye, Clock, CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
 
+const TRANSCRIPT_STATUS = {
+    PENDING_REVIEW: 1,
+    APPROVED: 2,
+    REJECTED: 3
+};
+
 function TranscriptRequestsPage() {
     const navigate = useNavigate();
     const [requests, setRequests] = useState<any[]>([]);
@@ -61,21 +67,21 @@ function TranscriptRequestsPage() {
         navigate(`/transcript-requests/${id}`);
     };
 
-    const getStatusBadge = (status: string) => {
+    const getStatusBadge = (status: number) => {
         switch (status) {
-            case 'approved':
+            case TRANSCRIPT_STATUS.APPROVED:
                 return (
                     <Badge variant="default" className="bg-green-600 hover:bg-green-700 gap-1 w-fit">
                         <CheckCircle className="w-3 h-3" /> Approved
                     </Badge>
                 );
-            case 'rejected':
+            case TRANSCRIPT_STATUS.REJECTED:
                 return (
                     <Badge variant="destructive" className="gap-1 w-fit">
                         <XCircle className="w-3 h-3" /> Rejected
                     </Badge>
                 );
-            case 'pending_review':
+            case TRANSCRIPT_STATUS.PENDING_REVIEW:
             default:
                 return (
                     <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-200 gap-1 w-fit">
@@ -156,11 +162,11 @@ function TranscriptRequestsPage() {
                                         <TableCell>{request.reviewedAt ? new Date(request.reviewedAt).toLocaleDateString() : '—'}</TableCell>
                                         <TableCell>{request.reviewedBy?.name || '—'}</TableCell>
                                         <TableCell className="text-center">
-                                            {request.status === 'approved' ? (
+                                            {request.status === TRANSCRIPT_STATUS.APPROVED ? (
                                                 <Button size="sm" variant="ghost" onClick={() => handleViewRequest(request.id)} className="hover:bg-primary/10 hover:text-primary">
                                                     <Eye className="w-4 h-4 mr-2" /> View
                                                 </Button>
-                                            ) : request.status === 'rejected' ? (
+                                            ) : request.status === TRANSCRIPT_STATUS.REJECTED ? (
                                                 <span className="text-destructive text-sm italic">{request.rejectionReason || 'Rejected'}</span>
                                             ) : (
                                                 <span className="text-muted-foreground text-sm italic">Pending...</span>

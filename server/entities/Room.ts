@@ -1,13 +1,14 @@
 // @ts-ignore
-import { Entity, Property, Enum, OneToMany, Collection } from '@mikro-orm/core';
+import { Entity, Property, Enum, OneToMany, Collection, Cascade } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 import { Booking } from './Booking';
+import { RoomAttributeValue } from './RoomAttributeValue';
 
 export enum RoomType {
-    Classroom = 'classroom',
-    Lab = 'lab',
-    LectureHall = 'lecture_hall',
-    ConferenceRoom = 'conference_room'
+    Classroom = 1,
+    Lab = 2,
+    LectureHall = 3,
+    ConferenceRoom = 4
 }
 
 @Entity()
@@ -27,17 +28,14 @@ export class Room extends BaseEntity {
     @Enum({ items: () => RoomType })
     type!: RoomType;
 
-    @Property({ nullable: true })
-    description?: string;
-
     @Property({ default: true })
     isAvailable: boolean = true;
 
-    @Property({ type: 'json', nullable: true })
-    amenities?: string[];
-
     @OneToMany(() => Booking, booking => booking.room)
     bookings = new Collection<Booking>(this);
+
+    @OneToMany(() => RoomAttributeValue, av => av.room, { cascade: [Cascade.ALL] })
+    attributes = new Collection<RoomAttributeValue>(this);
 
     constructor(name: string, building: string, floor: number, capacity: number, type: RoomType) {
         super();

@@ -1,6 +1,6 @@
 import { Entity, Property, OneToMany, Collection, ManyToOne } from "@mikro-orm/core";
 import { BaseEntity } from "./BaseEntity";
-import { EntityAttributeValue } from "./EntityAttributeValue";
+import { ProgramAttributeValue } from "./ProgramAttributeValue";
 import { Department } from "./Department";
 
 /**
@@ -18,8 +18,8 @@ export class Program extends BaseEntity {
     @ManyToOne(() => Department, { nullable: true })
     department?: Department;
 
-    @OneToMany(() => EntityAttributeValue, (eav) => eav.program, { cascade: ["all" as any] })
-    attributes = new Collection<EntityAttributeValue>(this);
+    @OneToMany(() => ProgramAttributeValue, (eav) => eav.program, { cascade: ["all" as any] })
+    attributes = new Collection<ProgramAttributeValue>(this);
 
     constructor(name: string) {
         super();

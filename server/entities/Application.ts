@@ -45,13 +45,14 @@ export class Application extends BaseEntity {
     submissionDate: Date = new Date();
 
     @Enum({ items: () => ApplicationStatus })
-    status: ApplicationStatus = ApplicationStatus.Pending;
+    status: ApplicationStatus;
 
     constructor(applicant: Applicant, program: Program, semester: Semester) {
         super();
         this.applicant = applicant;
         this.program = program;
         this.semester = semester;
+        this.status = ApplicationStatus.Pending;
     }
 }
 

@@ -1,10 +1,26 @@
-import { Entity, Property, ManyToOne, ManyToMany, Collection, Embeddable, Embedded, Enum, Unique } from '@mikro-orm/core';
+import { Entity, Property, ManyToOne, ManyToMany, Collection, Embeddable, Embedded, Enum, Unique, OneToMany } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 import { User } from './User';
+import { CourseAttributeValue } from './CourseAttributeValue';
 
+
+
+/**
+ * Course type enum for categorizing core vs elective courses.
+ * Using integers for better database performance.
+ */
 export enum CourseType {
-    Core = "Core",
-    Elective = "Elective",
+    Core = 1,
+    Elective = 2,
+}
+
+/**
+ * Course difficulty levels.
+ */
+export enum Difficulty {
+    Introductory = 1,
+    Intermediate = 2,
+    Advanced = 3,
 }
 
 @Embeddable()
@@ -32,7 +48,7 @@ export class Course extends BaseEntity {
     description?: string;
 
     @Enum({ items: () => CourseType })
-    type!: CourseType;
+    type: CourseType;
 
     @Property()
     credits!: number;
@@ -40,21 +56,8 @@ export class Course extends BaseEntity {
     @Property({ nullable: true })
     semester?: string;
 
-    @Property()
-    image: string = "https://placehold.co/600x400";
-
-    @Property()
-    subjectArea: string = "Science";
-
-
     @Enum({ items: () => Difficulty })
     difficulty: Difficulty = Difficulty.Introductory;
-
-    @Property()
-    pace: string = "Self-paced";
-
-    @Property()
-    professorName: string = "TBA";
 
     @Property()
     totalMarks: number = 100;
@@ -74,6 +77,9 @@ export class Course extends BaseEntity {
     @ManyToOne(() => User, { nullable: true })
     createdBy?: User;
 
+    @OneToMany(() => CourseAttributeValue, (eav) => eav.course, { cascade: ["all" as any] })
+    attributes = new Collection<CourseAttributeValue>(this);
+
     constructor(code: string, title: string, type: CourseType, credits: number) {
         super();
         this.code = code;
@@ -81,10 +87,4 @@ export class Course extends BaseEntity {
         this.type = type;
         this.credits = credits;
     }
-}
-
-export enum Difficulty {
-    Introductory = "Introductory",
-    Intermediate = "Intermediate",
-    Advanced = "Advanced",
 }

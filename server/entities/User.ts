@@ -12,6 +12,14 @@ import { BaseEntity } from './BaseEntity';
 import * as bcrypt from 'bcrypt';
 import { Department } from './Department';
 
+//@Observation
+// UserRole can be replaced with int
+// Profile fields (phone, officeLocation) are sparse and create NULLs for Students
+
+//@Solution
+// Switch to INT Enums
+// Move sparse fields to subclasses or separate entity (Normalized)
+
 export enum UserRole {
   Student = 'student',
   Staff = 'staff',
@@ -44,11 +52,6 @@ export abstract class User extends BaseEntity {
 
   // --- NEW profile fields shared by Professor / Staff / TA ---
 
-  @Property({ nullable: true })
-  phone?: string;
-
-  @Property({ nullable: true })
-  officeLocation?: string;
 
   @ManyToOne(() => Department, { nullable: true })
   department?: Department;

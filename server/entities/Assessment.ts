@@ -2,15 +2,10 @@ import { Entity, Property, ManyToOne, Enum, Collection, OneToMany } from '@mikro
 import { BaseEntity } from './BaseEntity';
 import { Course } from './Course';
 import { User } from './User';
-import { EntityAttributeValue } from './EntityAttributeValue';
+import { AssessmentAttributeValue } from './AssessmentAttributeValue';
 
 
-//@Observation
-//Assessment type can be replaced with int
-//Attributes are unpredictable
 
-// @Solution
-// Switch to EAV and INT
 
 
 export enum AssessmentType {
@@ -44,8 +39,8 @@ export class Assessment extends BaseEntity {
     @ManyToOne(() => User)
     createdBy!: User;
 
-    @OneToMany(() => EntityAttributeValue, eav => eav.assessment)
-    attributes = new Collection<EntityAttributeValue>(this);
+    @OneToMany(() => AssessmentAttributeValue, eav => eav.assessment, { cascade: ["all" as any] })
+    attributes = new Collection<AssessmentAttributeValue>(this);
 
     constructor(title: string, course: Course, totalMarks: number, createdBy: User) {
         super();

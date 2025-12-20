@@ -3,6 +3,10 @@ import { BaseEntity } from "./BaseEntity";
 import { Application } from "./Application";
 import { User } from "./User";
 
+
+
+
+
 /**
  * Represents a generated decision letter for an application.
  * Stores the letter content, generation timestamp, and the user who generated it.

@@ -5,7 +5,7 @@ import { RequestContext } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Resource, ResourceType } from '../entities/Resource';
 import { Allocation, AllocationStatus, AllocationTarget, TargetType } from '../entities/Allocation';
-import { AttributeDataType, ResourceAttribute } from '../entities/ResourceAttribute';
+import { Attribute, AttributeDataType } from '../entities/Attribute';
 import { ResourceAttributeValue } from '../entities/ResourceAttributeValue';
 import { User, UserRole } from '../entities/User';
 import { Department } from '../entities/Department';
@@ -48,14 +48,14 @@ router.post(
       await em.persist(resource);
 
       for (const attr of attributes) {
-        const attribute = await em.findOne(ResourceAttribute, { key: attr.key });
+        // Use Attribute entity instead of ResourceAttribute
+        const attribute = await em.findOne(Attribute, { name: attr.key, entityType: 'Resource' });
         if (!attribute) {
           // Clean up in-memory resource (not flushed) and return error
-          return res.status(400).json({ success: false, message: `Attribute '${attr.key}' not defined` });
+          return res.status(400).json({ success: false, message: `Attribute '${attr.key}' not defined for Resource` });
         }
 
-        const value = new ResourceAttributeValue();
-        value.resource = resource;
+        const value = new ResourceAttributeValue(resource);
         value.attribute = attribute;
 
         if (attribute.dataType === AttributeDataType.Number) {
@@ -145,13 +145,11 @@ router.post(
       if (!resource) return res.status(404).json({ success: false, message: 'Resource not found' });
 
       // Check for active allocation
+      // Check for active allocation
       const activeAllocation = resource.allocations.getItems().find(a => a.status === AllocationStatus.Active);
       if (activeAllocation) {
         return res.status(400).json({ success: false, message: 'Resource already allocated', data: { allocationId: activeAllocation.id } });
       }
-
-      const allocation = new Allocation();
-      allocation.resource = resource;
 
       let targetType: TargetType;
       let targetId: number;
@@ -185,7 +183,7 @@ router.post(
         em.persist(allocationTarget);
       }
 
-      allocation.target = allocationTarget;
+      const allocation = new Allocation(resource, allocationTarget);
 
       if (dueDate) {
         allocation.dueDate = new Date(dueDate);

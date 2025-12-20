@@ -11,6 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 
+const TRANSCRIPT_STATUS = {
+    PENDING_REVIEW: 1,
+    APPROVED: 2,
+    REJECTED: 3
+};
+
 export default function StaffTranscriptManagementPage() {
     const navigate = useNavigate();
     const [requests, setRequests] = useState<any[]>([]);
@@ -32,7 +38,7 @@ export default function StaffTranscriptManagementPage() {
             setLoading(true);
             setError('');
             const response = await transcriptService.getPendingRequests();
-            setRequests(response.requests || []);
+            setRequests((response as any).requests || []);
         } catch (err) {
             setError('Failed to load pending transcript requests. Please try again.');
             console.error(err);
@@ -47,7 +53,7 @@ export default function StaffTranscriptManagementPage() {
             setMessage('');
             setError('');
             const response = await transcriptService.approveRequest(id);
-            if (response.success) {
+            if ((response as any).success) {
                 setMessage(`Transcript request #${id} approved successfully!`);
                 // Refresh the list to remove approved request
                 await fetchPendingRequests();
@@ -68,7 +74,7 @@ export default function StaffTranscriptManagementPage() {
             setMessage('');
             setError('');
             const response = await transcriptService.rejectRequest(selectedRequestId, rejectionReason);
-            if (response.success) {
+            if ((response as any).success) {
                 setMessage(`Transcript request #${selectedRequestId} rejected.`);
                 setShowRejectModal(false);
                 setRejectionReason('');
@@ -96,14 +102,26 @@ export default function StaffTranscriptManagementPage() {
         setSelectedRequestId(null);
     };
 
-    const getStatusBadge = (status: string) => {
+    const getStatusBadge = (status: number) => {
         switch (status) {
-            case 'pending_review':
-                return <Badge variant="warning" className="gap-1"><Clock size={12} /> Pending Review</Badge>;
-            case 'approved':
-                return <Badge variant="success" className="gap-1"><CheckCircle size={12} /> Approved</Badge>;
-            case 'rejected':
-                return <Badge variant="destructive" className="gap-1"><XCircle size={12} /> Rejected</Badge>;
+            case TRANSCRIPT_STATUS.PENDING_REVIEW:
+                return (
+                    <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-200 gap-1 w-fit">
+                        <Clock size={12} /> Pending Review
+                    </Badge>
+                );
+            case TRANSCRIPT_STATUS.APPROVED:
+                return (
+                    <Badge variant="default" className="bg-green-600 hover:bg-green-700 gap-1 w-fit">
+                        <CheckCircle size={12} /> Approved
+                    </Badge>
+                );
+            case TRANSCRIPT_STATUS.REJECTED:
+                return (
+                    <Badge variant="destructive" className="gap-1 w-fit">
+                        <XCircle size={12} /> Rejected
+                    </Badge>
+                );
             default:
                 return <Badge variant="secondary">{status}</Badge>;
         }
@@ -141,7 +159,7 @@ export default function StaffTranscriptManagementPage() {
                     <CardContent className="pt-6">
                         {/* Messages */}
                         {message && (
-                            <Alert variant="success" className="mb-6 bg-green-50 text-green-900 border-green-200">
+                            <Alert variant="default" className="mb-6 bg-green-50 text-green-900 border-green-200">
                                 <CheckCircle className="h-4 w-4" />
                                 <AlertTitle>Success</AlertTitle>
                                 <AlertDescription>{message}</AlertDescription>
@@ -194,7 +212,7 @@ export default function StaffTranscriptManagementPage() {
                                                     {new Date(request.requestedAt).toLocaleDateString()}
                                                 </TableCell>
                                                 <TableCell className="text-center">
-                                                    {request.status === 'pending_review' ? (
+                                                    {request.status === TRANSCRIPT_STATUS.PENDING_REVIEW ? (
                                                         <div className="flex items-center justify-center gap-2">
                                                             <Button
                                                                 size="sm"

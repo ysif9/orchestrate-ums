@@ -1,5 +1,7 @@
-import { Entity, Property } from '@mikro-orm/core';
+import { Entity, Property, OneToMany, Collection, Cascade } from '@mikro-orm/core';
+import { DepartmentAttributeValue } from './DepartmentAttributeValue';
 import { BaseEntity } from './BaseEntity';
+
 
 @Entity()
 export class Department extends BaseEntity {
@@ -8,6 +10,9 @@ export class Department extends BaseEntity {
 
   @Property({ nullable: true })
   description?: string;
+
+  @OneToMany(() => DepartmentAttributeValue, (av) => av.department, { cascade: [Cascade.ALL] })
+  attributes = new Collection<DepartmentAttributeValue>(this);
 
 
   constructor(name?: string) {

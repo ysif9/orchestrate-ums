@@ -2,13 +2,8 @@ import { Entity, Property, ManyToOne, Enum, Collection, OneToMany } from "@mikro
 import { BaseEntity } from "./BaseEntity";
 import { Applicant } from "./Applicant";
 import { User } from "./User";
-import { EntityAttributeValue } from "./EntityAttributeValue";
-//@Observation
-//Assessment type can be replaced with int
-//Attributes are unpredictable
+import { AttachmentAttributeValue } from "./AttachmentAttributeValue";
 
-// @Solution
-// Switch to EAV and INT
 /**
  * Attachment type enum for categorizing uploaded documents.
  * Using integers for better database performance.
@@ -57,8 +52,8 @@ export class Attachment extends BaseEntity {
     @ManyToOne(() => User, { nullable: true })
     createdBy?: User;
 
-    @OneToMany(() => EntityAttributeValue, (eav) => eav.attachment, { cascade: ["all" as any] })
-    attributes = new Collection<EntityAttributeValue>(this);
+    @OneToMany(() => AttachmentAttributeValue, (eav) => eav.attachment, { cascade: ["all" as any] })
+    attributes = new Collection<AttachmentAttributeValue>(this);
 
     constructor(
         applicant: Applicant,

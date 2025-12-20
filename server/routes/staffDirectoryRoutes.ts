@@ -84,6 +84,7 @@ router.get(
       // TODO: populate assigned courses once your Course entity is available.
       const assignedCourses: any[] = [];
 
+      const userWithDetails = user as any;
       return res.json({
         success: true,
         data: {
@@ -91,8 +92,8 @@ router.get(
           name: user.name,
           email: user.email,
           role: user.role,
-          phone: user.phone,
-          officeLocation: user.officeLocation,
+          phone: userWithDetails.phone,
+          officeLocation: userWithDetails.officeLocation,
           department: user.department
             ? { id: user.department.id, name: user.department.name }
             : null,
@@ -136,7 +137,7 @@ router.post(
       req.body;
 
     try {
-      let user: User;
+      let user: any;
 
       if (role === UserRole.Professor) {
         user = new Professor(name, email, password);
@@ -208,9 +209,10 @@ router.put(
           .json({ success: false, message: 'Staff member not found' });
       }
 
+      const userAny = user as any;
       if (email) user.email = email;
-      if (phone !== undefined) user.phone = phone;
-      if (officeLocation !== undefined) user.officeLocation = officeLocation;
+      if (phone !== undefined) userAny.phone = phone;
+      if (officeLocation !== undefined) userAny.officeLocation = officeLocation;
 
       if (departmentId !== undefined) {
         if (departmentId === null) {
@@ -235,8 +237,8 @@ router.put(
           name: user.name,
           email: user.email,
           role: user.role,
-          phone: user.phone,
-          officeLocation: user.officeLocation,
+          phone: userAny.phone,
+          officeLocation: userAny.officeLocation,
           department: user.department
             ? { id: user.department.id, name: user.department.name }
             : null,

@@ -1,14 +1,15 @@
 // @ts-ignore
-import { Entity, Property, Enum, ManyToOne, Ref } from '@mikro-orm/core';
+import { Entity, Property, Enum, ManyToOne, Ref, OneToMany, Collection, Cascade } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 import { LabStation } from './LabStation';
 import { User } from './User';
+import { LabStationReservationAttributeValue } from './LabStationReservationAttributeValue';
 
 export enum ReservationStatus {
-    Active = 'active',
-    Completed = 'completed',
-    Cancelled = 'cancelled',
-    Expired = 'expired'
+    Active = 1,
+    Completed = 2,
+    Cancelled = 3,
+    Expired = 4
 }
 
 // Maximum reservation duration in hours
@@ -32,13 +33,10 @@ export class LabStationReservation extends BaseEntity {
     status: ReservationStatus = ReservationStatus.Active;
 
     @Property({ nullable: true })
-    purpose?: string;
-
-    @Property({ nullable: true })
-    notes?: string;
-
-    @Property({ nullable: true })
     expirationAlertSent?: boolean;
+
+    @OneToMany(() => LabStationReservationAttributeValue, av => av.labStationReservation, { cascade: [Cascade.ALL] })
+    attributes = new Collection<LabStationReservationAttributeValue>(this);
 
     constructor(station: LabStation, student: User, startTime: Date, endTime: Date) {
         super();

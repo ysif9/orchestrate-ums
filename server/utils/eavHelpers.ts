@@ -18,28 +18,32 @@ export async function updateEntityAttributes(
 
             // Determine query filter
             const where: any = { attribute };
-            if (entityType === 'Course') where.course = entity;
-            else if (entityType === 'User') where.user = entity;
+            if (entityType === 'User') where.user = entity;
+            else if (entityType === 'Course') where.course = entity;
             else if (entityType === 'Department') where.department = entity;
             else if (entityType === 'Applicant') where.applicant = entity;
             else if (entityType === 'Program') where.program = entity;
             else if (entityType === 'ApplicationReview') where.applicationReview = entity;
             else if (entityType === 'Assessment') where.assessment = entity;
             else if (entityType === 'Attachment') where.attachment = entity;
+            else if (entityType === 'Booking') where.booking = entity;
+            else if (entityType === 'CourseTA') where.courseTA = entity;
             else where.entityId = entity.id;
 
             let eav = await em.findOne(EntityAttributeValue, where);
 
             if (!eav) {
                 eav = new EntityAttributeValue(attribute, entity.id, entityType);
-                if (entityType === 'Course') eav.course = entity;
-                else if (entityType === 'User') eav.user = entity;
+                if (entityType === 'User') eav.user = entity;
+                else if (entityType === 'Course') eav.course = entity;
                 else if (entityType === 'Department') eav.department = entity;
                 else if (entityType === 'Applicant') eav.applicant = entity;
                 else if (entityType === 'Program') eav.program = entity;
                 else if (entityType === 'ApplicationReview') eav.applicationReview = entity;
                 else if (entityType === 'Assessment') eav.assessment = entity;
                 else if (entityType === 'Attachment') eav.attachment = entity;
+                else if (entityType === 'Booking') eav.booking = entity;
+                else if (entityType === 'CourseTA') eav.courseTA = entity;
                 em.persist(eav);
             }
 

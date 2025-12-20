@@ -217,7 +217,7 @@ router.post('/generate', authenticate, authorize(UserRole.Staff, UserRole.Profes
 
         // Find the application with applicant data
         const application = await em.findOne(Application, { id: applicationId }, {
-            populate: ['applicant'],
+            populate: ['applicant', 'program'],
         });
         if (!application) {
             return res.status(404).json({ success: false, message: 'Application not found' });
@@ -242,7 +242,7 @@ router.post('/generate', authenticate, authorize(UserRole.Staff, UserRole.Profes
         const applicantName = `${application.applicant.firstName} ${application.applicant.lastName}`;
         const content = generateLetterContent(
             applicantName,
-            application.program,
+            application.program.name,
             application.status,
             customContent
         );

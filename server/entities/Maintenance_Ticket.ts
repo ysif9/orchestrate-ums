@@ -3,19 +3,19 @@ import { Entity, Property, Enum, ManyToOne, Ref } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 
 import { User } from './User';
-import {Room} from "./Room";
+import { Room } from "./Room";
 
 
-export enum ticket_status{
+export enum ticket_status {
 
-    open = "open",
-    in_progress = "in_progress",
-    resolved = "resolved",
+    open = 1,
+    in_progress = 2,
+    resolved = 3,
 }
-export enum issue_type{
-    hardware = "hardware",
-    software = "software",
-    other = "other",
+export enum issue_type {
+    hardware = 1,
+    software = 2,
+    other = 3,
 }
 
 @Entity()
@@ -28,18 +28,18 @@ export class Maintenance_Ticket extends BaseEntity {
     status: ticket_status = ticket_status.open;
     @Enum({ items: () => issue_type })
     issue_type: issue_type = issue_type.other;
-    @Property({ nullable: true })
-    description!: string | null;
+    @Property()
+    description!: string;
     @Property({ nullable: true })
     created_by?: Date = new Date();
     @Property({ nullable: true })
     resolved_at?: Date;
 
-        constructor(room: Room, user: User, description?: string) {
+    constructor(room: Room, user: User, description: string) {
         super();
         this.room = room as unknown as Ref<Room>;
         this.user = user as unknown as Ref<User>;
-        this.description = description ?? null;
+        this.description = description;
 
     }
 }

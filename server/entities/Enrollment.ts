@@ -5,9 +5,9 @@ import { Course } from './Course';
 import { Semester } from './Semester';
 
 export enum EnrollmentStatus {
-    Enrolled = "enrolled",
-    Completed = "completed",
-    Dropped = "dropped",
+    Enrolled = 1,
+    Completed = 2,
+    Dropped = 3,
 }
 
 @Entity()

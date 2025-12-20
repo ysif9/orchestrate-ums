@@ -1,7 +1,7 @@
 // @ts-ignore
 import express, { Response } from 'express';
 // @ts-ignore
-import { RequestContext } from '@mikro-orm/core';
+import { RequestContext, wrap } from '@mikro-orm/core';
 import { LabStation, LabStationStatus } from '../entities/LabStation';
 import { LabStationReservation, ReservationStatus, MAX_RESERVATION_DURATION_HOURS } from '../entities/LabStationReservation';
 import { User, UserRole } from '../entities/User';
@@ -9,6 +9,16 @@ import authenticate, { AuthRequest } from '../middleware/auth';
 import authorize from '../middleware/authorize';
 
 const router = express.Router();
+
+function flattenReservation(reservation: LabStationReservation): any {
+    const obj = wrap(reservation).toJSON() as any;
+    if (reservation.attributes && reservation.attributes.isInitialized()) {
+        reservation.attributes.getItems().forEach(attrVal => {
+            obj[attrVal.attribute.name] = attrVal.value;
+        });
+    }
+    return obj;
+}
 
 // Helper function to check if a student has an active reservation
 async function hasActiveReservation(em: any, studentId: number): Promise<LabStationReservation | null> {
@@ -18,7 +28,7 @@ async function hasActiveReservation(em: any, studentId: number): Promise<LabStat
         status: ReservationStatus.Active,
         endTime: { $gt: now }
     }, {
-        populate: ['station', 'station.lab']
+        populate: ['station', 'station.lab', 'attributes', 'attributes.attribute']
     });
     return activeReservation;
 }
@@ -46,7 +56,7 @@ async function isStationAvailable(em: any, stationId: number, startTime: Date, e
 // Helper function to expire old reservations
 async function expireOldReservations(em: any): Promise<LabStationReservation[]> {
     const now = new Date();
-    
+
     const expiredReservations = await em.find(LabStationReservation, {
         status: ReservationStatus.Active,
         endTime: { $lte: now }
@@ -56,14 +66,14 @@ async function expireOldReservations(em: any): Promise<LabStationReservation[]> 
 
     for (const reservation of expiredReservations) {
         reservation.status = ReservationStatus.Expired;
-        
+
         const station = reservation.station.getEntity();
         const otherActiveReservations = await em.find(LabStationReservation, {
             station: { id: station.id },
             status: ReservationStatus.Active,
             id: { $ne: reservation.id }
         });
-        
+
         if (otherActiveReservations.length === 0) {
             station.status = LabStationStatus.Available;
         }
@@ -105,11 +115,11 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
         }
 
         const reservations = await em.find(LabStationReservation, filter, {
-            populate: ['station', 'station.lab', 'student'],
+            populate: ['station', 'station.lab', 'student', 'attributes', 'attributes.attribute'],
             orderBy: { startTime: 'DESC' }
         });
 
-        res.json({ success: true, reservations });
+        res.json({ success: true, reservations: reservations.map(flattenReservation) });
     } catch (error: any) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -127,10 +137,10 @@ router.get('/my-active', authenticate, async (req: AuthRequest, res: Response) =
 
         const activeReservation = await hasActiveReservation(em, parseInt(req.user.id));
 
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             hasActiveReservation: !!activeReservation,
-            reservation: activeReservation 
+            reservation: activeReservation ? flattenReservation(activeReservation) : null
         });
     } catch (error: any) {
         res.status(500).json({ success: false, message: error.message });
@@ -144,18 +154,44 @@ router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
         const reservation = await em.findOne(LabStationReservation, { id: parseInt(req.params.id) }, {
-            populate: ['station', 'station.lab', 'student']
+            populate: ['station', 'station.lab', 'student', 'attributes', 'attributes.attribute']
         });
 
         if (!reservation) {
             return res.status(404).json({ success: false, message: 'Reservation not found' });
         }
 
-        res.json({ success: true, reservation });
+        res.json({ success: true, reservation: flattenReservation(reservation) });
     } catch (error: any) {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
+import { Attribute, AttributeDataType } from '../entities/Attribute';
+import { LabStationReservationAttributeValue } from '../entities/LabStationReservationAttributeValue';
+// ... imports
+
+// Helper: upsert attribute
+async function upsertAttribute(em: any, r: LabStationReservation, key: string, value: any, dataType: AttributeDataType) {
+    if (value === undefined || value === null) return;
+    let attr = await em.findOne(Attribute, { name: key, entityType: 'LabStationReservation' });
+    if (!attr) {
+        attr = new Attribute(key, key.charAt(0).toUpperCase() + key.slice(1), dataType, 'LabStationReservation');
+        await em.persist(attr);
+    }
+    const existingVal = r.attributes.getItems().find(a => a.attribute.name === key);
+    if (existingVal) {
+        existingVal.setValue(value);
+    } else {
+        const newVal = new LabStationReservationAttributeValue(r);
+        newVal.attribute = attr;
+        newVal.setValue(value);
+        r.attributes.add(newVal);
+        em.persist(newVal);
+    }
+}
+
+// ... existing code ...
 
 // POST /api/lab-reservations - Create a new reservation (Students only)
 router.post('/', authenticate, authorize(UserRole.Student), async (req: AuthRequest, res: Response) => {
@@ -242,14 +278,21 @@ router.post('/', authenticate, authorize(UserRole.Student), async (req: AuthRequ
 
         // Create the reservation
         const reservation = new LabStationReservation(station, student, start, end);
-        reservation.purpose = purpose;
-        reservation.notes = notes;
+        // Remove direct assignment, use EAV
+        await em.persist(reservation);
+
+        if (purpose) {
+            await upsertAttribute(em, reservation, 'purpose', purpose, AttributeDataType.String);
+        }
+        if (notes) {
+            await upsertAttribute(em, reservation, 'notes', notes, AttributeDataType.String);
+        }
 
         // Update station status
         station.status = LabStationStatus.Reserved;
 
-        await em.persistAndFlush(reservation);
-        await em.populate(reservation, ['station', 'station.lab', 'student']);
+        await em.flush();
+        await em.populate(reservation, ['station', 'station.lab', 'student', 'attributes', 'attributes.attribute']);
 
         res.status(201).json({
             success: true,
@@ -334,7 +377,7 @@ router.get('/check-expiring', authenticate, async (req: AuthRequest, res: Respon
             endTime: { $lte: thirtyMinutesFromNow, $gt: now },
             expirationAlertSent: { $ne: true }
         }, {
-            populate: ['station', 'station.lab']
+            populate: ['station', 'station.lab', 'attributes', 'attributes.attribute']
         });
 
         if (expiringReservation) {
@@ -345,7 +388,7 @@ router.get('/check-expiring', authenticate, async (req: AuthRequest, res: Respon
         res.json({
             success: true,
             hasExpiringReservation: !!expiringReservation,
-            reservation: expiringReservation
+            reservation: expiringReservation ? flattenReservation(expiringReservation) : null
         });
     } catch (error: any) {
         res.status(500).json({ success: false, message: error.message });

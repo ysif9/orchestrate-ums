@@ -1,7 +1,9 @@
 import { Entity, Property, Unique, OneToMany, Collection, Cascade } from "@mikro-orm/core";
 import { BaseEntity } from "./BaseEntity";
 import type { Attachment } from "./Attachment";
-import { EntityAttributeValue } from "./EntityAttributeValue";
+import { ApplicantAttributeValue } from "./ApplicantAttributeValue";
+
+
 
 /**
  * Represents an applicant to the university.
@@ -9,6 +11,7 @@ import { EntityAttributeValue } from "./EntityAttributeValue";
  */
 @Entity()
 export class Applicant extends BaseEntity {
+    // Personal Information
     @Property()
     firstName!: string;
 
@@ -18,15 +21,15 @@ export class Applicant extends BaseEntity {
     @Property()
     @Unique()
     email!: string;
-
+    // changed to not null
     @Property({ nullable: false })
     phone!: string;
 
     @Property()
     address: string = "123 Street";
 
-    @OneToMany(() => EntityAttributeValue, (eav) => eav.applicant, { cascade: [Cascade.ALL], orphanRemoval: true })
-    attributes = new Collection<EntityAttributeValue>(this);
+    @OneToMany(() => ApplicantAttributeValue, (eav) => eav.applicant, { cascade: [Cascade.ALL], orphanRemoval: true })
+    attributes = new Collection<ApplicantAttributeValue>(this);
 
     @OneToMany('Attachment', 'applicant')
     attachments = new Collection<Attachment>(this);

@@ -126,6 +126,21 @@ export const init = async () => {
     const orm = await MikroORM.init<PostgreSqlDriver>(mikroOrmConfig);
 
     const generator = orm.getSchemaGenerator();
+
+    // Attempt to drop default constraints that block casting to integers
+    // These defaults are likely string literals ('Active') that cannot be cast to SMALLINT
+    try {
+        const connection = orm.em.getConnection();
+        await connection.execute(`ALTER TABLE "allocation" ALTER COLUMN status DROP DEFAULT`);
+        await connection.execute(`ALTER TABLE "application" ALTER COLUMN status DROP DEFAULT`);
+        await connection.execute(`ALTER TABLE "semester" ALTER COLUMN status DROP DEFAULT`);
+        await connection.execute(`ALTER TABLE "transcript_request" ALTER COLUMN status DROP DEFAULT`);
+        await connection.execute(`ALTER TABLE "user" ALTER COLUMN role DROP DEFAULT`);
+        console.log('Successfully dropped old default constraints');
+    } catch (e: any) {
+        console.warn('Could not drop default constraints (they might not exist):', e.message);
+    }
+
     await generator.updateSchema();
     console.log('Database schema synchronized');
 

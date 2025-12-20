@@ -32,7 +32,7 @@ router.get('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), asy
         }
 
         if (program && typeof program === 'string') {
-            where.program = { $like: `%${program}%` };
+            where.program = { name: { $like: `%${program}%` } };
         }
 
         const [applications, total] = await em.findAndCount(Application, where, {

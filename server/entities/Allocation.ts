@@ -66,10 +66,17 @@ export class Allocation extends BaseEntity {
   dueDate?: Date;
 
   @Enum({ items: () => AllocationStatus })
-  status: AllocationStatus = AllocationStatus.Active;
+  status: AllocationStatus;
 
   @Property({ nullable: true })
   notes?: string;
+
+  constructor(resource: Resource, target: AllocationTarget) {
+    super();
+    this.resource = resource;
+    this.target = target;
+    this.status = AllocationStatus.Active;
+  }
 }
 
 

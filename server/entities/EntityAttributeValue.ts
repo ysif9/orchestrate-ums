@@ -9,6 +9,8 @@ import { Program } from './Program';
 import { ApplicationReview } from './ApplicationReview';
 import { Assessment } from './Assessment';
 import { Attachment } from './Attachment';
+import { Booking } from './Booking';
+import { CourseTA } from './CourseTA';
 
 @Entity()
 @Unique({ properties: ['entityId', 'entityType', 'attribute'] })
@@ -45,6 +47,12 @@ export class EntityAttributeValue extends BaseEntity {
 
     @ManyToOne(() => Attachment, { nullable: true, deleteRule: 'cascade' })
     attachment?: Attachment;
+
+    @ManyToOne(() => Booking, { nullable: true, deleteRule: 'cascade' })
+    booking?: Booking;
+
+    @ManyToOne(() => CourseTA, { nullable: true, deleteRule: 'cascade' })
+    courseTA?: CourseTA;
 
     @Property({ nullable: true })
     stringValue?: string;

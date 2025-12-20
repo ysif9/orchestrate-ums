@@ -2,6 +2,23 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { authService } from '@/services/authService';
 
 interface Department {
@@ -50,6 +67,37 @@ export default function StaffProfileDetailPage() {
   const [phone, setPhone] = useState('');
   const [officeLocation, setOfficeLocation] = useState('');
   const [departmentName, setDepartmentName] = useState('');
+
+  // Message Dialog State
+  const [messageOpen, setMessageOpen] = useState(false);
+  const [messageContent, setMessageContent] = useState('');
+  const [selectedCourseId, setSelectedCourseId] = useState<string>('');
+  const [myCourses, setMyCourses] = useState<any[]>([]);
+  const [sendingMessage, setSendingMessage] = useState(false);
+
+  const isStudent = user?.role === 'student';
+
+  useEffect(() => {
+    if (isStudent && messageOpen) {
+      // Fetch student enrollments for context dropdown
+      const fetchEnrollments = async () => {
+        try {
+          const token = localStorage.getItem('token');
+          const res = await fetch(`${API_BASE_URL}/enrollments`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const json = await res.json();
+          // json is array of enrollments
+          if (Array.isArray(json)) {
+            setMyCourses(json.map((e: any) => e.course));
+          }
+        } catch (e) {
+          console.error("Failed to fetch enrollments", e);
+        }
+      };
+      fetchEnrollments();
+    }
+  }, [messageOpen, isStudent]);
 
   useEffect(() => {
     if (!id) return;
@@ -101,6 +149,41 @@ export default function StaffProfileDetailPage() {
       cancelled = true;
     };
   }, [id]);
+
+  const handleSendMessage = async () => {
+    if (!messageContent.trim() || !id) return;
+    setSendingMessage(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE_URL}/messages`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          receiverId: Number(id),
+          content: messageContent,
+          courseId: selectedCourseId && selectedCourseId !== 'none' ? Number(selectedCourseId) : undefined
+        })
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setSuccess('Message sent successfully!');
+        setMessageOpen(false);
+        setMessageContent('');
+        setSelectedCourseId('');
+      } else {
+        setError(json.message || 'Failed to send message');
+      }
+    } catch (e: any) {
+      setError(e.message || 'Error sending message');
+    } finally {
+      setSendingMessage(false);
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(''), 3000);
+    }
+  };
 
   const handleSave = async () => {
     if (!id) return;
@@ -182,9 +265,57 @@ export default function StaffProfileDetailPage() {
             {profile.role.replace('_', ' ')}
           </p>
         </div>
-        <Button variant="outline" onClick={() => navigate(backPath)}>
-          Back to directory
-        </Button>
+        <div className="flex gap-2">
+          {isStudent && profile.role === 'professor' && (
+            <Dialog open={messageOpen} onOpenChange={setMessageOpen}>
+              <DialogTrigger asChild>
+                <Button>Private Message</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Send Private Message</DialogTitle>
+                  <DialogDescription>
+                    Send a confidential message to {profile.name}.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <label htmlFor="course" className="text-sm font-medium">Related Course (Optional)</label>
+                    <Select value={selectedCourseId} onValueChange={setSelectedCourseId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a course context..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None / General Inquiry</SelectItem>
+                        {myCourses.map(c => (
+                          <SelectItem key={c.id} value={String(c.id)}>{c.code} - {c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <label htmlFor="message" className="text-sm font-medium">Message</label>
+                    <Textarea
+                      id="message"
+                      placeholder="Type your message here..."
+                      value={messageContent}
+                      onChange={(e) => setMessageContent(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setMessageOpen(false)}>Cancel</Button>
+                  <Button onClick={handleSendMessage} disabled={sendingMessage || !messageContent.trim()}>
+                    {sendingMessage ? 'Sending...' : 'Send Message'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+          <Button variant="outline" onClick={() => navigate(backPath)}>
+            Back to directory
+          </Button>
+        </div>
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}

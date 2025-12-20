@@ -38,51 +38,52 @@ import StudentLayout from './components/StudentLayout';
 import StaffDirectoryPage from './pages/StaffDirectoryPage';
 import StaffProfileDetailPage from './pages/StaffProfileDetailPage';
 import ProfessorOfficeHoursPage from './pages/ProfessorOfficeHoursPage';
+import MessagesPage from './pages/MessagesPage';
 
 /**
  * Protected Route Component
  */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-    const isAuthenticated = authService.isAuthenticated();
-    return isAuthenticated ? children : <Navigate to="/login" replace />;
+  const isAuthenticated = authService.isAuthenticated();
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
 
 /**
  * Staff Only Route Component
  */
 function StaffOnlyRoute({ children }: { children: React.ReactNode }) {
-    const isAuthenticated = authService.isAuthenticated();
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
-    }
+  const isAuthenticated = authService.isAuthenticated();
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
-    const user: any = authService.getCurrentUser();
-    if (user?.role !== 'staff') {
-        return <Navigate to="/admin/home" replace />;
-    }
+  const user: any = authService.getCurrentUser();
+  if (user?.role !== 'staff') {
+    return <Navigate to="/admin/home" replace />;
+  }
 
-    return children;
+  return children;
 }
 
 /**
  * Root Redirect Component
  */
 function RootRedirect() {
-    const isAuthenticated = authService.isAuthenticated();
+  const isAuthenticated = authService.isAuthenticated();
 
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
-    }
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
-    const user: any = authService.getCurrentUser();
+  const user: any = authService.getCurrentUser();
 
-    if (user?.role === 'teaching_assistant') {
-        return <Navigate to="/ta-dashboard" replace />;
-    }
+  if (user?.role === 'teaching_assistant') {
+    return <Navigate to="/ta-dashboard" replace />;
+  }
 
-    const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
+  const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
 
-    return <Navigate to={isAdminOrStaff ? "/admin/home" : "/home"} replace />;
+  return <Navigate to={isAdminOrStaff ? "/admin/home" : "/home"} replace />;
 }
 
 function MyResourcesPage() {
@@ -113,135 +114,151 @@ function MyResourcesPage() {
 
 
 function App() {
-    return (
-        <BrowserRouter>
-            <Routes>
-                {/* Public Routes */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
 
-                {/* New Public/Admissions Routes from dev */}
-                <Route path="/admissions" element={<AdmissionsInfoPage />} />
-                <Route path="/apply" element={<ApplicationFormPage />} />
-                <Route path="/apply/confirmation/:id" element={<ApplicationConfirmationPage />} />
+        {/* New Public/Admissions Routes from dev */}
+        <Route path="/admissions" element={<AdmissionsInfoPage />} />
+        <Route path="/apply" element={<ApplicationFormPage />} />
+        <Route path="/apply/confirmation/:id" element={<ApplicationConfirmationPage />} />
 
-                {/* Protected Student Routes wrapped in Layout */}
-                <Route element={<ProtectedRoute><StudentLayout /></ProtectedRoute>}>
-                    {/* Student Home / Dashboard (My Courses) */}
-                    <Route path="/home" element={<StudentHome />} />
+        {/* Protected Student Routes wrapped in Layout */}
+        <Route element={<ProtectedRoute><StudentLayout /></ProtectedRoute>}>
+          {/* Student Home / Dashboard (My Courses) */}
+          <Route path="/home" element={<StudentHome />} />
 
-                    {/* Course Catalog (Browsing new courses) */}
-                    <Route path="/courses" element={<CourseCatalog />} />
-                    <Route path="/catalog" element={<CourseCatalog />} />
-                    <Route path="/catalog/course/:id" element={<CatalogCourseDetails />} />
+          {/* Course Catalog (Browsing new courses) */}
+          <Route path="/courses" element={<CourseCatalog />} />
+          <Route path="/catalog" element={<CourseCatalog />} />
+          <Route path="/catalog/course/:id" element={<CatalogCourseDetails />} />
 
-                    {/* Student Grades View */}
-                    <Route path="/my-grades" element={<MyGradesPage />} />
+          {/* Student Grades View */}
+          <Route path="/my-grades" element={<MyGradesPage />} />
 
-                    {/* Enrolled Course Detail View */}
-                    <Route path="/course/:id" element={<CourseDetails />} />
+          {/* Enrolled Course Detail View */}
+          <Route path="/course/:id" element={<CourseDetails />} />
 
-                    {/* Transcript Requests (Student View) */}
-                    <Route path="/transcript-requests" element={<TranscriptRequestsPage />} />
-                    <Route path="/transcript-requests/:id" element={<ViewTranscriptPage />} />
+          {/* Transcript Requests (Student View) */}
+          <Route path="/transcript-requests" element={<TranscriptRequestsPage />} />
+          <Route path="/transcript-requests/:id" element={<ViewTranscriptPage />} />
 
-                    {/* Lab Station Booking (Students) */}
-                    <Route path="/lab-stations" element={<LabStationBookingPage />} />
+          {/* Lab Station Booking (Students) */}
+          <Route path="/lab-stations" element={<LabStationBookingPage />} />
 
-                    {/* Student Maintenance Tickets */}
-                    <Route path="/tickets" element={<MaintenanceTicketPage />} />
+          {/* Student Maintenance Tickets */}
+          <Route path="/tickets" element={<MaintenanceTicketPage />} />
 
-                    {/* Student routes inside StudentLayout */}
-                    <Route path="staff-directory" element={<StaffDirectoryPage />} />
-                    <Route path="staff-directory/:id" element={<StaffProfileDetailPage />} />
-                </Route>
+          {/* Student Messages */}
+          <Route path="/messages" element={<MessagesPage />} />
 
-                {/* --- Admin/Staff Routes --- */}
+          {/* Student routes inside StudentLayout */}
+          <Route path="staff-directory" element={<StaffDirectoryPage />} />
+          <Route path="staff-directory/:id" element={<StaffProfileDetailPage />} />
+        </Route>
 
-                {/* Admin Dashboard */}
-                <Route path="/admin/home" element={<ProtectedRoute><AdminHome /></ProtectedRoute>} />
+        {/* --- Admin/Staff Routes --- */}
 
-                {/* Course Management (Admin) */}
-                <Route path="/admin/courses" element={<ProtectedRoute><AdminCourseManager /></ProtectedRoute>} />
+        {/* Admin Dashboard */}
+        <Route path="/admin/home" element={<ProtectedRoute><AdminHome /></ProtectedRoute>} />
 
-                {/* TA Dashboard */}
-                <Route path="/ta-dashboard" element={<ProtectedRoute><TADashboard /></ProtectedRoute>} />
+        {/* Course Management (Admin) */}
+        <Route path="/admin/courses" element={<ProtectedRoute><AdminCourseManager /></ProtectedRoute>} />
 
-                {/* NEW ROUTE: Assessment Creation */}
-                <Route path="/admin/assessments/create" element={<ProtectedRoute><AssessmentCreationPage /></ProtectedRoute>} />
+        {/* TA Dashboard */}
+        <Route path="/ta-dashboard" element={<ProtectedRoute><TADashboard /></ProtectedRoute>} />
 
-                {/* Application Review Routes - Staff/Professor only */}
-                <Route path="/admin/applications" element={<ProtectedRoute><ApplicationListPage /></ProtectedRoute>} />
-                <Route path="/admin/applications/:id/review" element={<ProtectedRoute><ApplicationReviewPage /></ProtectedRoute>} />
+        {/* NEW ROUTE: Assessment Creation */}
+        <Route path="/admin/assessments/create" element={<ProtectedRoute><AssessmentCreationPage /></ProtectedRoute>} />
 
-                {/* Gradebook for Admin/Staff */}
-                <Route path="/admin/gradebook" element={<ProtectedRoute><GradebookPage /></ProtectedRoute>} />
+        {/* Application Review Routes - Staff/Professor only */}
+        <Route path="/admin/applications" element={<ProtectedRoute><ApplicationListPage /></ProtectedRoute>} />
+        <Route path="/admin/applications/:id/review" element={<ProtectedRoute><ApplicationReviewPage /></ProtectedRoute>} />
 
-                {/* Staff Transcript Management */}
-                <Route path="/admin/transcript-requests" element={<ProtectedRoute><StaffTranscriptManagementPage /></ProtectedRoute>} />
+        {/* Gradebook for Admin/Staff */}
+        <Route path="/admin/gradebook" element={<ProtectedRoute><GradebookPage /></ProtectedRoute>} />
 
-                {/* Student Record Management */}
-                <Route path="/admin/student-records" element={<ProtectedRoute><StudentRecordSearchPage /></ProtectedRoute>} />
-                <Route path="/admin/student-records/:id/summary" element={<ProtectedRoute><StudentRecordSummaryPage /></ProtectedRoute>} />
+        {/* Staff Transcript Management */}
+        <Route path="/admin/transcript-requests" element={<ProtectedRoute><StaffTranscriptManagementPage /></ProtectedRoute>} />
 
-                {/* Professional Development Tracking (Staff) */}
-                <Route path="/admin/pd-tracking" element={<StaffOnlyRoute><StaffPDTrackingPage /></StaffOnlyRoute>} />
+        {/* Student Record Management */}
+        <Route path="/admin/student-records" element={<ProtectedRoute><StudentRecordSearchPage /></ProtectedRoute>} />
+        <Route path="/admin/student-records/:id/summary" element={<ProtectedRoute><StudentRecordSummaryPage /></ProtectedRoute>} />
 
-                {/* Semester Management (Staff Only) */}
-                <Route path="/admin/semesters" element={<StaffOnlyRoute><StaffSemesterManagementPage /></StaffOnlyRoute>} />
+        {/* Professional Development Tracking (Staff) */}
+        <Route path="/admin/pd-tracking" element={<StaffOnlyRoute><StaffPDTrackingPage /></StaffOnlyRoute>} />
 
-                {/* Professional Development History (Professor) */}
-                <Route path="/faculty/pd-history" element={<ProtectedRoute><ProfessorPDHistoryPage /></ProtectedRoute>} />
+        {/* Semester Management (Staff Only) */}
+        <Route path="/admin/semesters" element={<StaffOnlyRoute><StaffSemesterManagementPage /></StaffOnlyRoute>} />
 
-                {/* Professor Office Hours (Professor) */}
-                <Route
-                path="/faculty/office-hours"
-                element={
-                    <ProtectedRoute>
-                    <ProfessorOfficeHoursPage />
-                    </ProtectedRoute>
-                }
-                />
+        {/* Professional Development History (Professor) */}
+        <Route path="/faculty/pd-history" element={<ProtectedRoute><ProfessorPDHistoryPage /></ProtectedRoute>} />
 
-                {/* Room Booking (Student/Staff access to page) */}
-                <Route path="/admin/room-booking" element={<ProtectedRoute><RoomBookingPage /></ProtectedRoute>} />
+        {/* Professor Office Hours (Professor) */}
+        <Route
+          path="/faculty/office-hours"
+          element={
+            <ProtectedRoute>
+              <ProfessorOfficeHoursPage />
+            </ProtectedRoute>
+          }
+        />
 
-                {/* Room Management (Staff Only) - Retaining StaffOnlyRoute where specified */}
-                <Route path="/admin/rooms" element={<StaffOnlyRoute><AdminRoomManager /></StaffOnlyRoute>} />
+        {/* Messages (Professor only - outside StudentLayout) */}
+        <Route
+          path="/admin/messages"
+          element={
+            <ProtectedRoute>
+              <MessagesPage />
+            </ProtectedRoute>
+          }
+        />
 
-                {/* Lab Station Management (Staff Only) - Retaining StaffOnlyRoute where specified */}
-                <Route path="/admin/rooms/:labId/stations" element={<StaffOnlyRoute><AdminLabStationManager /></StaffOnlyRoute>} />
+        {/* Legacy/Specific route aliases */}
+        <Route path="/faculty/messages" element={<Navigate to="/admin/messages" replace />} />
 
-                {/* Admin Maintenance Tickets (Staff Only) - Retaining StaffOnlyRoute where specified */}
-                <Route path="/admin/tickets" element={<StaffOnlyRoute><AdminTicketsManager /></StaffOnlyRoute>} />
+        {/* Room Booking (Student/Staff access to page) */}
+        <Route path="/admin/room-booking" element={<ProtectedRoute><RoomBookingPage /></ProtectedRoute>} />
 
-                {/* Resources/Facilities Routes (from dev) */}
-                <Route path="/facilities/allocate" element={<StaffOnlyRoute><AllocateResources /></StaffOnlyRoute>} />
-                <Route path="/facilities/my-resources" element={<ProtectedRoute><MyResourcesPage /></ProtectedRoute>} />
+        {/* Room Management (Staff Only) - Retaining StaffOnlyRoute where specified */}
+        <Route path="/admin/rooms" element={<StaffOnlyRoute><AdminRoomManager /></StaffOnlyRoute>} />
 
-                {/* Root redirect */}
-                <Route path="/" element={<RootRedirect />} />
+        {/* Lab Station Management (Staff Only) - Retaining StaffOnlyRoute where specified */}
+        <Route path="/admin/rooms/:labId/stations" element={<StaffOnlyRoute><AdminLabStationManager /></StaffOnlyRoute>} />
 
-                {/* Staff Directory Page */}
-                <Route path="/admin/staff-directory" element={<ProtectedRoute><StaffDirectoryPage /></ProtectedRoute>} />
+        {/* Admin Maintenance Tickets (Staff Only) - Retaining StaffOnlyRoute where specified */}
+        <Route path="/admin/tickets" element={<StaffOnlyRoute><AdminTicketsManager /></StaffOnlyRoute>} />
 
-                 {/* Staff profile detail (Staff Only) */}
-                <Route
-                    path="/admin/staff-directory/:id"
-                    element={
-                        <StaffOnlyRoute>
-                        <StaffProfileDetailPage />
-                        </StaffOnlyRoute>
-                    }
-                    />
+        {/* Resources/Facilities Routes (from dev) */}
+        <Route path="/facilities/allocate" element={<StaffOnlyRoute><AllocateResources /></StaffOnlyRoute>} />
+        <Route path="/facilities/my-resources" element={<ProtectedRoute><MyResourcesPage /></ProtectedRoute>} />
 
-                {/* Catch all - smart redirect */}
-                <Route path="*" element={<RootRedirect />} />
-                
-                
-            </Routes>
-        </BrowserRouter>
-    );
+        {/* Root redirect */}
+        <Route path="/" element={<RootRedirect />} />
+
+        {/* Staff Directory Page */}
+        <Route path="/admin/staff-directory" element={<ProtectedRoute><StaffDirectoryPage /></ProtectedRoute>} />
+
+        {/* Staff profile detail (Staff Only) */}
+        <Route
+          path="/admin/staff-directory/:id"
+          element={
+            <StaffOnlyRoute>
+              <StaffProfileDetailPage />
+            </StaffOnlyRoute>
+          }
+        />
+
+        {/* Catch all - smart redirect */}
+        <Route path="*" element={<RootRedirect />} />
+
+
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;

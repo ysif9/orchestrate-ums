@@ -6,6 +6,7 @@ import { Student } from '../entities/Student';
 import { Staff } from '../entities/Staff';
 import { Professor } from '../entities/Professor';
 import { TeachingAssistant } from '../entities/TeachingAssistant';
+import { Parent } from '../entities/Parent';
 import authenticate from '../middleware/auth';
 import authorize from '../middleware/authorize';
 
@@ -16,7 +17,7 @@ router.post('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), [
     body('name').trim().notEmpty().withMessage('Name is required'),
     body('email').isEmail().withMessage('Valid email is required'),
     body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
-    body('role').isIn(['staff', 'professor', 'student', 'teaching_assistant']).withMessage('Valid role is required'),
+    body('role').isIn(['staff', 'professor', 'student', 'teaching_assistant', 'parent']).withMessage('Valid role is required'),
     body('maxCredits').optional().isInt({ min: 0 }).withMessage('Max credits must be a positive integer'),
 ], async (req: Request, res: Response) => {
 
@@ -43,6 +44,8 @@ router.post('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), [
             user = new Professor(name, email, password);
         } else if (userRole === 'teaching_assistant') {
             user = new TeachingAssistant(name, email, password);
+        } else if (userRole === 'parent') {
+            user = new Parent(name, email, password);
         } else {
             return res.status(400).json({ message: 'Invalid role' });
         }

@@ -39,6 +39,8 @@ import StaffDirectoryPage from './pages/StaffDirectoryPage';
 import StaffProfileDetailPage from './pages/StaffProfileDetailPage';
 import ProfessorOfficeHoursPage from './pages/ProfessorOfficeHoursPage';
 import MessagesPage from './pages/MessagesPage';
+import ParentHome from './pages/ParentHome';
+import ParentLogin from './pages/ParentLogin';
 
 /**
  * Protected Route Component
@@ -81,6 +83,10 @@ function RootRedirect() {
     return <Navigate to="/ta-dashboard" replace />;
   }
 
+  if (user?.role === 'parent') {
+    return <Navigate to="/parent/home" replace />;
+  }
+
   const isAdminOrStaff = user?.role === 'professor' || user?.role === 'staff';
 
   return <Navigate to={isAdminOrStaff ? "/admin/home" : "/home"} replace />;
@@ -120,6 +126,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/parent-login" element={<ParentLogin />} />
 
         {/* New Public/Admissions Routes from dev */}
         <Route path="/admissions" element={<AdmissionsInfoPage />} />
@@ -235,6 +242,9 @@ function App() {
         {/* Resources/Facilities Routes (from dev) */}
         <Route path="/facilities/allocate" element={<StaffOnlyRoute><AllocateResources /></StaffOnlyRoute>} />
         <Route path="/facilities/my-resources" element={<ProtectedRoute><MyResourcesPage /></ProtectedRoute>} />
+
+        {/* Parent Routes */}
+        <Route path="/parent/home" element={<ProtectedRoute><ParentHome /></ProtectedRoute>} />
 
         {/* Root redirect */}
         <Route path="/" element={<RootRedirect />} />

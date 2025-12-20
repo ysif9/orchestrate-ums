@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { authService } from '@/services/authService';
 import { courseService } from '@/services/courseService';
 import { semesterService } from '@/services/semesterService';
-import { BookOpen, Building, Calendar, ClipboardCheck, FileText, User, Users, Wrench } from 'lucide-react';
+import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, User, Users, Wrench } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -27,7 +27,7 @@ function AdminHome() {
             fetchMyCourses();
         }
         fetchActiveSemester();
-    }, [isProfessor, user]);
+    }, [isProfessor, user?.id]);
 
     const fetchMyCourses = async () => {
         try {
@@ -164,24 +164,38 @@ function AdminHome() {
         }] : []),
 
         ...(isProfessor ? [
-        {
-            title: 'My PD History',
-            description: 'View your professional development history',
-            icon: FileText,
-            path: '/faculty/pd-history',
-            color: '#0ea5e9', // sky-500
-        },
-        {
-            title: 'My Office Hours',
-            description: 'Manage when students can meet with you',
-            icon: Calendar,
-            path: '/faculty/office-hours',
-            color: '#16a34a', // green-600
-        },
+            {
+                title: 'My Profile',
+                description: 'View your public professor profile',
+                icon: User,
+                path: `/admin/staff-directory/${user.id}`,
+                color: '#7c3aed', // violet-600
+            },
+            {
+                title: 'My Messages',
+                description: 'View and respond to student messages',
+                icon: MessageSquare,
+                path: '/admin/messages',
+                color: '#2563eb', // blue-600
+            },
+            {
+                title: 'My PD History',
+                description: 'View your professional development history',
+                icon: FileText,
+                path: '/faculty/pd-history',
+                color: '#0ea5e9', // sky-500
+            },
+            {
+                title: 'My Office Hours',
+                description: 'Manage when students can meet with you',
+                icon: Calendar,
+                path: '/faculty/office-hours',
+                color: '#16a34a', // green-600
+            },
         ] : []),
     ];
 
-    
+
 
     return (
         <div className="min-h-screen bg-background">

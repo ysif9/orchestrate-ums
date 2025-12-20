@@ -54,6 +54,9 @@ export abstract class User extends BaseEntity {
   @ManyToOne(() => Department, { nullable: true })
   department?: Department;
 
+  @Property({ nullable: true, type: 'text' })
+  researchInterests?: string;
+
   constructor(name: string, email: string, password: string, role: UserRole) {
     super();
     this.name = name;

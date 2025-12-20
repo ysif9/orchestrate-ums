@@ -35,6 +35,7 @@ import staffDirectoryRoutes from './routes/staffDirectoryRoutes';
 import messageRoutes from './routes/messageRoutes';
 import parentRoutes from './routes/parentRoutes';
 import studentRoutes from './routes/studentRoutes';
+import publicationRoutes from './routes/publicationRoutes';
 dotenv.config();
 
 const app = express();
@@ -174,6 +175,7 @@ export const init = async () => {
     app.use('/api/messages', messageRoutes);
     app.use('/api/parents', parentRoutes);
     app.use('/api/students', studentRoutes);
+    app.use('/api/publications', publicationRoutes);
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);
     });

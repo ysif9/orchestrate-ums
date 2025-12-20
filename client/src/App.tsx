@@ -256,9 +256,9 @@ function App() {
         <Route
           path="/admin/staff-directory/:id"
           element={
-            <StaffOnlyRoute>
+            <ProtectedRoute>
               <StaffProfileDetailPage />
-            </StaffOnlyRoute>
+            </ProtectedRoute>
           }
         />
 

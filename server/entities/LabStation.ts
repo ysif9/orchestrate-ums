@@ -4,6 +4,17 @@ import { Room } from './Room';
 import { LabStationReservation } from './LabStationReservation';
 import { LabStationAttributeValue } from './LabStationAttributeValue';
 
+
+//@Observation
+// Status can be replaced with int
+//Station number can be replaced with INT
+//Description can have a default value
+//JSON can be replaced with EAV
+
+// @Solution
+// Switch to EAV and INT
+
+
 export enum LabStationStatus {
     Available = 1,
     Reserved = 2,
@@ -14,7 +25,7 @@ export enum LabStationStatus {
 @Entity()
 export class LabStation extends BaseEntity {
     @Property()
-    stationNumber!: number;
+    stationNumber!: string;
 
     @Property({ default: '' })
     description: string = '';
@@ -34,7 +45,7 @@ export class LabStation extends BaseEntity {
     @OneToMany(() => LabStationAttributeValue, av => av.labStation, { cascade: [Cascade.ALL] })
     attributes = new Collection<LabStationAttributeValue>(this);
 
-    constructor(stationNumber: number, lab: Room) {
+    constructor(stationNumber: string, lab: Room) {
         super();
         this.stationNumber = stationNumber;
         this.lab = lab as unknown as Ref<Room>;

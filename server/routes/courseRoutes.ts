@@ -3,6 +3,7 @@ import { RequestContext, FilterQuery } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Course, CourseType, Difficulty } from '../entities/Course';
 import { User, UserRole } from '../entities/User';
+import { Semester } from '../entities/Semester';
 import { updateEntityAttributes, toFlatObject } from '../utils/eavHelpers';
 import authenticate, { AuthRequest } from '../middleware/auth';
 import authorize from '../middleware/authorize';
@@ -37,8 +38,15 @@ router.post('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), as
         const course = new Course(code, title, courseType, credits);
 
         course.description = description;
-        course.semester = semester;
         course.createdBy = creator;
+
+        // Lookup semester by ID if provided
+        if (semester) {
+            const semesterEntity = await em.findOne(Semester, { id: parseInt(semester) });
+            if (semesterEntity) {
+                course.semester = semesterEntity;
+            }
+        }
 
         if (difficulty) {
             course.difficulty = typeof difficulty === 'string' ? Difficulty[difficulty as keyof typeof Difficulty] : difficulty;
@@ -92,7 +100,19 @@ router.put('/:id', authenticate, authorize(UserRole.Staff, UserRole.Professor), 
         if (description !== undefined) course.description = description;
         if (type) course.type = typeof type === 'string' ? (type === 'Core' ? CourseType.Core : CourseType.Elective) : type;
         if (credits) course.credits = credits;
-        if (semester !== undefined) course.semester = semester;
+
+        // Lookup semester by ID if provided
+        if (semester !== undefined) {
+            if (semester) {
+                const semesterEntity = await em.findOne(Semester, { id: parseInt(semester) });
+                if (semesterEntity) {
+                    course.semester = semesterEntity;
+                }
+            } else {
+                course.semester = undefined;
+            }
+        }
+
         if (difficulty) {
             course.difficulty = typeof difficulty === 'string' ? Difficulty[difficulty as keyof typeof Difficulty] : difficulty;
         }
@@ -171,7 +191,7 @@ router.get('/', authenticate, async (req: Request, res: Response) => {
         }
 
         const courses = await em.find(Course, filter, {
-            populate: ['prerequisites', 'professor', 'attributes.attribute']
+            populate: ['prerequisites', 'professor', 'semester', 'attributes.attribute']
         });
 
         let result = courses;
@@ -194,7 +214,7 @@ router.get('/:id', async (req: Request, res: Response) => {
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
         const course = await em.findOne(Course, { id: parseInt(req.params.id) }, {
-            populate: ['prerequisites', 'professor', 'attributes.attribute']
+            populate: ['prerequisites', 'professor', 'semester', 'attributes.attribute']
         });
 
         if (!course) {

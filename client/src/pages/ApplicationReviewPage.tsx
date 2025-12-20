@@ -80,7 +80,8 @@ function ApplicationReviewPage() {
         navigate('/login');
     };
 
-    const canGenerateLetter = application && ['accepted', 'rejected', 'waitlisted'].includes(application.status);
+    // ApplicationStatus: Pending=1, UnderReview=2, Accepted=3, Rejected=4, Waitlisted=5
+    const canGenerateLetter = application && [3, 4, 5].includes(application.status);
 
     if (loading) {
         return (

@@ -2,8 +2,17 @@ import { Entity, Property, ManyToOne, ManyToMany, Collection, Embeddable, Embedd
 import { BaseEntity } from './BaseEntity';
 import { User } from './User';
 import { CourseAttributeValue } from './CourseAttributeValue';
+import { Semester } from './Semester';
 
 
+//@Observation
+// Enums can be replaced with int for performance
+// Metadata like subjectArea, pace, image are unpredictable/sparse
+// Redundant professorName (professor relation exists)
+// Attributes are unpredictable (Syllabus, Resource Links, Video Intro)
+
+//@Solution
+// Switch to EAV and INT, Cleanup redundant fields
 
 /**
  * Course type enum for categorizing core vs elective courses.
@@ -53,8 +62,8 @@ export class Course extends BaseEntity {
     @Property()
     credits!: number;
 
-    @Property({ nullable: true })
-    semester?: string;
+    @ManyToOne(() => Semester, { nullable: true })
+    semester?: Semester;
 
     @Enum({ items: () => Difficulty })
     difficulty: Difficulty = Difficulty.Introductory;

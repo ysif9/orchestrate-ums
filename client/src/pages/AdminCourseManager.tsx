@@ -24,6 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Search, Plus, Trash2, Edit2, X, Users } from 'lucide-react'
 import { userService } from '@/services/userService';
+import { semesterService } from '@/services/semesterService';
 
 // Define interfaces for data structures if we were fully strict, but for now we'll use 'any' or loose typing to match JS migration style
 // or inferred types.
@@ -50,6 +51,7 @@ const AdminCourseManager = () => {
     };
     const [formData, setFormData] = useState(initialFormState);
     const [professors, setProfessors] = useState<any[]>([]);
+    const [semesters, setSemesters] = useState<any[]>([]);
 
     // Multi-select state
     const [searchTerm, setSearchTerm] = useState('');
@@ -68,16 +70,19 @@ const AdminCourseManager = () => {
 
     const fetchData = async () => {
         try {
-            const [coursesData, professorsData] = await Promise.all([
+            const [coursesData, professorsData, semestersData] = await Promise.all([
                 courseService.getAll(),
-                userService.getProfessors()
+                userService.getProfessors(),
+                semesterService.getAll()
             ]);
             setCourses(Array.isArray(coursesData) ? coursesData : []);
             setProfessors(Array.isArray(professorsData) ? professorsData : []);
+            setSemesters(Array.isArray(semestersData) ? semestersData : []);
         } catch (error) {
             console.error('Failed to fetch data', error);
             setCourses([]);
             setProfessors([]);
+            setSemesters([]);
         } finally {
             setLoading(false);
         }
@@ -98,7 +103,8 @@ const AdminCourseManager = () => {
             setFormData({
                 ...course,
                 prerequisites: course.prerequisites ? course.prerequisites.map((p: any) => p.id || p) : [],
-                professorId: course.professor?.id || ''
+                professorId: course.professor?.id || '',
+                semester: course.semester?.id?.toString() || ''
             });
         } else {
             setCurrentCourse(null);
@@ -127,8 +133,13 @@ const AdminCourseManager = () => {
     };
 
     const handleSelectChange = (name: string, value: string) => {
-        // Special handling for unassigned/TBA value
-        const finalValue = (name === 'professorId' && value === 'unassigned') ? '' : value;
+        // Special handling for unassigned/TBA values
+        let finalValue = value;
+        if (name === 'professorId' && value === 'unassigned') {
+            finalValue = '';
+        } else if (name === 'semester' && value === 'no_semester') {
+            finalValue = '';
+        }
         setFormData(prev => ({
             ...prev,
             [name]: finalValue
@@ -326,7 +337,7 @@ const AdminCourseManager = () => {
                                                     </Badge>
                                                 </td>
                                                 <td className="px-6 py-4">{course.credits}</td>
-                                                <td className="px-6 py-4">{course.semester || 'Not set'}</td>
+                                                <td className="px-6 py-4">{course.semester?.name || 'Not set'}</td>
                                                 <td className="px-6 py-4">
                                                     {course.professor ? (
                                                         <div className="flex items-center gap-2">
@@ -497,14 +508,23 @@ const AdminCourseManager = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="semester">Semester (e.g., Fall 2024)</Label>
-                                <Input
-                                    id="semester"
-                                    name="semester"
-                                    value={formData.semester}
-                                    onChange={handleInputChange}
-                                    placeholder="Fall 2024"
-                                />
+                                <Label htmlFor="semester">Semester</Label>
+                                <Select
+                                    value={formData.semester ? formData.semester.toString() : "no_semester"}
+                                    onValueChange={(value) => handleSelectChange('semester', value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select semester (Optional)" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="no_semester">No Semester</SelectItem>
+                                        {Array.isArray(semesters) && semesters.map(sem => (
+                                            <SelectItem key={sem?.id || Math.random()} value={sem?.id ? sem.id.toString() : "invalid"}>
+                                                {sem?.name || "Unknown"}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             <div className="space-y-2 col-span-2">

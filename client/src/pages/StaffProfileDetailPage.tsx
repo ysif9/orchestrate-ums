@@ -34,6 +34,15 @@ interface OfficeHourSlot {
   location: string;
 }
 
+interface Publication {
+  id: number;
+  title: string;
+  authors?: string;
+  journalConference?: string;
+  year?: number;
+  url?: string;
+}
+
 interface StaffProfile {
   id: number;
   name: string;
@@ -41,9 +50,11 @@ interface StaffProfile {
   role: string;
   phone?: string;
   officeLocation?: string;
+  researchInterests?: string;
   department?: Department | null;
   assignedCourses: any[];
-  officeHours?: OfficeHourSlot[]; // new
+  officeHours?: OfficeHourSlot[];
+  publications?: Publication[]; // new
 }
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -66,6 +77,7 @@ export default function StaffProfileDetailPage() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [officeLocation, setOfficeLocation] = useState('');
+  const [researchInterests, setResearchInterests] = useState('');
   const [departmentName, setDepartmentName] = useState('');
 
   // Message Dialog State
@@ -74,6 +86,15 @@ export default function StaffProfileDetailPage() {
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
   const [myCourses, setMyCourses] = useState<any[]>([]);
   const [sendingMessage, setSendingMessage] = useState(false);
+
+  // Publication Dialog State
+  const [pubOpen, setPubOpen] = useState(false);
+  const [pubTitle, setPubTitle] = useState('');
+  const [pubAuthors, setPubAuthors] = useState('');
+  const [pubJournal, setPubJournal] = useState('');
+  const [pubYear, setPubYear] = useState('');
+  const [pubUrl, setPubUrl] = useState('');
+  const [creatingPub, setCreatingPub] = useState(false);
 
   const isStudent = user?.role === 'student';
 
@@ -130,6 +151,7 @@ export default function StaffProfileDetailPage() {
           setEmail(data.email || '');
           setPhone(data.phone || '');
           setOfficeLocation(data.officeLocation || '');
+          setResearchInterests(data.researchInterests || '');
           setDepartmentName(data.department?.name || '');
         }
       } catch (err: any) {
@@ -205,6 +227,7 @@ export default function StaffProfileDetailPage() {
           email: email || undefined,
           phone: phone || undefined,
           officeLocation: officeLocation || undefined,
+          researchInterests: researchInterests || undefined,
         }),
       });
 
@@ -220,6 +243,53 @@ export default function StaffProfileDetailPage() {
       setError(err.message || 'Error updating staff profile');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleCreatePub = async () => {
+    if (!pubTitle.trim()) return;
+    setCreatingPub(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE_URL}/publications`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: pubTitle,
+          authors: pubAuthors,
+          journalConference: pubJournal,
+          year: pubYear || undefined,
+          url: pubUrl
+        })
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setSuccess('Publication added successfully!');
+        setPubOpen(false);
+        // reset form
+        setPubTitle('');
+        setPubAuthors('');
+        setPubJournal('');
+        setPubYear('');
+        setPubUrl('');
+        // Refresh profile or append to list
+        if (profile) {
+          setProfile({
+            ...profile,
+            publications: [json.data, ...(profile.publications || [])]
+          });
+        }
+      } else {
+        setError(json.message || 'Failed to add publication');
+      }
+    } catch (e: any) {
+      setError(e.message || 'Error adding publication');
+    } finally {
+      setCreatingPub(false);
+      setTimeout(() => setSuccess(''), 3000);
     }
   };
 
@@ -249,10 +319,11 @@ export default function StaffProfileDetailPage() {
     );
   }
 
-  const backPath =
-    location.pathname.startsWith('/admin')
-      ? '/admin/staff-directory'
-      : '/staff-directory';
+  const isOwnProfile = Number(user?.id) === Number(id);
+
+  const backPath = isOwnProfile
+    ? '/admin/home'
+    : (location.pathname.startsWith('/admin') ? '/admin/staff-directory' : '/staff-directory');
 
   return (
     <div className="px-6 py-6 space-y-4">
@@ -313,7 +384,7 @@ export default function StaffProfileDetailPage() {
             </Dialog>
           )}
           <Button variant="outline" onClick={() => navigate(backPath)}>
-            Back to directory
+            {isOwnProfile ? 'Back to Dashboard' : 'Back to directory'}
           </Button>
         </div>
       </div>
@@ -369,6 +440,18 @@ export default function StaffProfileDetailPage() {
                 placeholder="No department assigned"
               />
             </div>
+
+            <div className="md:col-span-2">
+              <label className="text-sm font-medium">Research Interests</label>
+              <input
+                type="text"
+                className="w-full rounded-md border px-3 py-2 text-sm"
+                value={researchInterests}
+                onChange={(e) => setResearchInterests(e.target.value)}
+                disabled={!isStaff}
+                placeholder="e.g. Artificial Intelligence, Machine Learning"
+              />
+            </div>
           </div>
 
           {isStaff && (
@@ -415,6 +498,118 @@ export default function StaffProfileDetailPage() {
             ) : (
               <p className="text-sm text-muted-foreground">
                 No office hours set.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {profile.role === 'professor' && (
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Research Publications</h2>
+              {Number(user?.id) === profile.id && (
+                <Dialog open={pubOpen} onOpenChange={setPubOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm">Add Publication</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add Publication</DialogTitle>
+                      <DialogDescription>
+                        Add a new research publication to your profile.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <label htmlFor="pubTitle" className="text-sm font-medium">Title *</label>
+                        <input
+                          id="pubTitle"
+                          className="w-full rounded-md border px-3 py-2 text-sm"
+                          value={pubTitle}
+                          onChange={(e) => setPubTitle(e.target.value)}
+                          placeholder="Research paper title"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <label htmlFor="pubAuthors" className="text-sm font-medium">Authors</label>
+                        <input
+                          id="pubAuthors"
+                          className="w-full rounded-md border px-3 py-2 text-sm"
+                          value={pubAuthors}
+                          onChange={(e) => setPubAuthors(e.target.value)}
+                          placeholder="e.g. Smith, J., Doe, A."
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <label htmlFor="pubJournal" className="text-sm font-medium">Journal/Conference</label>
+                        <input
+                          id="pubJournal"
+                          className="w-full rounded-md border px-3 py-2 text-sm"
+                          value={pubJournal}
+                          onChange={(e) => setPubJournal(e.target.value)}
+                          placeholder="e.g. Journal of Computer Science"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <label htmlFor="pubYear" className="text-sm font-medium">Year</label>
+                          <input
+                            id="pubYear"
+                            type="number"
+                            className="w-full rounded-md border px-3 py-2 text-sm"
+                            value={pubYear}
+                            onChange={(e) => setPubYear(e.target.value)}
+                            placeholder="2024"
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <label htmlFor="pubUrl" className="text-sm font-medium">URL / DOI</label>
+                          <input
+                            id="pubUrl"
+                            className="w-full rounded-md border px-3 py-2 text-sm"
+                            value={pubUrl}
+                            onChange={(e) => setPubUrl(e.target.value)}
+                            placeholder="https://..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setPubOpen(false)}>Cancel</Button>
+                      <Button onClick={handleCreatePub} disabled={creatingPub || !pubTitle.trim()}>
+                        {creatingPub ? 'Adding...' : 'Add Publication'}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
+
+            {profile.publications && profile.publications.length > 0 ? (
+              <div className="space-y-4">
+                {profile.publications.map((pub) => (
+                  <div key={pub.id} className="border-b pb-4 last:border-0 last:pb-0">
+                    <h3 className="font-medium text-base">{pub.title}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {pub.authors && <span>{pub.authors}</span>}
+                      {pub.year && <span> ({pub.year})</span>}
+                    </p>
+                    <p className="text-sm text-muted-foreground italic">
+                      {pub.journalConference}
+                    </p>
+                    {pub.url && (
+                      <a href={pub.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline mt-1 block">
+                        View Publication
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No publications listed.
               </p>
             )}
           </CardContent>

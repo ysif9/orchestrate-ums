@@ -7,6 +7,7 @@ import authorize from '../middleware/authorize';
 import { User, UserRole } from '../entities/User';
 import { Department } from '../entities/Department';
 import { OfficeHours } from '../entities/OfficeHours';
+import { Publication } from '../entities/Publication';
 
 const router = express.Router();
 
@@ -27,6 +28,7 @@ router.get(
         where.$or = [
           { name: { $ilike: `%${search}%` } },
           { email: { $ilike: `%${search}%` } },
+          { researchInterests: { $ilike: `%${search}%` } },
         ];
       }
 
@@ -85,6 +87,8 @@ router.get(
 
       // New: office hours for professors
       let officeHours: any[] = [];
+      let publications: any[] = []; // New: publications
+
       if (user.role === UserRole.Professor) {
         const slots = await em.find(
           OfficeHours,
@@ -99,6 +103,12 @@ router.get(
           endTime: s.endTime,
           location: s.location,
         }));
+
+        const pubs = await em.find(Publication,
+          { professor: user.id },
+          { orderBy: { year: 'DESC', title: 'ASC' } }
+        );
+        publications = pubs;
       }
 
       return res.json({
@@ -114,7 +124,9 @@ router.get(
             ? { id: user.department.id, name: user.department.name }
             : null,
           assignedCourses,
-          officeHours, // new field
+          officeHours,
+          publications, // new field
+          researchInterests: user.researchInterests,
         },
       });
     } catch (err) {
@@ -145,12 +157,13 @@ router.post(
   body('departmentId').optional().isInt(),
   body('phone').optional().isString(),
   body('officeLocation').optional().isString(),
+  body('researchInterests').optional().isString(),
   async (req: AuthRequest, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return sendValidationErrors(res, errors.array());
 
     const em = RequestContext.getEntityManager() as EntityManager;
-    const { name, email, password, role, departmentId, phone, officeLocation } =
+    const { name, email, password, role, departmentId, phone, officeLocation, researchInterests } =
       req.body;
 
     try {
@@ -165,6 +178,7 @@ router.post(
 
       user.phone = phone || undefined;
       user.officeLocation = officeLocation || undefined;
+      user.researchInterests = researchInterests || undefined;
 
       if (departmentId) {
         const dept = await em.findOne(Department, Number(departmentId));
@@ -205,13 +219,14 @@ router.put(
   body('phone').optional().isString(),
   body('officeLocation').optional().isString(),
   body('departmentId').optional().isInt(),
+  body('researchInterests').optional().isString(),
   async (req: AuthRequest, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return sendValidationErrors(res, errors.array());
 
     const em = RequestContext.getEntityManager() as EntityManager;
     const id = Number(req.params.id);
-    const { email, phone, officeLocation, departmentId } = req.body;
+    const { email, phone, officeLocation, departmentId, researchInterests } = req.body;
 
     try {
       const user = await em.findOne(
@@ -229,6 +244,7 @@ router.put(
       if (email) user.email = email;
       if (phone !== undefined) user.phone = phone;
       if (officeLocation !== undefined) user.officeLocation = officeLocation;
+      if (researchInterests !== undefined) user.researchInterests = researchInterests;
 
       if (departmentId !== undefined) {
         if (departmentId === null) {
@@ -255,6 +271,7 @@ router.put(
           role: user.role,
           phone: user.phone,
           officeLocation: user.officeLocation,
+          researchInterests: user.researchInterests,
           department: user.department
             ? { id: user.department.id, name: user.department.name }
             : null,

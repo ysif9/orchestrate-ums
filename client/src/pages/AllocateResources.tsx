@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-// import { useNavigate } from 'react-router-dom'; // Unused in original logic except instantiation
+import { useNavigate } from 'react-router-dom';
 import { resourceService } from '../services/resourceService.js';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -22,10 +22,10 @@ import {
     DialogFooter
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Save, Package, AlertCircle, Loader2, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { Plus, Save, Package, AlertCircle, Loader2, CheckCircle, XCircle, Trash2, ArrowLeft } from 'lucide-react';
 
 export default function AllocateResources() {
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
     const [resources, setResources] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -161,6 +161,15 @@ export default function AllocateResources() {
     return (
         <div className="min-h-screen p-8 bg-muted/20">
             <div className="max-w-7xl mx-auto space-y-6">
+
+                <Button
+                    variant="ghost"
+                    className="gap-2 pl-0 hover:bg-transparent hover:text-primary"
+                    onClick={() => navigate('/admin/home')}
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Dashboard
+                </Button>
 
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg">

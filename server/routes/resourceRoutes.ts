@@ -48,10 +48,11 @@ router.post(
       await em.persist(resource);
 
       for (const attr of attributes) {
-        const attribute = await em.findOne(ResourceAttribute, { key: attr.key });
+        let attribute = await em.findOne(ResourceAttribute, { key: attr.key });
         if (!attribute) {
-          // Clean up in-memory resource (not flushed) and return error
-          return res.status(400).json({ success: false, message: `Attribute '${attr.key}' not defined` });
+          // Auto-create attribute if not found (default to String)
+          attribute = new ResourceAttribute(attr.key, attr.key, AttributeDataType.String);
+          await em.persist(attribute);
         }
 
         const value = new ResourceAttributeValue();

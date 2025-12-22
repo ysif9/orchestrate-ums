@@ -22,7 +22,7 @@ interface LinkedStudent {
     studentId: number;
     studentName: string;
     studentEmail: string;
-    studentStatus: string;
+    studentStatus: number | string; // Can be integer enum (1-5) or string
     linkedAt: string;
 }
 
@@ -57,11 +57,44 @@ function ParentHome() {
         navigate('/login');
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status.toLowerCase()) {
+    // Convert status enum (integer) to readable string
+    const getStatusText = (status: number | string | undefined | null): string => {
+        if (status === null || status === undefined) {
+            return 'Unknown';
+        }
+
+        // If it's already a string, return it
+        if (typeof status === 'string') {
+            return status;
+        }
+
+        // Convert integer enum to string
+        // StudentStatus enum: Active=1, Inactive=2, OnHold=3, Suspended=4, Graduated=5
+        switch (status) {
+            case 1: return 'Active';
+            case 2: return 'Inactive';
+            case 3: return 'On Hold';
+            case 4: return 'Suspended';
+            case 5: return 'Graduated';
+            default: return 'Unknown';
+        }
+    };
+
+    const getStatusColor = (status: number | string | undefined | null): string => {
+        // Handle null/undefined
+        if (status === null || status === undefined) {
+            return 'bg-gray-500';
+        }
+
+        // Convert to lowercase string for comparison
+        const statusStr = typeof status === 'string'
+            ? status.toLowerCase()
+            : getStatusText(status).toLowerCase();
+
+        switch (statusStr) {
             case 'active': return 'bg-green-500';
             case 'inactive': return 'bg-gray-500';
-            case 'on_hold': return 'bg-yellow-500';
+            case 'on hold': return 'bg-yellow-500';
             case 'suspended': return 'bg-red-500';
             case 'graduated': return 'bg-blue-500';
             default: return 'bg-gray-500';
@@ -149,7 +182,7 @@ function ParentHome() {
                                                     </div>
                                                 </div>
                                                 <Badge className={getStatusColor(student.studentStatus)}>
-                                                    {student.studentStatus.replace('_', ' ')}
+                                                    {getStatusText(student.studentStatus)}
                                                 </Badge>
                                             </div>
                                             <div className="text-xs text-muted-foreground">

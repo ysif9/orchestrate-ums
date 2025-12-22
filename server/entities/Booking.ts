@@ -4,7 +4,13 @@ import { Room } from './Room';
 import { User } from './User';
 import { BookingAttributeValue } from './BookingAttributeValue';
 
+//@Observation
+//Booking status can be replaced with int
+//Attributes are predictable for now but can get unpredictable (Lectures, Exams, Maintenance)
 
+
+//@Solution
+// Switch to EAV and INT, Rename relation
 
 /**
  * Booking status enum representing the lifecycle of a room booking.

@@ -4,6 +4,11 @@ import { BaseEntity } from './BaseEntity';
 import { ResourceAttributeValue } from './ResourceAttributeValue';
 import { Allocation } from './Allocation';
 
+//@Observation
+// Resource type can be replaced with int
+
+
+
 export enum ResourceType {
   Equipment = 1,
   SoftwareLicense = 2,

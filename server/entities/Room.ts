@@ -2,6 +2,13 @@
 import { Entity, Property, Enum, OneToMany, Collection, Cascade } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 import { Booking } from './Booking';
+
+//@Observation
+// Room type can be replaced with int
+// Amenities and description can be combined into EAV for expandability
+
+// @Solution
+// Switch to EAV and INT
 import { RoomAttributeValue } from './RoomAttributeValue';
 
 export enum RoomType {

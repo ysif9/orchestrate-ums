@@ -4,7 +4,9 @@ import { Assessment } from './Assessment';
 import { User } from './User';
 
 
-
+//@Observation
+// Score needed to have default value and not be nullable
+//Feedback can be switched to EAV but overkill for now
 
 @Entity()
 @Unique({ properties: ['assessment', 'student'] })

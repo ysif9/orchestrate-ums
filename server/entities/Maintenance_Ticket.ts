@@ -6,7 +6,14 @@ import { User } from './User';
 import { Room } from "./Room";
 
 
-export enum ticket_status {
+//@Observation
+// Ticket status and issue type can be replaced with int
+//Description needs to be mandatory
+
+// @Solution
+// Switch to INT and make Description mandatory
+
+export enum ticket_status{
 
     open = 1,
     in_progress = 2,

@@ -4,6 +4,8 @@ import { Application } from "./Application";
 import { User } from "./User";
 import { ApplicationReviewAttributeValue } from "./ApplicationReviewAttributeValue";
 
+//@Solution
+// Switch to EAV and INT
 
 /**
  * Final decision enum for application reviews.

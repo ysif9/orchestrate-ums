@@ -5,7 +5,8 @@ import { User } from "./User";
 
 
 
-
+//@Observation
+// Doesn't need anything, Already good as is
 
 /**
  * Represents a generated decision letter for an application.

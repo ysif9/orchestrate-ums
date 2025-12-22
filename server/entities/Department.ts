@@ -2,7 +2,12 @@ import { Entity, Property, OneToMany, Collection, Cascade } from '@mikro-orm/cor
 import { DepartmentAttributeValue } from './DepartmentAttributeValue';
 import { BaseEntity } from './BaseEntity';
 
+//@Observation
+// Seems fine, but EAV can be added for expandability
 
+
+//@Solution
+// Add EAV
 @Entity()
 export class Department extends BaseEntity {
   @Property({ unique: true })

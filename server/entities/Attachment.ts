@@ -4,6 +4,8 @@ import { Applicant } from "./Applicant";
 import { User } from "./User";
 import { AttachmentAttributeValue } from "./AttachmentAttributeValue";
 
+// @Solution
+// Switch to EAV and INT
 /**
  * Attachment type enum for categorizing uploaded documents.
  * Using integers for better database performance.

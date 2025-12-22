@@ -5,7 +5,12 @@ import { User } from './User';
 import { AssessmentAttributeValue } from './AssessmentAttributeValue';
 
 
+//@Observation
+//Assessment type can be replaced with int
+//Attributes are unpredictable
 
+// @Solution
+// Switch to EAV and INT
 
 
 export enum AssessmentType {

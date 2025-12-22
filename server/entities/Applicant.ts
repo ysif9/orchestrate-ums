@@ -3,7 +3,16 @@ import { BaseEntity } from "./BaseEntity";
 import type { Attachment } from "./Attachment";
 import { ApplicantAttributeValue } from "./ApplicantAttributeValue";
 
+//@Observation
+// Has CSV/JsonB which is bad for queries
+// can be split by ID
+//Too many Nulls
 
+
+//@Solution
+// EAV for JsonB fields
+//Assert not null for address and phone number
+// Default value for address
 
 /**
  * Represents an applicant to the university.

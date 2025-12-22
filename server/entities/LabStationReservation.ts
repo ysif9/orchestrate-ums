@@ -5,6 +5,14 @@ import { LabStation } from './LabStation';
 import { User } from './User';
 import { LabStationReservationAttributeValue } from './LabStationReservationAttributeValue';
 
+//@Observation
+// Reservation status can be replaced with int
+//Purpose and notes can be combined into EAV for expandability
+
+
+// @Solution
+// Switch to EAV and INT
+
 export enum ReservationStatus {
     Active = 1,
     Completed = 2,

@@ -1,6 +1,12 @@
 import { Entity, ManyToOne, Property, Enum, OneToMany, Collection, Cascade } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 import { User } from './User';
+
+
+//@Observation
+// PDActivityType can be replaced with int
+// provider and  notes can be combined into EAV for expandability
+
 import { ProfessionalDevelopmentAttributeValue } from './ProfessionalDevelopmentAttributeValue';
 
 export enum PDActivityType {

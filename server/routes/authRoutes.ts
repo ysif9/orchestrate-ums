@@ -71,6 +71,7 @@ router.post('/signup', [
             case 'staff': roleEnum = UserRole.Staff; break;
             case 'professor': roleEnum = UserRole.Professor; break;
             case 'teaching_assistant': roleEnum = UserRole.TeachingAssistant; break;
+            case 'parent': roleEnum = UserRole.Parent; break;
             case 'student':
             default: roleEnum = UserRole.Student; break;
         }
@@ -84,7 +85,7 @@ router.post('/signup', [
             user = new Professor(name, email, password);
         } else if (roleEnum === UserRole.TeachingAssistant) {
             user = new TeachingAssistant(name, email, password);
-        } else if (userRole === 'parent') {
+        } else if (roleEnum === UserRole.Parent) {
             user = new Parent(name, email, password);
         } else {
             return res.status(400).json({ message: 'Invalid role' });

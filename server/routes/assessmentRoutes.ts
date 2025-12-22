@@ -88,8 +88,24 @@ router.post('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), as
 
     const assessment = new Assessment(title, courseEntity, totalMarks, creator);
     assessment.description = description;
-    assessment.type = type !== undefined ? parseInt(type) : AssessmentType.Assignment;
-    assessment.dueDate = dueDate;
+    let assessmentType = AssessmentType.Assignment;
+    if (type !== undefined) {
+      if (!isNaN(parseInt(type))) {
+        assessmentType = parseInt(type);
+      } else if (typeof type === 'string') {
+        const lowerType = type.toLowerCase();
+        switch (lowerType) {
+          case 'assignment': assessmentType = AssessmentType.Assignment; break;
+          case 'quiz': assessmentType = AssessmentType.Quiz; break;
+          case 'midterm': assessmentType = AssessmentType.Midterm; break;
+          case 'final': assessmentType = AssessmentType.Final; break;
+          case 'project': assessmentType = AssessmentType.Project; break;
+          default: assessmentType = AssessmentType.Assignment;
+        }
+      }
+    }
+    assessment.type = assessmentType;
+    assessment.dueDate = dueDate ? new Date(dueDate) : undefined;
 
     await em.persistAndFlush(assessment);
 

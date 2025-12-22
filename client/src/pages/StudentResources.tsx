@@ -156,7 +156,14 @@ export default function StudentResources() {
                                                     <div className="flex items-center gap-2">
                                                         <CardTitle className="text-xl">{allocation.resource?.name}</CardTitle>
                                                         <Badge variant="outline" className="capitalize font-normal text-xs bg-background">
-                                                            {allocation.resource?.type?.replace('_', ' ')}
+                                                            {(() => {
+                                                                const type = allocation.resource?.type;
+                                                                if (type === 1) return 'Equipment';
+                                                                if (type === 2) return 'Software License';
+                                                                if (type === 3) return 'Other';
+                                                                if (typeof type === 'string') return type.replace(/_/g, ' ');
+                                                                return 'Unknown';
+                                                            })()}
                                                         </Badge>
                                                     </div>
                                                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -168,9 +175,16 @@ export default function StudentResources() {
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-col items-end gap-2">
-                                                    <Badge variant={allocation.status === 'active' ? "default" : "secondary"} className={allocation.status === 'active' ? "bg-green-600 hover:bg-green-700" : ""}>
+                                                    <Badge variant={(allocation.status === 1 || allocation.status === 'active') ? "default" : "secondary"} className={(allocation.status === 1 || allocation.status === 'active') ? "bg-green-600 hover:bg-green-700" : ""}>
                                                         <CheckCircle className="w-3 h-3 mr-1" />
-                                                        {allocation.status?.charAt(0).toUpperCase() + allocation.status?.slice(1)}
+                                                        {(() => {
+                                                            const s = allocation.status;
+                                                            if (s === 1) return 'Active';
+                                                            if (s === 2) return 'Returned';
+                                                            if (s === 0) return 'Expired';
+                                                            if (typeof s === 'string') return s.charAt(0).toUpperCase() + s.slice(1);
+                                                            return 'Unknown';
+                                                        })()}
                                                     </Badge>
 
                                                     {allocation.dueDate && (
@@ -200,7 +214,7 @@ export default function StudentResources() {
                                                         <div key={idx} className="bg-muted/50 p-2.5 rounded-lg text-sm">
                                                             <span className="text-muted-foreground text-xs block mb-0.5">{attr.attribute?.label || 'Detail'}</span>
                                                             <span className="font-medium text-foreground">
-                                                                {attr.stringValue || (attr.numberValue !== undefined ? attr.numberValue.toString() : '') || (attr.dateValue ? formatDate(attr.dateValue) : '') || (attr.booleanValue !== undefined ? (attr.booleanValue ? 'Yes' : 'No') : 'N/A')}
+                                                                {attr.stringValue || (attr.numberValue != null ? attr.numberValue.toString() : '') || (attr.dateValue ? formatDate(attr.dateValue) : '') || (attr.booleanValue != null ? (attr.booleanValue ? 'Yes' : 'No') : 'N/A')}
                                                             </span>
                                                         </div>
                                                     ))}
@@ -223,7 +237,7 @@ export default function StudentResources() {
                                                 <Button variant="outline" size="sm" onClick={() => alert(`Details for: ${allocation.resource?.name}`)}>
                                                     View Details
                                                 </Button>
-                                                {allocation.status === 'active' && (
+                                                {(allocation.status === 1 || allocation.status === 'active') && (
                                                     <Button
                                                         variant="secondary"
                                                         size="sm"

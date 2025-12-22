@@ -68,11 +68,13 @@ router.post('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), as
             }
         }
 
-        // Handle dynamic attributes (EAV)
+        await em.persistAndFlush(course);
+
+        // Handle dynamic attributes (EAV) - course now has an ID
         const attributes = getCourseAttributes(req.body);
         await updateEntityAttributes(em, course, 'Course', attributes);
 
-        await em.persistAndFlush(course);
+        await em.flush();
 
         res.status(201).json(toFlatObject(course));
     } catch (error: any) {

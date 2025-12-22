@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import mikroOrmConfig from './mikro-orm.config';
 import { Semester, SemesterStatus } from './entities/Semester';
 import { Enrollment } from './entities/Enrollment';
+import { Program } from './entities/Program';
 import resourceRoutes from './routes/resourceRoutes';
 
 import authRoutes from './routes/authRoutes';
@@ -127,6 +128,54 @@ async function migrateEnrollmentsToSemesters(em: any) {
     }
 }
 
+// Seed function to populate engineering programs
+async function seedPrograms(orm: MikroORM<PostgreSqlDriver>) {
+    try {
+        const em = orm.em.fork();
+
+        const engineeringMajors = [
+            { name: 'Computer Engineering', description: 'Design and development of computer systems and hardware' },
+            { name: 'Electrical Engineering', description: 'Study of electrical systems, circuits, and electronics' },
+            { name: 'Mechanical Engineering', description: 'Design and analysis of mechanical systems and machinery' },
+            { name: 'Civil Engineering', description: 'Infrastructure design and construction engineering' },
+            { name: 'Chemical Engineering', description: 'Chemical processes and industrial production systems' },
+            { name: 'Aerospace Engineering', description: 'Aircraft and spacecraft design and development' },
+            { name: 'Biomedical Engineering', description: 'Medical devices and healthcare technology' },
+            { name: 'Industrial Engineering', description: 'Optimization of complex processes and systems' },
+            { name: 'Environmental Engineering', description: 'Environmental protection and sustainability solutions' },
+            { name: 'Software Engineering', description: 'Software development methodologies and systems design' },
+            { name: 'Materials Engineering', description: 'Study and development of materials and their properties' },
+            { name: 'Petroleum Engineering', description: 'Oil and gas extraction and production engineering' }
+        ];
+
+        let createdCount = 0;
+        let existingCount = 0;
+
+        for (const programData of engineeringMajors) {
+            const existing = await em.findOne(Program, { name: programData.name });
+
+            if (!existing) {
+                const program = em.create(Program, {
+                    name: programData.name,
+                    description: programData.description
+                } as any);
+                em.persist(program);
+                createdCount++;
+                console.log(`✓ Created program: ${programData.name}`);
+            } else {
+                existingCount++;
+            }
+        }
+
+        await em.flush();
+
+        console.log(`\n📚 Program seeding complete: ${createdCount} created, ${existingCount} already existed\n`);
+    } catch (error: any) {
+        console.error('Error seeding programs:', error.message);
+        console.error(error.stack);
+    }
+}
+
 export const init = async () => {
     const orm = await MikroORM.init<PostgreSqlDriver>(mikroOrmConfig);
 
@@ -151,6 +200,9 @@ export const init = async () => {
 
     // Migrate existing enrollments to use Semester entity
     await migrateEnrollmentsToSemesters(orm.em);
+
+    // Seed engineering programs
+    await seedPrograms(orm);
 
     app.use(cors());
     app.use(express.json());

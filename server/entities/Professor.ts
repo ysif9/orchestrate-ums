@@ -1,13 +1,13 @@
-import { Entity, OneToMany, Collection } from '@mikro-orm/core';
+import { Entity, OneToMany, Collection,Property } from '@mikro-orm/core';
 import { User, UserRole } from './User';
 
 @Entity({ discriminatorValue: 'professor' })
 export class Professor extends User {
   @Property({ nullable: false })
-  phone?: string;
+  phone = "01000000000";
 
   @Property({ nullable: false })
-  officeLocation?: string;
+  officeLocation = "Office 1";
   @OneToMany('Publication', 'professor')
   publications = new Collection<any>(this);
 

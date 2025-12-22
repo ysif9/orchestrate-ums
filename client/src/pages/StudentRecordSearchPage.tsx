@@ -19,7 +19,7 @@ export default function StudentRecordSearchPage() {
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!studentId.trim()) {
-            setError('Please enter a student ID');
+            setError('Please enter a student ID or Email');
             return;
         }
 
@@ -102,7 +102,7 @@ export default function StudentRecordSearchPage() {
                                         type="text"
                                         value={studentId}
                                         onChange={(e) => setStudentId(e.target.value)}
-                                        placeholder="Enter Student ID (e.g. 2023001)"
+                                        placeholder="Enter Student ID or Email"
                                         className="h-12 text-lg"
                                     />
                                 </div>

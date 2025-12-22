@@ -8,6 +8,10 @@ import { UserRole } from '../entities/User';
 import { Parent } from '../entities/Parent';
 import { Student } from '../entities/Student';
 import { ParentStudentLink } from '../entities/ParentStudentLink';
+import { Grade } from '../entities/Grade';
+import { Assessment } from '../entities/Assessment';
+import { Course } from '../entities/Course';
+import { Enrollment, EnrollmentStatus } from '../entities/Enrollment';
 
 const router = express.Router();
 
@@ -170,6 +174,161 @@ router.delete('/unlink-student/:linkId', authenticate, authorize(UserRole.Parent
         });
     }
 });
+
+/**
+ * GET /api/parents/linked-students/:studentId/academic-summary
+ * Aggregate course + grade data for a parent's linked student
+ */
+router.get(
+  '/linked-students/:studentId/academic-summary',
+  authenticate,
+  authorize(UserRole.Parent),
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const em = RequestContext.getEntityManager() as EntityManager;
+      if (!em) {
+        return res.status(500).json({ success: false, message: 'EntityManager not found' });
+      }
+
+      const parentId = parseInt(req.user!.id);
+      const studentId = parseInt(req.params.studentId);
+
+      // 1) Security: ensure this student is actually linked to this parent
+      const link = await em.findOne(
+        ParentStudentLink,
+        { parent: parentId, student: studentId },
+        { populate: ['student'] }
+      );
+
+      if (!link) {
+        return res.status(403).json({
+          success: false,
+          message: 'You are not authorized to view this student’s academic summary',
+        });
+      }
+
+      const student = link.student as unknown as Student;
+
+      // 2) Current enrollments for this student
+      const enrollments = await em.find(
+        Enrollment,
+        { student: studentId, status: EnrollmentStatus.Enrolled },
+        { populate: ['course', 'semester'] }
+      );
+
+      if (enrollments.length === 0) {
+        return res.json({
+          success: true,
+          student: { id: student.id, name: student.name, email: student.email },
+          summary: { courses: [] },
+        });
+      }
+
+      const courseIds = enrollments.map(e => e.course.id);
+
+      // 3) Assessments for those courses
+      const assessments = await em.find(
+        Assessment,
+        { course: { $in: courseIds } },
+        { populate: ['course'] }
+      );
+
+      if (assessments.length === 0) {
+        return res.json({
+          success: true,
+          student: { id: student.id, name: student.name, email: student.email },
+          summary: { courses: [] },
+        });
+      }
+
+      const assessmentIds = assessments.map(a => a.id);
+
+      // 4) Grades for this student on those assessments
+      const grades = await em.find(
+        Grade,
+        { student: studentId, assessment: { $in: assessmentIds } },
+        { populate: ['assessment', 'assessment.course'] }
+      );
+
+      type CourseSummary = {
+        id: number;
+        code: string;
+        name: string;
+        term?: string;
+        runningAverage: number;
+        assignments: {
+          id: number;
+          name: string;
+          score: number;
+          maxScore: number;
+          weight?: number | null;
+        }[];
+      };
+
+      const coursesMap = new Map<number, CourseSummary>();
+
+      for (const g of grades) {
+        const a = g.assessment as any as Assessment;
+        const c = a.course as any as Course;
+
+        if (!coursesMap.has(c.id)) {
+          const enrollment = enrollments.find(e => e.course.id === c.id);
+          coursesMap.set(c.id, {
+            id: c.id,
+            code: (c as any).code ?? c.id.toString(),
+            name: (c as any).title ?? (c as any).name ?? 'Course',
+            term: enrollment?.semester ? (enrollment.semester as any).name : undefined,
+            runningAverage: 0,
+            assignments: [],
+          });
+        }
+
+        const cs = coursesMap.get(c.id)!;
+
+        cs.assignments.push({
+          id: a.id,
+          name: (a as any).title ?? 'Assessment',
+          score: g.score,
+          maxScore: a.totalMarks,
+          weight: null, // you don't have a weight field yet; keep null for now
+        });
+      }
+
+      // 5) Compute running averages per course (simple mean of percentages)
+      for (const cs of coursesMap.values()) {
+        if (cs.assignments.length === 0) {
+          cs.runningAverage = 0;
+          continue;
+        }
+
+        let totalPct = 0;
+        for (const a of cs.assignments) {
+          totalPct += (a.score / a.maxScore) * 100;
+        }
+        cs.runningAverage = totalPct / cs.assignments.length;
+      }
+
+      return res.json({
+        success: true,
+        student: {
+          id: student.id,
+          name: student.name,
+          email: student.email,
+        },
+        summary: {
+          courses: Array.from(coursesMap.values()),
+        },
+      });
+    } catch (error) {
+      console.error('Get academic summary error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Error fetching academic summary',
+      });
+    }
+  }
+);
+
 
 export default router;
 

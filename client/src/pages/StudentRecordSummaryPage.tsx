@@ -45,16 +45,22 @@ export default function StudentRecordSummaryPage() {
         window.print();
     };
 
-    const getStatusBadge = (status: string) => {
+    // StudentStatus: Active=1, Inactive=2, OnHold=3, Suspended=4, Graduated=5
+    const getStatusBadge = (status: number | string) => {
         switch (status) {
+            case 1:
             case 'active':
                 return <Badge variant="success" className="gap-1"><CheckCircle size={12} /> Active</Badge>;
+            case 2:
             case 'inactive':
                 return <Badge variant="secondary" className="gap-1"><Clock size={12} /> Inactive</Badge>;
+            case 3:
             case 'on_hold':
                 return <Badge variant="warning" className="gap-1"><AlertCircle size={12} /> On Hold</Badge>;
+            case 4:
             case 'suspended':
                 return <Badge variant="destructive" className="gap-1"><XCircle size={12} /> Suspended</Badge>;
+            case 5:
             case 'graduated':
                 return <Badge variant="info" className="gap-1"><Award size={12} /> Graduated</Badge>;
             default:
@@ -75,12 +81,16 @@ export default function StudentRecordSummaryPage() {
         }
     };
 
-    const getEnrollmentStatusBadge = (status: string) => {
+    // EnrollmentStatus: Enrolled=1, Completed=2, Dropped=3
+    const getEnrollmentStatusBadge = (status: number | string) => {
         switch (status) {
+            case 1:
             case 'enrolled':
                 return <Badge variant="info">Enrolled</Badge>;
+            case 2:
             case 'completed':
                 return <Badge variant="success">Completed</Badge>;
+            case 3:
             case 'dropped':
                 return <Badge variant="destructive">Dropped</Badge>;
             default:

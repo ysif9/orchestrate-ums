@@ -88,7 +88,7 @@ router.post('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), as
 
     const assessment = new Assessment(title, courseEntity, totalMarks, creator);
     assessment.description = description;
-    assessment.type = type !== undefined ? type : AssessmentType.Assignment;
+    assessment.type = type !== undefined ? parseInt(type) : AssessmentType.Assignment;
     assessment.dueDate = dueDate;
 
     await em.persistAndFlush(assessment);

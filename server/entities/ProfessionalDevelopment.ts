@@ -1,12 +1,19 @@
-import { Entity, ManyToOne, Property, Enum } from '@mikro-orm/core';
+import { Entity, ManyToOne, Property, Enum, OneToMany, Collection, Cascade } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 import { User } from './User';
 
+
+//@Observation
+// PDActivityType can be replaced with int
+// provider and  notes can be combined into EAV for expandability
+
+import { ProfessionalDevelopmentAttributeValue } from './ProfessionalDevelopmentAttributeValue';
+
 export enum PDActivityType {
-    Workshop = 'Workshop',
-    Conference = 'Conference',
-    Certification = 'Certification',
-    Other = 'Other',
+    Workshop = 1,
+    Conference = 2,
+    Certification = 3,
+    Other = 4,
 }
 
 @Entity()
@@ -26,20 +33,15 @@ export class ProfessionalDevelopment extends BaseEntity {
     @Property()
     hours!: number;
 
-    @Property()
-    provider!: string;
-
-    @Property({ nullable: true })
-    notes?: string;
+    @OneToMany(() => ProfessionalDevelopmentAttributeValue, av => av.professionalDevelopment, { cascade: [Cascade.ALL] })
+    attributes = new Collection<ProfessionalDevelopmentAttributeValue>(this);
 
     constructor(
         professor: User,
         title: string,
         activityType: PDActivityType,
         date: Date,
-        hours: number,
-        provider: string,
-        notes?: string
+        hours: number
     ) {
         super();
         this.professor = professor;
@@ -47,7 +49,5 @@ export class ProfessionalDevelopment extends BaseEntity {
         this.activityType = activityType;
         this.date = date;
         this.hours = hours;
-        this.provider = provider;
-        this.notes = notes;
     }
 }

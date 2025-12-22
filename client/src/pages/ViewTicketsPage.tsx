@@ -33,34 +33,36 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
+// issue_type enum: hardware=1, software=2, other=3
 const ISSUE_TYPES = [
-    { value: 'hardware', label: 'Hardware' },
-    { value: 'software', label: 'Software' },
-    { value: 'other', label: 'Other' }
+    { value: '1', label: 'Hardware' },
+    { value: '2', label: 'Software' },
+    { value: '3', label: 'Other' }
 ];
 
-const TICKET_STATUS_COLORS: Record<string, string> = {
-    open: 'bg-red-100 text-red-800',
-    in_progress: 'bg-yellow-100 text-yellow-800',
-    resolved: 'bg-green-100 text-green-800'
+// ticket_status enum: open=1, in_progress=2, resolved=3
+const TICKET_STATUS_COLORS: Record<number | string, string> = {
+    1: 'bg-red-100 text-red-800',
+    2: 'bg-yellow-100 text-yellow-800',
+    3: 'bg-green-100 text-green-800'
 };
 
-const TICKET_STATUS_LABELS: Record<string, string> = {
-    open: 'Open',
-    in_progress: 'In Progress',
-    resolved: 'Resolved'
+const TICKET_STATUS_LABELS: Record<number | string, string> = {
+    1: 'Open',
+    2: 'In Progress',
+    3: 'Resolved'
 };
 
-const ISSUE_TYPE_COLORS: Record<string, string> = {
-    hardware: 'bg-red-100 text-red-800',
-    software: 'bg-blue-100 text-blue-800',
-    other: 'bg-gray-100 text-gray-800'
+const ISSUE_TYPE_COLORS: Record<number | string, string> = {
+    1: 'bg-red-100 text-red-800',
+    2: 'bg-blue-100 text-blue-800',
+    3: 'bg-gray-100 text-gray-800'
 };
 
-const ISSUE_TYPE_LABELS: Record<string, string> = {
-    hardware: 'Hardware',
-    software: 'Software',
-    other: 'Other'
+const ISSUE_TYPE_LABELS: Record<number | string, string> = {
+    1: 'Hardware',
+    2: 'Software',
+    3: 'Other'
 };
 
 export default function ViewTicketsPage() {
@@ -83,7 +85,7 @@ export default function ViewTicketsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedRoom, setSelectedRoom] = useState<any>(null);
     const [formData, setFormData] = useState({
-        issue_type: 'other',
+        issue_type: '3', // default to 'other' (3)
         description: ''
     });
     const [submitting, setSubmitting] = useState(false);
@@ -155,13 +157,13 @@ export default function ViewTicketsPage() {
         });
     };
 
-    const getStatusIcon = (status: string) => {
+    const getStatusIcon = (status: number | string) => {
         switch (status) {
-            case 'open':
+            case 1:
                 return <AlertCircle size={16} />;
-            case 'in_progress':
+            case 2:
                 return <PlayCircle size={16} />;
-            case 'resolved':
+            case 3:
                 return <CheckCircle size={16} />;
             default:
                 return <Clock size={16} />;
@@ -171,7 +173,7 @@ export default function ViewTicketsPage() {
     const openTicketModal = (room: any) => {
         setSelectedRoom(room);
         setFormData({
-            issue_type: 'other',
+            issue_type: '3', // default to 'other' (3)
             description: ''
         });
         setFormError('');
@@ -208,7 +210,7 @@ export default function ViewTicketsPage() {
         try {
             const ticketData = {
                 roomId: selectedRoom.id,
-                issue_type: formData.issue_type,
+                issue_type: parseInt(formData.issue_type), // Convert to integer
                 description: formData.description.trim()
             };
 

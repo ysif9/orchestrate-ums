@@ -11,6 +11,11 @@ const CourseDetails = () => {
     const [course, setCourse] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
+    const COURSE_TYPE_LABELS: Record<number, string> = {
+        1: 'Core',
+        2: 'Elective'
+    };
+
     useEffect(() => {
         const fetchCourse = async () => {
             try {
@@ -43,7 +48,7 @@ const CourseDetails = () => {
                 </Badge>
                 <h1 className="text-3xl font-bold m-0 mb-2 text-primary-foreground">{course.title}</h1>
                 <p className="text-lg text-primary-foreground/90">
-                    {typeof course.semester === 'object' ? (course.semester as any).name : (course.semester || 'Fall 2024')} | {course.type} Course
+                    {typeof course.semester === 'object' ? (course.semester as any).name : (course.semester || 'Fall 2024')} | {COURSE_TYPE_LABELS[course.type] || 'Core'} Course
                 </p>
             </div>
 
@@ -67,7 +72,7 @@ const CourseDetails = () => {
                             </div>
                             <div className="flex justify-between items-start mb-4">
                                 <span className="text-muted-foreground text-sm">Subject</span>
-                                <span className="font-semibold text-foreground">{course.subjectArea}</span>
+                                <span className="font-semibold text-foreground">{typeof course.subjectArea === 'object' ? (course.subjectArea as any).name : (course.subjectArea || 'N/A')}</span>
                             </div>
                             <div className="flex justify-between items-start mb-4">
                                 <span className="text-muted-foreground text-sm">Credits</span>

@@ -21,34 +21,36 @@ import {
 import { Label } from "@/components/ui/label"
 import { Wrench, AlertCircle, Check, X, Clock, CheckCircle, PlayCircle, Eye } from 'lucide-react';
 
+// ticket_status enum: open=1, in_progress=2, resolved=3
 const TICKET_STATUS = [
-    { value: 'open', label: 'Open' },
-    { value: 'in_progress', label: 'In Progress' },
-    { value: 'resolved', label: 'Resolved' }
+    { value: '1', label: 'Open' },
+    { value: '2', label: 'In Progress' },
+    { value: '3', label: 'Resolved' }
 ];
 
-const TICKET_STATUS_CLASSES: Record<string, string> = {
-    open: 'bg-red-100 text-red-800 hover:bg-red-200 border-red-200',
-    in_progress: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200',
-    resolved: 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200'
+const TICKET_STATUS_CLASSES: Record<number | string, string> = {
+    1: 'bg-red-100 text-red-800 hover:bg-red-200 border-red-200',
+    2: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200',
+    3: 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200'
 };
 
-const TICKET_STATUS_LABELS: Record<string, string> = {
-    open: 'Open',
-    in_progress: 'In Progress',
-    resolved: 'Resolved'
+const TICKET_STATUS_LABELS: Record<number | string, string> = {
+    1: 'Open',
+    2: 'In Progress',
+    3: 'Resolved'
 };
 
-const ISSUE_TYPE_LABELS: Record<string, string> = {
-    hardware: 'Hardware',
-    software: 'Software',
-    other: 'Other'
+// issue_type enum: hardware=1, software=2, other=3
+const ISSUE_TYPE_LABELS: Record<number | string, string> = {
+    1: 'Hardware',
+    2: 'Software',
+    3: 'Other'
 };
 
-const ISSUE_TYPE_CLASSES: Record<string, string> = {
-    hardware: 'bg-red-100 text-red-800 hover:bg-red-200 border-red-200',
-    software: 'bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-200',
-    other: 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200'
+const ISSUE_TYPE_CLASSES: Record<number | string, string> = {
+    1: 'bg-red-100 text-red-800 hover:bg-red-200 border-red-200',
+    2: 'bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-200',
+    3: 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200'
 };
 
 
@@ -98,7 +100,7 @@ const AdminTicketsManager = () => {
 
     const handleOpenModifyModal = (ticket: any) => {
         setSelectedTicket(ticket);
-        setNewStatus(ticket.status);
+        setNewStatus(String(ticket.status)); // Convert to string for Select component
         setModalError('');
         setIsModifyModalOpen(true);
     };
@@ -123,14 +125,14 @@ const AdminTicketsManager = () => {
         setModalError('');
         setSubmitting(true);
 
-        if (newStatus === selectedTicket.status) {
+        if (parseInt(newStatus) === selectedTicket.status) {
             setModalError('Please select a different status');
             setSubmitting(false);
             return;
         }
 
         try {
-            await ticketsService.updateTicket(selectedTicket.id, { status: newStatus });
+            await ticketsService.updateTicket(selectedTicket.id, { status: parseInt(newStatus) });
 
             // Simulate delay like existing code
             await new Promise(resolve => setTimeout(resolve, 800));
@@ -140,7 +142,7 @@ const AdminTicketsManager = () => {
             // Update local state
             setTickets(prev => prev.map(t =>
                 t.id === selectedTicket.id
-                    ? { ...t, status: newStatus, resolved_at: newStatus === 'resolved' ? new Date().toISOString() : t.resolved_at }
+                    ? { ...t, status: parseInt(newStatus), resolved_at: parseInt(newStatus) === 3 ? new Date().toISOString() : t.resolved_at }
                     : t
             ));
 
@@ -164,13 +166,13 @@ const AdminTicketsManager = () => {
         });
     };
 
-    const getStatusIcon = (status: string) => {
+    const getStatusIcon = (status: number | string) => {
         switch (status) {
-            case 'open':
+            case 1:
                 return <AlertCircle size={14} />;
-            case 'in_progress':
+            case 2:
                 return <PlayCircle size={14} />;
-            case 'resolved':
+            case 3:
                 return <CheckCircle size={14} />;
             default:
                 return <Clock size={14} />;
@@ -180,14 +182,14 @@ const AdminTicketsManager = () => {
     // Filter tickets based on status
     const filteredTickets = filterStatus === 'all'
         ? tickets
-        : tickets.filter(t => t.status === filterStatus);
+        : tickets.filter(t => t.status === parseInt(filterStatus));
 
     // Calculate statistics
     const stats = {
         total: tickets.length,
-        open: tickets.filter(t => t.status === 'open').length,
-        in_progress: tickets.filter(t => t.status === 'in_progress').length,
-        resolved: tickets.filter(t => t.status === 'resolved').length
+        open: tickets.filter(t => t.status === 1).length,
+        in_progress: tickets.filter(t => t.status === 2).length,
+        resolved: tickets.filter(t => t.status === 3).length
     };
 
     if (loading) {
@@ -286,9 +288,9 @@ const AdminTicketsManager = () => {
                         <div className="flex flex-wrap gap-2">
                             {[
                                 { id: 'all', label: `All (${stats.total})`, variant: filterStatus === 'all' ? 'default' : 'secondary' },
-                                { id: 'open', label: `Open (${stats.open})`, variant: filterStatus === 'open' ? 'destructive' : 'secondary', className: filterStatus === 'open' ? '' : 'hover:bg-destructive/10 hover:text-destructive' },
-                                { id: 'in_progress', label: `In Progress (${stats.in_progress})`, variant: filterStatus === 'in_progress' ? 'default' : 'secondary', className: filterStatus === 'in_progress' ? 'bg-yellow-600 hover:bg-yellow-700' : 'hover:bg-yellow-100 hover:text-yellow-800' },
-                                { id: 'resolved', label: `Resolved (${stats.resolved})`, variant: filterStatus === 'resolved' ? 'default' : 'secondary', className: filterStatus === 'resolved' ? 'bg-green-600 hover:bg-green-700' : 'hover:bg-green-100 hover:text-green-800' }
+                                { id: '1', label: `Open (${stats.open})`, variant: filterStatus === '1' ? 'destructive' : 'secondary', className: filterStatus === '1' ? '' : 'hover:bg-destructive/10 hover:text-destructive' },
+                                { id: '2', label: `In Progress (${stats.in_progress})`, variant: filterStatus === '2' ? 'default' : 'secondary', className: filterStatus === '2' ? 'bg-yellow-600 hover:bg-yellow-700' : 'hover:bg-yellow-100 hover:text-yellow-800' },
+                                { id: '3', label: `Resolved (${stats.resolved})`, variant: filterStatus === '3' ? 'default' : 'secondary', className: filterStatus === '3' ? 'bg-green-600 hover:bg-green-700' : 'hover:bg-green-100 hover:text-green-800' }
                             ].map((filter: any) => (
                                 <Button
                                     key={filter.id}

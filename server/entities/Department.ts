@@ -1,8 +1,13 @@
-// entities/Department.ts
-import { Entity, Property, OneToMany, Collection } from '@mikro-orm/core';
+import { Entity, Property, OneToMany, Collection, Cascade } from '@mikro-orm/core';
+import { DepartmentAttributeValue } from './DepartmentAttributeValue';
 import { BaseEntity } from './BaseEntity';
-import { Allocation } from './Allocation';
 
+//@Observation
+// Seems fine, but EAV can be added for expandability
+
+
+//@Solution
+// Add EAV
 @Entity()
 export class Department extends BaseEntity {
   @Property({ unique: true })
@@ -11,8 +16,9 @@ export class Department extends BaseEntity {
   @Property({ nullable: true })
   description?: string;
 
-  @OneToMany('Allocation', 'allocatedToDepartment')
-  allocations = new Collection<Allocation>(this);
+  @OneToMany(() => DepartmentAttributeValue, (av) => av.department, { cascade: [Cascade.ALL] })
+  attributes = new Collection<DepartmentAttributeValue>(this);
+
 
   constructor(name?: string) {
     super();

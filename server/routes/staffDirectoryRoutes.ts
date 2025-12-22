@@ -118,8 +118,8 @@ router.get(
           name: user.name,
           email: user.email,
           role: user.role,
-          phone: user.phone,
-          officeLocation: user.officeLocation,
+          phone: userWithDetails.phone,
+          officeLocation: userWithDetails.officeLocation,
           department: user.department
             ? { id: user.department.id, name: user.department.name }
             : null,
@@ -167,7 +167,7 @@ router.post(
       req.body;
 
     try {
-      let user: User;
+      let user: any;
 
       if (role === UserRole.Professor) {
         user = new Professor(name, email, password);
@@ -241,6 +241,7 @@ router.put(
           .json({ success: false, message: 'Staff member not found' });
       }
 
+      const userAny = user as any;
       if (email) user.email = email;
       if (phone !== undefined) user.phone = phone;
       if (officeLocation !== undefined) user.officeLocation = officeLocation;

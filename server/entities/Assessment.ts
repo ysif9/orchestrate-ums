@@ -1,14 +1,24 @@
-import { Entity, Property, ManyToOne, Enum } from '@mikro-orm/core';
+import { Entity, Property, ManyToOne, Enum, Collection, OneToMany } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 import { Course } from './Course';
 import { User } from './User';
+import { AssessmentAttributeValue } from './AssessmentAttributeValue';
+
+
+//@Observation
+//Assessment type can be replaced with int
+//Attributes are unpredictable
+
+// @Solution
+// Switch to EAV and INT
+
 
 export enum AssessmentType {
-    Assignment = "assignment",
-    Quiz = "quiz",
-    Midterm = "midterm",
-    Final = "final",
-    Project = "project",
+    Assignment = 1,
+    Quiz = 2,
+    Midterm = 3,
+    Final = 4,
+    Project = 5,
 }
 
 @Entity()
@@ -33,6 +43,9 @@ export class Assessment extends BaseEntity {
 
     @ManyToOne(() => User)
     createdBy!: User;
+
+    @OneToMany(() => AssessmentAttributeValue, eav => eav.assessment, { cascade: ["all" as any] })
+    attributes = new Collection<AssessmentAttributeValue>(this);
 
     constructor(title: string, course: Course, totalMarks: number, createdBy: User) {
         super();

@@ -40,6 +40,12 @@ import {
 } from "@/components/ui/table"
 import { Plus, Edit2, Play, CheckCircle, AlertCircle } from 'lucide-react'
 
+const SEMESTER_STATUS = {
+    ACTIVE: 1,
+    INACTIVE: 2,
+    FINALIZED: 3
+};
+
 const StaffSemesterManagementPage = () => {
     const [semesters, setSemesters] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -56,7 +62,7 @@ const StaffSemesterManagementPage = () => {
         startDate: '',
         endDate: '',
         dropDate: '',
-        status: 'inactive'
+        status: SEMESTER_STATUS.INACTIVE
     };
     const [formData, setFormData] = useState(initialFormState);
     const [currentSemester, setCurrentSemester] = useState<any>(null);
@@ -118,7 +124,7 @@ const StaffSemesterManagementPage = () => {
     const handleSelectChange = (name: string, value: string) => {
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: name === 'status' ? parseInt(value) : value
         }));
     };
 
@@ -150,7 +156,7 @@ const StaffSemesterManagementPage = () => {
     };
 
     const handleActivate = async (semester: any) => {
-        if (semester.status === 'finalized') {
+        if (semester.status === SEMESTER_STATUS.FINALIZED) {
             setError('Cannot activate a finalized semester');
             return;
         }
@@ -164,7 +170,7 @@ const StaffSemesterManagementPage = () => {
     };
 
     const handleFinalizeClick = (semester: any) => {
-        if (semester.status === 'finalized') {
+        if (semester.status === SEMESTER_STATUS.FINALIZED) {
             setError('Semester is already finalized');
             return;
         }
@@ -195,21 +201,27 @@ const StaffSemesterManagementPage = () => {
         }
     };
 
-    const getStatusBadge = (status: string) => {
-        const variants: { [key: string]: string } = {
-            active: 'default',
-            inactive: 'secondary',
-            finalized: 'outline'
+    const getStatusBadge = (status: number) => {
+        const variants: { [key: number]: string } = {
+            [SEMESTER_STATUS.ACTIVE]: 'default',
+            [SEMESTER_STATUS.INACTIVE]: 'secondary',
+            [SEMESTER_STATUS.FINALIZED]: 'outline'
         };
-        const colors: { [key: string]: string } = {
-            active: 'bg-green-500',
-            inactive: 'bg-gray-500',
-            finalized: 'bg-blue-500'
+        const colors: { [key: number]: string } = {
+            [SEMESTER_STATUS.ACTIVE]: 'bg-green-500',
+            [SEMESTER_STATUS.INACTIVE]: 'bg-gray-500',
+            [SEMESTER_STATUS.FINALIZED]: 'bg-blue-500'
+        };
+
+        const labels: { [key: number]: string } = {
+            [SEMESTER_STATUS.ACTIVE]: 'Active',
+            [SEMESTER_STATUS.INACTIVE]: 'Inactive',
+            [SEMESTER_STATUS.FINALIZED]: 'Finalized'
         };
 
         return (
             <Badge variant={variants[status] as any} className={colors[status]}>
-                {status.charAt(0).toUpperCase() + status.slice(1)}
+                {labels[status]}
             </Badge>
         );
     };
@@ -268,13 +280,13 @@ const StaffSemesterManagementPage = () => {
                                 </TableRow>
                             ) : (
                                 semesters.map((semester) => (
-                                    <TableRow 
+                                    <TableRow
                                         key={semester.id}
-                                        className={semester.status === 'active' ? 'bg-green-50 dark:bg-green-950/20' : ''}
+                                        className={semester.status === SEMESTER_STATUS.ACTIVE ? 'bg-green-50 dark:bg-green-950/20' : ''}
                                     >
                                         <TableCell className="font-medium">
                                             {semester.name}
-                                            {semester.status === 'active' && (
+                                            {semester.status === SEMESTER_STATUS.ACTIVE && (
                                                 <span className="ml-2 text-xs text-green-600 dark:text-green-400 font-semibold">
                                                     (Currently Active)
                                                 </span>
@@ -289,7 +301,7 @@ const StaffSemesterManagementPage = () => {
                                         <TableCell>{getStatusBadge(semester.status)}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
-                                                {semester.status !== 'finalized' && (
+                                                {semester.status !== SEMESTER_STATUS.FINALIZED && (
                                                     <>
                                                         <Button
                                                             variant="outline"
@@ -298,7 +310,7 @@ const StaffSemesterManagementPage = () => {
                                                         >
                                                             <Edit2 className="h-4 w-4" />
                                                         </Button>
-                                                        {semester.status !== 'active' && (
+                                                        {semester.status !== SEMESTER_STATUS.ACTIVE && (
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
@@ -388,19 +400,19 @@ const StaffSemesterManagementPage = () => {
                                     Last date students can drop courses for this semester. Leave empty if not set.
                                 </p>
                             </div>
-                            {currentSemester && currentSemester.status !== 'finalized' && (
+                            {currentSemester && currentSemester.status !== SEMESTER_STATUS.FINALIZED && (
                                 <div className="space-y-2">
                                     <Label htmlFor="status">Status</Label>
                                     <Select
-                                        value={formData.status}
+                                        value={formData.status.toString()}
                                         onValueChange={(value) => handleSelectChange('status', value)}
                                     >
                                         <SelectTrigger>
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="inactive">Inactive</SelectItem>
-                                            <SelectItem value="active">Active</SelectItem>
+                                            <SelectItem value={SEMESTER_STATUS.INACTIVE.toString()}>Inactive</SelectItem>
+                                            <SelectItem value={SEMESTER_STATUS.ACTIVE.toString()}>Active</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>

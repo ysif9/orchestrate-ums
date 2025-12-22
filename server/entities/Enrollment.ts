@@ -4,10 +4,15 @@ import { User } from './User';
 import { Course } from './Course';
 import { Semester } from './Semester';
 
+//@Observation
+// Enrollment status can be replaced with int
+//EAV is unnecessary for now but might be needed if requirements evolved
+
+
 export enum EnrollmentStatus {
-    Enrolled = "enrolled",
-    Completed = "completed",
-    Dropped = "dropped",
+    Enrolled = 1,
+    Completed = 2,
+    Dropped = 3,
 }
 
 @Entity()

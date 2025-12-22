@@ -1,13 +1,25 @@
-import { Entity, Property, Enum, ManyToOne, OneToMany, Collection, Ref } from '@mikro-orm/core';
+import { Entity, Property, Enum, ManyToOne, OneToMany, Collection, Ref, Cascade } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 import { Room } from './Room';
 import { LabStationReservation } from './LabStationReservation';
+import { LabStationAttributeValue } from './LabStationAttributeValue';
+
+
+//@Observation
+// Status can be replaced with int
+//Station number can be replaced with INT
+//Description can have a default value
+//JSON can be replaced with EAV
+
+// @Solution
+// Switch to EAV and INT
+
 
 export enum LabStationStatus {
-    Available = 'available',
-    Reserved = 'reserved',
-    Occupied = 'occupied',
-    OutOfService = 'out_of_service'
+    Available = 1,
+    Reserved = 2,
+    Occupied = 3,
+    OutOfService = 4
 }
 
 @Entity()
@@ -15,8 +27,8 @@ export class LabStation extends BaseEntity {
     @Property()
     stationNumber!: string;
 
-    @Property({ nullable: true })
-    description?: string;
+    @Property({ default: '' })
+    description: string = '';
 
     @ManyToOne(() => Room, { ref: true })
     lab!: Ref<Room>;
@@ -24,14 +36,14 @@ export class LabStation extends BaseEntity {
     @Enum({ items: () => LabStationStatus })
     status: LabStationStatus = LabStationStatus.Available;
 
-    @Property({ type: 'json', nullable: true })
-    equipment?: string[];
-
     @Property({ default: true })
     isActive: boolean = true;
 
     @OneToMany(() => LabStationReservation, reservation => reservation.station)
     reservations = new Collection<LabStationReservation>(this);
+
+    @OneToMany(() => LabStationAttributeValue, av => av.labStation, { cascade: [Cascade.ALL] })
+    attributes = new Collection<LabStationAttributeValue>(this);
 
     constructor(stationNumber: string, lab: Room) {
         super();

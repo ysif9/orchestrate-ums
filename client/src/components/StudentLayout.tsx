@@ -12,7 +12,9 @@ import {
     LogOut,
     Menu,
     X,
-    User
+    User,
+    MessageSquare,
+    Package
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -40,7 +42,10 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
         { path: '/catalog', label: 'Course Catalog', icon: BookOpen },
         { path: '/transcript-requests', label: 'Transcript Requests', icon: FileText },
         { path: '/lab-stations', label: 'Lab Stations', icon: Monitor },
+        { path: '/facilities/my-resources', label: 'My Resources', icon: Package },
         { path: '/tickets', label: 'Support Tickets', icon: AlertCircle },
+        { path: '/messages', label: 'My Messages', icon: MessageSquare },
+        { path: '/staff-directory', label: 'Staff Directory', icon: User },
     ];
 
     return (

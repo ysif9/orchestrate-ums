@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { resourceService } from '../services/resourceService.js';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Package, AlertCircle, Loader2, CheckCircle, Calendar } from 'lucide-react';
+import { Button } from "@/components/ui/button"
+import { Package, AlertCircle, Loader2, CheckCircle, Calendar, ArrowLeft } from 'lucide-react';
 
 export default function ProfessorResources() {
+    const navigate = useNavigate();
     const [allocations, setAllocations] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -38,6 +41,15 @@ export default function ProfessorResources() {
     return (
         <div className="min-h-screen p-8 bg-muted/20">
             <div className="max-w-5xl mx-auto space-y-8">
+
+                <Button
+                    variant="ghost"
+                    className="gap-2 pl-0 hover:bg-transparent hover:text-primary"
+                    onClick={() => navigate('/admin/home')}
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Dashboard
+                </Button>
 
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg">

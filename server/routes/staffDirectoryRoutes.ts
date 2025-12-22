@@ -6,14 +6,15 @@ import authenticate, { AuthRequest } from '../middleware/auth';
 import authorize from '../middleware/authorize';
 import { User, UserRole } from '../entities/User';
 import { Department } from '../entities/Department';
+import { OfficeHours } from '../entities/OfficeHours';
+import { Publication } from '../entities/Publication';
 
 const router = express.Router();
 
 // GET /api/staff-directory?search=...
 router.get(
   '/',
-  authenticate,
-  authorize(UserRole.Staff),
+  authenticate, // now: any authenticated user (student, professor, staff)
   async (req: AuthRequest, res: Response) => {
     const em = RequestContext.getEntityManager() as EntityManager;
     const search = String(req.query.search || '').trim().toLowerCase();
@@ -27,6 +28,7 @@ router.get(
         where.$or = [
           { name: { $ilike: `%${search}%` } },
           { email: { $ilike: `%${search}%` } },
+          { researchInterests: { $ilike: `%${search}%` } },
         ];
       }
 
@@ -62,8 +64,7 @@ router.get(
 // GET /api/staff-directory/:id
 router.get(
   '/:id',
-  authenticate,
-  authorize(UserRole.Staff),
+  authenticate, // now: any authenticated user can view a profile
   async (req: AuthRequest, res: Response) => {
     const em = RequestContext.getEntityManager() as EntityManager;
     const id = Number(req.params.id);
@@ -84,7 +85,32 @@ router.get(
       // TODO: populate assigned courses once your Course entity is available.
       const assignedCourses: any[] = [];
 
-      const userWithDetails = user as any;
+      // New: office hours for professors
+      let officeHours: any[] = [];
+      let publications: any[] = []; // New: publications
+
+      if (user.role === UserRole.Professor) {
+        const slots = await em.find(
+          OfficeHours,
+          { professor: user.id },
+          { orderBy: { dayOfWeek: 'ASC', startTime: 'ASC' } },
+        );
+
+        officeHours = slots.map((s) => ({
+          id: s.id,
+          dayOfWeek: s.dayOfWeek,
+          startTime: s.startTime,
+          endTime: s.endTime,
+          location: s.location,
+        }));
+
+        const pubs = await em.find(Publication,
+          { professor: user.id },
+          { orderBy: { year: 'DESC', title: 'ASC' } }
+        );
+        publications = pubs;
+      }
+
       return res.json({
         success: true,
         data: {
@@ -98,6 +124,9 @@ router.get(
             ? { id: user.department.id, name: user.department.name }
             : null,
           assignedCourses,
+          officeHours,
+          publications, // new field
+          researchInterests: user.researchInterests,
         },
       });
     } catch (err) {
@@ -120,7 +149,7 @@ const sendValidationErrors = (res: Response, errorsArray: any[]) =>
 router.post(
   '/',
   authenticate,
-  authorize(UserRole.Staff),
+  authorize(UserRole.Staff), // unchanged: only staff can create
   body('name').notEmpty(),
   body('email').isEmail(),
   body('password').isLength({ min: 6 }),
@@ -128,12 +157,13 @@ router.post(
   body('departmentId').optional().isInt(),
   body('phone').optional().isString(),
   body('officeLocation').optional().isString(),
+  body('researchInterests').optional().isString(),
   async (req: AuthRequest, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return sendValidationErrors(res, errors.array());
 
     const em = RequestContext.getEntityManager() as EntityManager;
-    const { name, email, password, role, departmentId, phone, officeLocation } =
+    const { name, email, password, role, departmentId, phone, officeLocation, researchInterests } =
       req.body;
 
     try {
@@ -148,6 +178,7 @@ router.post(
 
       user.phone = phone || undefined;
       user.officeLocation = officeLocation || undefined;
+      user.researchInterests = researchInterests || undefined;
 
       if (departmentId) {
         const dept = await em.findOne(Department, Number(departmentId));
@@ -183,18 +214,19 @@ router.post(
 router.put(
   '/:id',
   authenticate,
-  authorize(UserRole.Staff),
+  authorize(UserRole.Staff), // unchanged: only staff can edit
   body('email').optional().isEmail(),
   body('phone').optional().isString(),
   body('officeLocation').optional().isString(),
   body('departmentId').optional().isInt(),
+  body('researchInterests').optional().isString(),
   async (req: AuthRequest, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return sendValidationErrors(res, errors.array());
 
     const em = RequestContext.getEntityManager() as EntityManager;
     const id = Number(req.params.id);
-    const { email, phone, officeLocation, departmentId } = req.body;
+    const { email, phone, officeLocation, departmentId, researchInterests } = req.body;
 
     try {
       const user = await em.findOne(
@@ -211,8 +243,9 @@ router.put(
 
       const userAny = user as any;
       if (email) user.email = email;
-      if (phone !== undefined) userAny.phone = phone;
-      if (officeLocation !== undefined) userAny.officeLocation = officeLocation;
+      if (phone !== undefined) user.phone = phone;
+      if (officeLocation !== undefined) user.officeLocation = officeLocation;
+      if (researchInterests !== undefined) user.researchInterests = researchInterests;
 
       if (departmentId !== undefined) {
         if (departmentId === null) {
@@ -237,8 +270,9 @@ router.put(
           name: user.name,
           email: user.email,
           role: user.role,
-          phone: userAny.phone,
-          officeLocation: userAny.officeLocation,
+          phone: user.phone,
+          officeLocation: user.officeLocation,
+          researchInterests: user.researchInterests,
           department: user.department
             ? { id: user.department.id, name: user.department.name }
             : null,
@@ -252,4 +286,5 @@ router.put(
     }
   },
 );
+
 export default router;

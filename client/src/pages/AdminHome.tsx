@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { authService } from '@/services/authService';
 import { courseService } from '@/services/courseService';
 import { semesterService } from '@/services/semesterService';
-import { BookOpen, Building, Calendar, ClipboardCheck, FileText, User, Users, Wrench } from 'lucide-react';
+import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, Package, User, Users, Wrench } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -27,7 +27,7 @@ function AdminHome() {
             fetchMyCourses();
         }
         fetchActiveSemester();
-    }, [isProfessor, user]);
+    }, [isProfessor, user?.id]);
 
     const fetchMyCourses = async () => {
         try {
@@ -148,30 +148,81 @@ function AdminHome() {
                 icon: Users,
                 path: '/admin/staff-directory',
                 color: '#16a34a' // green-600
+            },
+            {
+                title: 'Allocate Resources',
+                description: 'Allocate facilities and resources',
+                icon: Package,
+                path: '/facilities/allocate',
+                color: '#ec4899' // pink-500
             }
         ] : []),
 
         // PD Actions
-        ...(isStaff ? [{
-            title: 'PD Tracking',
-            description: 'Track faculty professional development',
-            icon: BookOpen, // Reusing BookOpen or similar if no better icon imported. 
-            // Better to import new icon but for now reuse or use existing imports. 
-            // Existing imports: BookOpen, Building, Calendar, ClipboardCheck, FileText, User, Users, Wrench.
-            // Let's use FileText or ClipboardCheck.
-            path: '/admin/pd-tracking',
-            color: '#0ea5e9' // sky-500
-        }] : []),
+        ...(isStaff ? [
+            {
+                title: 'PD Tracking',
+                description: 'Track faculty professional development',
+                icon: BookOpen,
+                path: '/admin/pd-tracking',
+                color: '#0ea5e9' // sky-500
+            },
+            {
+                title: 'Performance Management',
+                description: 'Evaluate professors and TAs',
+                icon: ClipboardCheck,
+                path: '/admin/performance',
+                color: '#be185d' // pink-700
+            }
+        ] : []),
 
-        ...(isProfessor ? [{
-            title: 'My PD History',
-            description: 'View your professional development history',
-            icon: FileText,
-            path: '/faculty/pd-history',
-            color: '#0ea5e9' // sky-500
-        }] : []),
-
+        ...(isProfessor ? [
+            {
+                title: 'My Profile',
+                description: 'View your public professor profile',
+                icon: User,
+                path: `/admin/staff-directory/${user.id}`,
+                color: '#7c3aed', // violet-600
+            },
+            {
+                title: 'My Messages',
+                description: 'View and respond to student messages',
+                icon: MessageSquare,
+                path: '/admin/messages',
+                color: '#2563eb', // blue-600
+            },
+            {
+                title: 'My Performance',
+                description: 'View your evaluations',
+                icon: ClipboardCheck,
+                path: '/faculty/performance',
+                color: '#be185d', // pink-700
+            },
+            {
+                title: 'My PD History',
+                description: 'View your professional development history',
+                icon: FileText,
+                path: '/faculty/pd-history',
+                color: '#0ea5e9', // sky-500
+            },
+            {
+                title: 'My Office Hours',
+                description: 'Manage when students can meet with you',
+                icon: Calendar,
+                path: '/faculty/office-hours',
+                color: '#16a34a', // green-600
+            },
+            {
+                title: 'My Resources',
+                description: 'View your allocated equipment',
+                icon: Package,
+                path: '/facilities/my-resources',
+                color: '#db2777', // pink-600
+            },
+        ] : []),
     ];
+
+
 
     return (
         <div className="min-h-screen bg-background">

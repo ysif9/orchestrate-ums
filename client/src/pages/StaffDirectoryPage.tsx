@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { staffDirectoryService } from '../services/staffDirectoryService.js';
+import { authService } from '@/services/authService';
 
 interface StaffRow {
   id: number;
@@ -31,6 +32,10 @@ export default function StaffDirectoryPage() {
   );
   const [newPhone, setNewPhone] = useState('');
   const [newOfficeLocation, setNewOfficeLocation] = useState('');
+
+  // role detection
+  const user: any = authService.getCurrentUser();
+  const isStaff = user?.role === 'staff';
 
   useEffect(() => {
     let cancelled = false;
@@ -102,17 +107,21 @@ export default function StaffDirectoryPage() {
             Staff directory
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            View professors and teaching assistants and manage their profiles.
+            View professors and teaching assistants
+            {isStaff && ' and manage their profiles.'}
+            {!isStaff && '.'}
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIsCreating(true)}
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90"
-        >
-          Add staff member
-        </button>
+        {isStaff && (
+          <button
+            type="button"
+            onClick={() => setIsCreating(true)}
+            className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90"
+          >
+            Add staff member
+          </button>
+        )}
       </div>
 
       <div className="mb-4">
@@ -168,7 +177,13 @@ export default function StaffDirectoryPage() {
                 >
                   <td
                     className="px-4 py-2 cursor-pointer text-primary underline-offset-2 hover:underline"
-                    onClick={() => navigate(`/admin/staff-directory/${u.id}`)}
+                    onClick={() =>
+                      navigate(
+                        isStaff
+                          ? `/admin/staff-directory/${u.id}`
+                          : `/staff-directory/${u.id}`,
+                      )
+                    }
                   >
                     {u.name}
                   </td>
@@ -186,7 +201,7 @@ export default function StaffDirectoryPage() {
         </div>
       )}
 
-      {isCreating && (
+      {isStaff && isCreating && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="w-full max-w-md rounded-lg bg-card p-6 shadow-lg">
             <h2 className="mb-4 text-lg font-semibold">Add staff member</h2>

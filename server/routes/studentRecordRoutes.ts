@@ -57,7 +57,7 @@ async function calculateStudentGPA(studentId: number): Promise<{ gpa: number | n
 
     for (const enrollment of completedEnrollments) {
         const course = enrollment.course;
-        
+
         // Get all assessments for this course
         const assessments = await em.find(Assessment, {
             course: { id: course.id }
@@ -119,12 +119,24 @@ router.get('/search', authenticate, authorize(UserRole.Staff), async (req: AuthR
 
         if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
 
-        const studentId = req.query.studentId;
-        if (!studentId) {
-            return res.status(400).json({ success: false, message: 'Student ID is required' });
+        const searchParam = (req.query.studentId || req.query.email) as string;
+        if (!searchParam) {
+            return res.status(400).json({ success: false, message: 'Student ID or Email is required' });
         }
 
-        const student = await em.findOne(Student, { id: parseInt(studentId as string) });
+        let student;
+        if (searchParam.includes('@')) {
+            // Search by email
+            student = await em.findOne(Student, { email: searchParam.trim() });
+        } else {
+            // Search by ID
+            const parsedId = parseInt(searchParam);
+            if (isNaN(parsedId)) {
+                return res.status(400).json({ success: false, message: 'Enter a valid Student ID or Email' });
+            }
+            student = await em.findOne(Student, { id: parsedId });
+        }
+
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
@@ -132,9 +144,9 @@ router.get('/search', authenticate, authorize(UserRole.Staff), async (req: AuthR
         // Get active semester
         const activeSemester = await getActiveSemester();
         if (!activeSemester) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'No active semester found. Please contact staff to activate a semester.' 
+            return res.status(400).json({
+                success: false,
+                message: 'No active semester found. Please contact staff to activate a semester.'
             });
         }
 
@@ -197,8 +209,11 @@ router.get('/:id/summary', authenticate, authorize(UserRole.Staff), async (req: 
         if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
 
         const studentId = parseInt(req.params.id);
+        if (isNaN(studentId)) {
+            return res.status(400).json({ success: false, message: 'Student ID must be a number' });
+        }
         const student = await em.findOne(Student, { id: studentId });
-        
+
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
@@ -216,7 +231,7 @@ router.get('/:id/summary', authenticate, authorize(UserRole.Staff), async (req: 
 
         // Get active semester for current term
         const activeSemester = await getActiveSemester();
-        const currentTermEnrollments = activeSemester 
+        const currentTermEnrollments = activeSemester
             ? allEnrollments.filter(e => e.semester && e.semester.id === activeSemester.id)
             : [];
         const registeredCredits = currentTermEnrollments
@@ -243,10 +258,10 @@ router.get('/:id/summary', authenticate, authorize(UserRole.Staff), async (req: 
         const courseHistory = [];
         for (const [semester, enrollments] of Object.entries(enrollmentsBySemester)) {
             const semesterCourses = [];
-            
+
             for (const enrollment of enrollments) {
                 const course = enrollment.course;
-                
+
                 // Get grades for completed courses
                 let courseGrade = null;
                 let coursePercentage = null;

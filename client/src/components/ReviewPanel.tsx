@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import { applicationService } from '../services/applicationService.js';
 import { CheckCircle, XCircle, Clock, Send, FileText, Star } from 'lucide-react';
 import { Button } from "@/components/ui/button"
@@ -8,9 +8,20 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 
 /**
+ * Scoring criteria input component props
+ */
+interface ScoringCriterionProps {
+    name: string;
+    label: string;
+    value: number;
+    maxScore: number;
+    onChange: (name: string, value: number) => void;
+}
+
+/**
  * Scoring criteria input component
  */
-function ScoringCriterion({ name, label, value, maxScore, onChange }: any) {
+function ScoringCriterion({ name, label, value, maxScore, onChange }: ScoringCriterionProps) {
     return (
         <div className="flex items-center justify-between py-3 border-b border-border last:border-0">
             <Label className="text-sm font-medium">{label}</Label>
@@ -20,7 +31,7 @@ function ScoringCriterion({ name, label, value, maxScore, onChange }: any) {
                     min="0"
                     max={maxScore}
                     value={value}
-                    onChange={(e: any) => onChange(name, parseInt(e.target.value) || 0)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(name, parseInt(e.target.value) || 0)}
                     className="w-20 text-center h-8"
                 />
                 <span className="text-sm text-muted-foreground">/ {maxScore}</span>
@@ -63,9 +74,18 @@ function DecisionButton({ decision, selected, onClick, icon: Icon, color }: any)
 }
 
 /**
+ * Scoring criteria interface
+ */
+interface Criterion {
+    name: string;
+    label: string;
+    maxScore: number;
+}
+
+/**
  * Default scoring criteria
  */
-const defaultCriteria = [
+const defaultCriteria: Criterion[] = [
     { name: 'academicPerformance', label: 'Academic Performance', maxScore: 30 },
     { name: 'personalStatement', label: 'Personal Statement', maxScore: 25 },
     { name: 'recommendations', label: 'Recommendations', maxScore: 20 },
@@ -77,22 +97,22 @@ const defaultCriteria = [
  * ReviewPanel component for submitting application reviews
  */
 function ReviewPanel({ application, onReviewSubmitted }: any) {
-    const [finalDecision, setFinalDecision] = useState('');
-    const [scores, setScores] = useState<any>(
-        defaultCriteria.reduce((acc: any, c) => ({ ...acc, [c.name]: 0 }), {})
+    const [finalDecision, setFinalDecision] = useState<number | ''>('');
+    const [scores, setScores] = useState<Record<string, number>>(
+        defaultCriteria.reduce((acc, c) => ({ ...acc, [c.name]: 0 }), {} as Record<string, number>)
     );
     const [comments, setComments] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    const totalScore = Object.values(scores).reduce((sum: any, score: any) => sum + score, 0);
+    const totalScore = Object.values(scores).reduce((sum, score) => sum + score, 0);
     const maxTotalScore = defaultCriteria.reduce((sum, c) => sum + c.maxScore, 0);
 
-    const handleScoreChange = (name: any, value: any) => {
+    const handleScoreChange = (name: string, value: number) => {
         const criterion = defaultCriteria.find((c) => c.name === name);
         const clampedValue = Math.min(Math.max(0, value), criterion?.maxScore || 100);
-        setScores((prev: any) => ({ ...prev, [name]: clampedValue }));
+        setScores((prev) => ({ ...prev, [name]: clampedValue }));
     };
 
     const handleSubmit = async (e: any) => {
@@ -182,22 +202,22 @@ function ReviewPanel({ application, onReviewSubmitted }: any) {
                         <div className="flex gap-3">
                             <DecisionButton
                                 decision="Accept"
-                                selected={finalDecision === 'accepted'}
-                                onClick={() => setFinalDecision('accepted')}
+                                selected={finalDecision === 1}
+                                onClick={() => setFinalDecision(1)}
                                 icon={CheckCircle}
                                 color="green"
                             />
                             <DecisionButton
                                 decision="Waitlist"
-                                selected={finalDecision === 'waitlisted'}
-                                onClick={() => setFinalDecision('waitlisted')}
+                                selected={finalDecision === 3}
+                                onClick={() => setFinalDecision(3)}
                                 icon={Clock}
                                 color="purple"
                             />
                             <DecisionButton
                                 decision="Reject"
-                                selected={finalDecision === 'rejected'}
-                                onClick={() => setFinalDecision('rejected')}
+                                selected={finalDecision === 2}
+                                onClick={() => setFinalDecision(2)}
                                 icon={XCircle}
                                 color="red"
                             />

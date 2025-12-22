@@ -9,7 +9,7 @@ export const applicationService = {
     /**
      * Get all applications with optional filtering
      * @param {Object} params - Query parameters
-     * @param {string} [params.status] - Filter by status
+     * @param {number} [params.status] - Filter by status (1: Pending, 2: Under Review, 3: Accepted, etc.)
      * @param {string} [params.program] - Filter by program
      * @param {number} [params.limit] - Limit results
      * @param {number} [params.offset] - Offset for pagination
@@ -43,7 +43,7 @@ export const applicationService = {
     /**
      * Update application status
      * @param {number} id - Application ID
-     * @param {string} status - New status
+     * @param {number} status - New status (1: Pending, 2: Under Review, 3: Accepted, etc.)
      * @returns {Promise<Object>} Response with updated application
      */
     updateApplicationStatus: async (id, status) => {
@@ -75,7 +75,7 @@ export const applicationService = {
      * Submit a review for an application
      * @param {Object} reviewData - Review data
      * @param {number} reviewData.applicationId - Application ID
-     * @param {string} reviewData.finalDecision - Decision (accepted/rejected/waitlisted)
+     * @param {number} reviewData.finalDecision - Decision (1: Accepted, 2: Rejected, 3: Waitlisted)
      * @param {Object} [reviewData.scoringRubric] - Scoring criteria and scores
      * @param {string} [reviewData.comments] - Review comments
      * @returns {Promise<Object>} Response with created review

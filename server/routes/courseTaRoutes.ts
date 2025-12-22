@@ -5,10 +5,21 @@ import { Course } from '../entities/Course';
 import { CourseTA } from '../entities/CourseTA';
 import { TeachingAssistant } from '../entities/TeachingAssistant';
 import { UserRole } from '../entities/User';
+import { updateEntityAttributes, toFlatObject } from '../utils/eavHelpers';
 import authenticate, { AuthRequest } from '../middleware/auth';
 import authorize from '../middleware/authorize';
 
 const router = express.Router({ mergeParams: true });
+
+/**
+ * Helper to identify dynamic attributes (anything not in the core entity schema)
+ */
+const getCourseTAAttributes = (body: any) => {
+    const coreFields = ['taId', 'responsibilities'];
+    return Object.keys(body)
+        .filter(key => !coreFields.includes(key))
+        .reduce((obj: any, key) => ({ ...obj, [key]: body[key] }), {});
+};
 
 // GET /api/courses/my-assignments - Get courses assigned to the current TA
 router.get('/my-assignments', authenticate, authorize(UserRole.TeachingAssistant), async (req: AuthRequest, res: Response) => {
@@ -18,8 +29,8 @@ router.get('/my-assignments', authenticate, authorize(UserRole.TeachingAssistant
 
         if (!taId) return res.status(401).json({ message: 'Unauthorized' });
 
-        const assignments = await em.find(CourseTA, { ta: { id: parseInt(taId) } }, { populate: ['course'] });
-        res.json(assignments);
+        const assignments = await em.find(CourseTA, { ta: { id: parseInt(taId) } }, { populate: ['course', 'attributes.attribute'] });
+        res.json(assignments.map(a => toFlatObject(a)));
     } catch (error: any) {
         res.status(500).json({ message: error.message });
     }
@@ -30,8 +41,8 @@ router.get('/:courseId/tas', authenticate, async (req: Request, res: Response) =
     try {
         const em = RequestContext.getEntityManager() as EntityManager;
         const { courseId } = req.params;
-        const tas = await em.find(CourseTA, { course: { id: parseInt(courseId) } }, { populate: ['ta'] });
-        res.json(tas);
+        const tas = await em.find(CourseTA, { course: { id: parseInt(courseId) } }, { populate: ['ta', 'attributes.attribute'] });
+        res.json(tas.map(t => toFlatObject(t)));
     } catch (error: any) {
         res.status(500).json({ message: error.message });
     }
@@ -56,9 +67,16 @@ router.post('/:courseId/tas', authenticate, authorize(UserRole.Staff, UserRole.P
         }
 
         const assignment = new CourseTA(ta, course, responsibilities);
+
         await em.persistAndFlush(assignment);
 
-        res.status(201).json(assignment);
+        // Handle dynamic attributes (EAV) - assignment now has an ID
+        const attributes = getCourseTAAttributes(req.body);
+        await updateEntityAttributes(em, assignment, 'CourseTA', attributes);
+
+        await em.flush();
+
+        res.status(201).json(toFlatObject(assignment));
     } catch (error: any) {
         res.status(500).json({ message: error.message });
     }

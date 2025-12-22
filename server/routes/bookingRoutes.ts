@@ -3,6 +3,7 @@ import { RequestContext } from '@mikro-orm/core';
 import { Booking, BookingStatus } from '../entities/Booking';
 import { Room } from '../entities/Room';
 import { User, UserRole } from '../entities/User';
+import { updateEntityAttributes, toFlatObject } from '../utils/eavHelpers';
 import authenticate, { AuthRequest } from '../middleware/auth';
 import authorize from '../middleware/authorize';
 
@@ -64,15 +65,16 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
 
         // If myBookings is true, only show bookings by the current user
         if (myBookings === 'true' && req.user) {
-            filter.bookedBy = { id: parseInt(req.user.id) };
+            filter.createdBy = { id: parseInt(req.user.id) };
         }
 
         const bookings = await em.find(Booking, filter, {
-            populate: ['room', 'bookedBy'],
+            populate: ['room', 'createdBy', 'attributes.attribute'],
             orderBy: { startTime: 'ASC' }
         });
 
-        res.json({ success: true, bookings });
+        const flatBookings = bookings.map(b => toFlatObject(b));
+        res.json({ success: true, bookings: flatBookings });
     } catch (error: any) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -107,11 +109,12 @@ router.get('/room/:roomId', authenticate, async (req: AuthRequest, res: Response
         }
 
         const bookings = await em.find(Booking, filter, {
-            populate: ['room', 'bookedBy'],
+            populate: ['room', 'createdBy', 'attributes.attribute'],
             orderBy: { startTime: 'ASC' }
         });
 
-        res.json({ success: true, bookings });
+        const flatBookings = bookings.map(b => toFlatObject(b));
+        res.json({ success: true, bookings: flatBookings });
     } catch (error: any) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -124,14 +127,14 @@ router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
         const booking = await em.findOne(Booking, { id: parseInt(req.params.id) }, {
-            populate: ['room', 'bookedBy']
+            populate: ['room', 'createdBy', 'attributes.attribute']
         });
 
         if (!booking) {
             return res.status(404).json({ success: false, message: 'Booking not found' });
         }
 
-        res.json({ success: true, booking });
+        res.json({ success: true, booking: toFlatObject(booking) });
     } catch (error: any) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -203,15 +206,25 @@ router.post('/', authenticate, authorize(UserRole.Professor, UserRole.Staff), as
         booking.notes = notes;
         booking.status = BookingStatus.Confirmed;
 
+        // Support attributes from body (any field not in the schema)
+        const schemaFields = ['title', 'description', 'roomId', 'startTime', 'endTime', 'notes', 'status'];
+        const attributesData = Object.keys(req.body)
+            .filter(key => !schemaFields.includes(key))
+            .reduce((obj: any, key) => ({ ...obj, [key]: req.body[key] }), {});
+
         await em.persistAndFlush(booking);
 
+        // Update attributes (booking now has an ID)
+        await updateEntityAttributes(em, booking, 'Booking', attributesData);
+        await em.flush();
+
         // Populate for response
-        await em.populate(booking, ['room', 'bookedBy']);
+        await em.populate(booking, ['room', 'createdBy', 'attributes.attribute']);
 
         res.status(201).json({
             success: true,
             message: 'Room booked successfully',
-            booking
+            booking: toFlatObject(booking)
         });
     } catch (error: any) {
         res.status(500).json({ success: false, message: error.message });
@@ -225,7 +238,7 @@ router.put('/:id', authenticate, authorize(UserRole.Professor, UserRole.Staff), 
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
         const booking = await em.findOne(Booking, { id: parseInt(req.params.id) }, {
-            populate: ['bookedBy']
+            populate: ['createdBy']
         });
 
         if (!booking) {
@@ -234,7 +247,7 @@ router.put('/:id', authenticate, authorize(UserRole.Professor, UserRole.Staff), 
 
         // Check if user is the owner or staff
         if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
-        const isOwner = booking.bookedBy.id === parseInt(req.user.id);
+        const isOwner = booking.createdBy.id === parseInt(req.user.id);
         const isStaff = req.user.role === UserRole.Staff;
 
         if (!isOwner && !isStaff) {
@@ -282,13 +295,24 @@ router.put('/:id', authenticate, authorize(UserRole.Professor, UserRole.Staff), 
         if (title) booking.title = title;
         if (description !== undefined) booking.description = description;
         if (notes !== undefined) booking.notes = notes;
-        if (status) booking.status = status as BookingStatus;
+        if (status) booking.status = parseInt(status as string);
 
+        // Update attributes
+        const schemaFields = ['title', 'description', 'roomId', 'startTime', 'endTime', 'notes', 'status'];
+        const attributesData = Object.keys(req.body)
+            .filter(key => !schemaFields.includes(key))
+            .reduce((obj: any, key) => ({ ...obj, [key]: req.body[key] }), {});
+
+        await updateEntityAttributes(em, booking, 'Booking', attributesData);
         await em.flush();
 
-        await em.populate(booking, ['room', 'bookedBy']);
+        await em.populate(booking, ['room', 'createdBy', 'attributes.attribute']);
 
-        res.json({ success: true, message: 'Booking updated successfully', booking });
+        res.json({
+            success: true,
+            message: 'Booking updated successfully',
+            booking: toFlatObject(booking)
+        });
     } catch (error: any) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -301,7 +325,7 @@ router.delete('/:id', authenticate, authorize(UserRole.Professor, UserRole.Staff
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
         const booking = await em.findOne(Booking, { id: parseInt(req.params.id) }, {
-            populate: ['bookedBy']
+            populate: ['createdBy']
         });
 
         if (!booking) {
@@ -310,7 +334,7 @@ router.delete('/:id', authenticate, authorize(UserRole.Professor, UserRole.Staff
 
         // Check if user is the owner or staff
         if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
-        const isOwner = booking.bookedBy.id === parseInt(req.user.id);
+        const isOwner = booking.createdBy.id === parseInt(req.user.id);
         const isStaff = req.user.role === UserRole.Staff;
 
         if (!isOwner && !isStaff) {

@@ -82,6 +82,9 @@ router.get(
           .json({ success: false, message: 'Staff member not found' });
       }
 
+      // Cast to any to access subclass properties not on the abstract User entity
+      const userWithDetails = user as any;
+
       // TODO: populate assigned courses once your Course entity is available.
       const assignedCourses: any[] = [];
 
@@ -118,8 +121,8 @@ router.get(
           name: user.name,
           email: user.email,
           role: user.role,
-          phone: user.phone,
-          officeLocation: user.officeLocation,
+          phone: userWithDetails.phone,
+          officeLocation: userWithDetails.officeLocation,
           department: user.department
             ? { id: user.department.id, name: user.department.name }
             : null,
@@ -167,7 +170,7 @@ router.post(
       req.body;
 
     try {
-      let user: User;
+      let user: any;
 
       if (role === UserRole.Professor) {
         user = new Professor(name, email, password);
@@ -241,9 +244,10 @@ router.put(
           .json({ success: false, message: 'Staff member not found' });
       }
 
+      const userAny = user as any;
       if (email) user.email = email;
-      if (phone !== undefined) user.phone = phone;
-      if (officeLocation !== undefined) user.officeLocation = officeLocation;
+      if (phone !== undefined) userAny.phone = phone;
+      if (officeLocation !== undefined) userAny.officeLocation = officeLocation;
       if (researchInterests !== undefined) user.researchInterests = researchInterests;
 
       if (departmentId !== undefined) {
@@ -269,13 +273,13 @@ router.put(
           name: user.name,
           email: user.email,
           role: user.role,
-          phone: user.phone,
-          officeLocation: user.officeLocation,
+          phone: userAny.phone,
+          officeLocation: userAny.officeLocation,
           researchInterests: user.researchInterests,
           department: user.department
             ? { id: user.department.id, name: user.department.name }
             : null,
-        },
+          },
       });
     } catch (err) {
       console.error('Error updating staff profile:', err);

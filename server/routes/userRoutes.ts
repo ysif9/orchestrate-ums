@@ -32,19 +32,28 @@ router.post('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), [
 
         const { name, email, password, role, maxCredits } = req.body;
 
+        // Map string role to integer enum
+        let roleEnum: UserRole;
         let user: User;
-        const userRole = role;
+        switch (role) {
+            case 'staff': roleEnum = UserRole.Staff; break;
+            case 'professor': roleEnum = UserRole.Professor; break;
+            case 'teaching_assistant': roleEnum = UserRole.TeachingAssistant; break;
+            case 'parent': roleEnum = UserRole.Parent; break;
+            case 'student':
+            default: roleEnum = UserRole.Student; break;
+        }
 
-        if (userRole === 'student') {
+        if (roleEnum === UserRole.Student) {
             user = new Student(name, email, password);
             if (maxCredits) (user as Student).maxCredits = maxCredits;
-        } else if (userRole === 'staff') {
+        } else if (roleEnum === UserRole.Staff) {
             user = new Staff(name, email, password);
-        } else if (userRole === 'professor') {
+        } else if (roleEnum === UserRole.Professor) {
             user = new Professor(name, email, password);
-        } else if (userRole === 'teaching_assistant') {
+        } else if (roleEnum === UserRole.TeachingAssistant) {
             user = new TeachingAssistant(name, email, password);
-        } else if (userRole === 'parent') {
+        } else if (roleEnum === UserRole.Parent) {
             user = new Parent(name, email, password);
         } else {
             return res.status(400).json({ message: 'Invalid role' });

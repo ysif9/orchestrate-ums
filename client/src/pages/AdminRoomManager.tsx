@@ -21,27 +21,34 @@ import {
     DialogFooter
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { Monitor, Trash2, Edit2, Plus, X } from 'lucide-react';
+import { Monitor, Trash2, Edit2, Plus } from 'lucide-react';
 
-const ROOM_TYPES = [
-    { value: 'classroom', label: 'Classroom' },
-    { value: 'lab', label: 'Lab' },
-    { value: 'lecture_hall', label: 'Lecture Hall' },
-    { value: 'conference_room', label: 'Conference Room' }
-];
-
-const ROOM_TYPE_LABELS: Record<string, string> = {
-    classroom: 'Classroom',
-    lab: 'Lab',
-    lecture_hall: 'Lecture Hall',
-    conference_room: 'Conference Room'
+const ROOM_TYPE = {
+    CLASSROOM: 1,
+    LAB: 2,
+    LECTURE_HALL: 3,
+    CONFERENCE_ROOM: 4
 };
 
-const ROOM_TYPE_BADGE_COLOR: Record<string, string> = {
-    classroom: 'bg-blue-100 text-blue-800 hover:bg-blue-100', // Using Tailwind classes on badge for custom colors
-    lab: 'bg-purple-100 text-purple-800 hover:bg-purple-100',
-    lecture_hall: 'bg-green-100 text-green-800 hover:bg-green-100',
-    conference_room: 'bg-orange-100 text-orange-800 hover:bg-orange-100'
+const ROOM_TYPES_OPTIONS = [
+    { value: ROOM_TYPE.CLASSROOM, label: 'Classroom' },
+    { value: ROOM_TYPE.LAB, label: 'Lab' },
+    { value: ROOM_TYPE.LECTURE_HALL, label: 'Lecture Hall' },
+    { value: ROOM_TYPE.CONFERENCE_ROOM, label: 'Conference Room' }
+];
+
+const ROOM_TYPE_LABELS: Record<number, string> = {
+    [ROOM_TYPE.CLASSROOM]: 'Classroom',
+    [ROOM_TYPE.LAB]: 'Lab',
+    [ROOM_TYPE.LECTURE_HALL]: 'Lecture Hall',
+    [ROOM_TYPE.CONFERENCE_ROOM]: 'Conference Room'
+};
+
+const ROOM_TYPE_BADGE_COLOR: Record<number, string> = {
+    [ROOM_TYPE.CLASSROOM]: 'bg-blue-100 text-blue-800 hover:bg-blue-100',
+    [ROOM_TYPE.LAB]: 'bg-purple-100 text-purple-800 hover:bg-purple-100',
+    [ROOM_TYPE.LECTURE_HALL]: 'bg-green-100 text-green-800 hover:bg-green-100',
+    [ROOM_TYPE.CONFERENCE_ROOM]: 'bg-orange-100 text-orange-800 hover:bg-orange-100'
 };
 
 
@@ -61,7 +68,7 @@ const AdminRoomManager = () => {
         building: '',
         floor: 0,
         capacity: 30,
-        type: 'classroom',
+        type: ROOM_TYPE.CLASSROOM,
         description: '',
         amenities: '',
         isAvailable: true
@@ -84,7 +91,7 @@ const AdminRoomManager = () => {
         try {
             setLoading(true);
             const response = await roomService.getAll();
-            setRooms(response.rooms || []);
+            setRooms((response as any).rooms || []);
         } catch (err) {
             setError('Failed to fetch rooms');
             console.error('Failed to fetch rooms', err);
@@ -101,7 +108,7 @@ const AdminRoomManager = () => {
                 building: room.building || '',
                 floor: room.floor || 0,
                 capacity: room.capacity || 30,
-                type: room.type || 'classroom',
+                type: room.type || ROOM_TYPE.CLASSROOM,
                 description: room.description || '',
                 amenities: Array.isArray(room.amenities) ? room.amenities.join(', ') : '',
                 isAvailable: room.isAvailable !== false
@@ -140,7 +147,7 @@ const AdminRoomManager = () => {
     const handleSelectChange = (name: string, value: string) => {
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: name === 'type' ? parseInt(value) : value
         }));
     };
 
@@ -190,7 +197,7 @@ const AdminRoomManager = () => {
         }
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (id: number) => {
         if (window.confirm('Are you sure you want to delete this room? This action cannot be undone.')) {
             try {
                 await roomService.delete(id);
@@ -281,7 +288,7 @@ const AdminRoomManager = () => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex gap-2 justify-end">
-                                                        {room.type === 'lab' && (
+                                                        {room.type === ROOM_TYPE.LAB && (
                                                             <Button
                                                                 variant="secondary"
                                                                 size="sm"
@@ -391,15 +398,15 @@ const AdminRoomManager = () => {
                             <div className="space-y-2">
                                 <Label htmlFor="type">Type *</Label>
                                 <Select
-                                    value={formData.type}
+                                    value={formData.type.toString()}
                                     onValueChange={(value) => handleSelectChange('type', value)}
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select type" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {ROOM_TYPES.map(type => (
-                                            <SelectItem key={type.value} value={type.value}>
+                                        {ROOM_TYPES_OPTIONS.map(type => (
+                                            <SelectItem key={type.value} value={type.value.toString()}>
                                                 {type.label}
                                             </SelectItem>
                                         ))}

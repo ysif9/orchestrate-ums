@@ -4,8 +4,8 @@ import { body, validationResult } from 'express-validator';
 import { RequestContext } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Resource, ResourceType } from '../entities/Resource';
-import { Allocation, AllocationStatus } from '../entities/Allocation';
-import { AttributeDataType, ResourceAttribute } from '../entities/ResourceAttribute';
+import { Allocation, AllocationStatus, AllocationTarget, TargetType } from '../entities/Allocation';
+import { Attribute, AttributeDataType } from '../entities/Attribute';
 import { ResourceAttributeValue } from '../entities/ResourceAttributeValue';
 import { User, UserRole } from '../entities/User';
 import { Department } from '../entities/Department';
@@ -28,7 +28,7 @@ router.post(
   authorize(UserRole.Staff),
   [
     body('name').notEmpty(),
-    body('type').isIn(Object.values(ResourceType)),
+    body('type').isString(),
     body('attributes').optional().isArray(),
     body('attributes.*.key').notEmpty().withMessage('Attribute key is required'),
     body('attributes.*.value').exists().withMessage('Attribute value is required'),
@@ -41,22 +41,47 @@ router.post(
     const { name, type, description, attributes = [] } = req.body;
 
     try {
-      const resource = new Resource(name, type);
+      // Map string type to enum value
+      const typeMap: Record<string, ResourceType> = {
+        'equipment': ResourceType.Equipment,
+        'software_license': ResourceType.SoftwareLicense,
+        'other': ResourceType.Other,
+      };
+
+      const resourceType = typeMap[type];
+      if (!resourceType) {
+        return res.status(400).json({ success: false, message: `Invalid resource type: ${type}` });
+      }
+
+      const resource = new Resource(name, resourceType);
       resource.description = description || null;
 
       // Persist resource first so that relation targets can reference it (Mikro ORM will handle it but persisting is clearer)
       await em.persist(resource);
 
       for (const attr of attributes) {
-        let attribute = await em.findOne(ResourceAttribute, { key: attr.key });
+        // Use Attribute entity instead of ResourceAttribute
+        let attribute = await em.findOne(Attribute, { name: attr.key, entityType: 'Resource' });
         if (!attribute) {
-          // Auto-create attribute if not found (default to String)
-          attribute = new ResourceAttribute(attr.key, attr.key, AttributeDataType.String);
-          await em.persist(attribute);
+          // Auto-create attribute if it doesn't exist
+          let inferredType = AttributeDataType.String;
+          const valStr = String(attr.value).toLowerCase().trim();
+
+          // Simple type inference
+          if (!isNaN(Number(attr.value)) && attr.value !== '' && attr.value !== null) {
+            inferredType = AttributeDataType.Number;
+          } else if (['true', 'false', 'yes', 'no', '1', '0'].includes(valStr)) {
+            inferredType = AttributeDataType.Boolean;
+          } else if (!isNaN(Date.parse(attr.value)) && valStr.length > 5 && (valStr.includes('-') || valStr.includes('/'))) {
+            // Very basic date check: must include separators and parse
+            inferredType = AttributeDataType.Date;
+          }
+
+          attribute = new Attribute(attr.key, attr.key, inferredType, 'Resource');
+          em.persist(attribute);
         }
 
-        const value = new ResourceAttributeValue();
-        value.resource = resource;
+        const value = new ResourceAttributeValue(resource);
         value.attribute = attribute;
 
         if (attribute.dataType === AttributeDataType.Number) {
@@ -146,13 +171,15 @@ router.post(
       if (!resource) return res.status(404).json({ success: false, message: 'Resource not found' });
 
       // Check for active allocation
+      // Check for active allocation
       const activeAllocation = resource.allocations.getItems().find(a => a.status === AllocationStatus.Active);
       if (activeAllocation) {
         return res.status(400).json({ success: false, message: 'Resource already allocated', data: { allocationId: activeAllocation.id } });
       }
 
-      const allocation = new Allocation();
-      allocation.resource = resource;
+      let targetType: TargetType;
+      let targetId: number;
+      let targetName: string;
 
       if (userId) {
         // Accept numeric id or email
@@ -164,14 +191,25 @@ router.post(
         }
 
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-        allocation.allocatedToUser = user;
-      }
-
-      if (departmentId) {
+        targetType = TargetType.User;
+        targetId = user.id;
+        targetName = `${user.firstName} ${user.lastName}`;
+      } else {
         const department = await em.findOne(Department, Number(departmentId));
         if (!department) return res.status(404).json({ success: false, message: 'Department not found' });
-        allocation.allocatedToDepartment = department;
+        targetType = TargetType.Department;
+        targetId = department.id;
+        targetName = department.name;
       }
+
+      // Find or create AllocationTarget
+      let allocationTarget = await em.findOne(AllocationTarget, { targetId, targetType });
+      if (!allocationTarget) {
+        allocationTarget = new AllocationTarget(targetName, targetId, targetType);
+        em.persist(allocationTarget);
+      }
+
+      const allocation = new Allocation(resource, allocationTarget);
 
       if (dueDate) {
         allocation.dueDate = new Date(dueDate);
@@ -186,7 +224,7 @@ router.post(
 
       await em.persistAndFlush([allocation, resource]);
 
-      await em.populate(allocation, ['resource', 'allocatedToUser', 'allocatedToDepartment']);
+      await em.populate(allocation, ['resource', 'target']);
 
       return res.status(201).json({ success: true, message: 'Resource allocated', data: allocation });
     } catch (err) {
@@ -213,7 +251,7 @@ router.post('/allocations/:id/return', authenticate, async (req: AuthRequest, re
     if (!reqUser) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
     const isStaff = reqUser.role === UserRole.Staff;
-    const isOwner = allocation.allocatedToUser && allocation.allocatedToUser.id === Number(reqUser.id);
+    const isOwner = allocation.target && allocation.target.targetId === Number(reqUser.id) && allocation.target.targetType === TargetType.User;
     if (!isStaff && !isOwner) {
       return res.status(403).json({ success: false, message: 'Forbidden' });
     }
@@ -238,20 +276,16 @@ router.get('/my', authenticate, async (req: AuthRequest, res: Response) => {
   if (!user) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
   try {
-    // If user's department exists, include allocations to that department
-    const where: any = {
+    const allocations = await em.find(Allocation, {
       status: AllocationStatus.Active,
-      $or: [
-        { allocatedToUser: { id: Number(user.id) } }
-      ]
-    };
-
-    if (user.departmentId) {
-      where.$or.push({ allocatedToDepartment: { id: Number(user.departmentId) } });
-    }
-
-    const allocations = await em.find(Allocation, where, {
-      populate: ['resource', 'resource.attributes', 'resource.attributes.attribute'],
+      target: {
+        $or: [
+          { targetId: Number(user.id), targetType: TargetType.User },
+          ...(user.departmentId ? [{ targetId: Number(user.departmentId), targetType: TargetType.Department }] : [])
+        ]
+      }
+    }, {
+      populate: ['resource', 'resource.attributes', 'resource.attributes.attribute', 'target'],
       orderBy: { allocatedAt: 'DESC' },
     });
 
@@ -266,7 +300,7 @@ router.get('/my', authenticate, async (req: AuthRequest, res: Response) => {
 router.get('/allocations', authenticate, authorize(UserRole.Staff), async (req, res) => {
   const em = RequestContext.getEntityManager() as EntityManager;
   try {
-    const allocations = await em.find(Allocation, {}, { populate: ['resource', 'allocatedToUser', 'allocatedToDepartment'] });
+    const allocations = await em.find(Allocation, {}, { populate: ['resource', 'target'] });
     return res.json({ success: true, data: allocations });
   } catch (err) {
     console.error('Error loading allocations:', err);
@@ -279,7 +313,7 @@ router.get('/:id', authenticate, async (req, res) => {
   const em = RequestContext.getEntityManager() as EntityManager;
   const id = Number(req.params.id);
   try {
-    const resource = await em.findOne(Resource, id, { populate: ['attributes', 'attributes.attribute', 'allocations'] });
+    const resource = await em.findOne(Resource, id, { populate: ['attributes', 'attributes.attribute', 'allocations', 'allocations.target'] });
     if (!resource) return res.status(404).json({ success: false, message: 'Resource not found' });
 
     // Ensure isAvailable consistent with allocations
@@ -297,7 +331,7 @@ router.get('/:id/history', authenticate, async (req, res) => {
   const em = RequestContext.getEntityManager() as EntityManager;
   const resourceId = Number(req.params.id);
   try {
-    const history = await em.find(Allocation, { resource: resourceId }, { populate: ['allocatedToUser', 'allocatedToDepartment'], orderBy: { allocatedAt: 'DESC' } });
+    const history = await em.find(Allocation, { resource: resourceId }, { populate: ['target'], orderBy: { allocatedAt: 'DESC' } });
     return res.json({ success: true, data: history });
   } catch (err) {
     console.error('Error fetching history:', err);

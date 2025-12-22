@@ -14,6 +14,14 @@ import { Loader2, AlertCircle, GraduationCap } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000/api';
 
+const ASSESSMENT_TYPE_LABELS: Record<number, string> = {
+    1: 'Assignment',
+    2: 'Quiz',
+    3: 'Midterm',
+    4: 'Final',
+    5: 'Project'
+};
+
 function MyGradesPage() {
     const [grades, setGrades] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -132,7 +140,7 @@ function MyGradesPage() {
                                         <TableCell>{grade.assessment.title}</TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className="uppercase text-[10px]">
-                                                {grade.assessment.type}
+                                                {ASSESSMENT_TYPE_LABELS[grade.assessment.type] || 'Other'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-center font-bold text-primary">

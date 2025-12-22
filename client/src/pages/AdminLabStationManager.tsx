@@ -24,32 +24,39 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Monitor, Plus, Edit2, Trash2, Check, AlertCircle } from 'lucide-react';
 
+const LAB_STATUS = {
+    AVAILABLE: 1,
+    RESERVED: 2,
+    OCCUPIED: 3,
+    OUT_OF_SERVICE: 4
+};
+
 const STATION_STATUS_OPTIONS = [
-    { value: 'available', label: 'Available' },
-    { value: 'reserved', label: 'Reserved' },
-    { value: 'occupied', label: 'Occupied' },
-    { value: 'out_of_service', label: 'Out of Service' }
+    { value: LAB_STATUS.AVAILABLE, label: 'Available' },
+    { value: LAB_STATUS.RESERVED, label: 'Reserved' },
+    { value: LAB_STATUS.OCCUPIED, label: 'Occupied' },
+    { value: LAB_STATUS.OUT_OF_SERVICE, label: 'Out of Service' }
 ];
 
-const STATION_STATUS_LABELS: Record<string, string> = {
-    available: 'Available',
-    reserved: 'Reserved',
-    occupied: 'Occupied',
-    out_of_service: 'Out of Service'
+const STATION_STATUS_LABELS: Record<number, string> = {
+    [LAB_STATUS.AVAILABLE]: 'Available',
+    [LAB_STATUS.RESERVED]: 'Reserved',
+    [LAB_STATUS.OCCUPIED]: 'Occupied',
+    [LAB_STATUS.OUT_OF_SERVICE]: 'Out of Service'
 };
 
-const STATION_STATUS_VARIANTS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-    available: 'default', // Using default (primary) for available or maybe something else? Let's generic 'secondary' for common
-    reserved: 'secondary',
-    occupied: 'destructive',
-    out_of_service: 'outline'
+const STATION_STATUS_VARIANTS: Record<number, "default" | "secondary" | "destructive" | "outline"> = {
+    [LAB_STATUS.AVAILABLE]: 'default',
+    [LAB_STATUS.RESERVED]: 'secondary',
+    [LAB_STATUS.OCCUPIED]: 'destructive',
+    [LAB_STATUS.OUT_OF_SERVICE]: 'outline'
 };
 // Custom colors often needed for status if semantic tokens aren't enough
-const STATION_STATUS_CLASSES: Record<string, string> = {
-    available: 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200',
-    reserved: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200',
-    occupied: 'bg-red-100 text-red-800 hover:bg-red-200 border-red-200',
-    out_of_service: 'bg-gray-100 text-gray-500 hover:bg-gray-200 border-gray-200'
+const STATION_STATUS_CLASSES: Record<number, string> = {
+    [LAB_STATUS.AVAILABLE]: 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200',
+    [LAB_STATUS.RESERVED]: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200',
+    [LAB_STATUS.OCCUPIED]: 'bg-red-100 text-red-800 hover:bg-red-200 border-red-200',
+    [LAB_STATUS.OUT_OF_SERVICE]: 'bg-gray-100 text-gray-500 hover:bg-gray-200 border-gray-200'
 };
 
 
@@ -74,7 +81,7 @@ const AdminLabStationManager = () => {
         stationNumber: '',
         description: '',
         equipment: '',
-        status: 'available',
+        status: LAB_STATUS.AVAILABLE,
         isActive: true
     };
     const [formData, setFormData] = useState(initialFormState);
@@ -99,15 +106,15 @@ const AdminLabStationManager = () => {
             setError('');
 
             // Fetch lab details
-            const labResponse = await roomService.getById(labId);
-            if (!labResponse.room || labResponse.room.type !== 'lab') {
+            const labResponse = await roomService.getById(parseInt(labId!));
+            if (!labResponse.room || labResponse.room.type !== 2) { // 2 = Lab
                 setError('This room is not a lab');
                 return;
             }
             setLab(labResponse.room);
 
             // Fetch stations for this lab
-            const stationsResponse = await labStationService.getStationsByLab(labId);
+            const stationsResponse = await labStationService.getStationsByLab(parseInt(labId!));
             setStations(stationsResponse.stations || []);
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err: any) {
@@ -125,7 +132,7 @@ const AdminLabStationManager = () => {
                 stationNumber: station.stationNumber || '',
                 description: station.description || '',
                 equipment: Array.isArray(station.equipment) ? station.equipment.join(', ') : '',
-                status: station.status || 'available',
+                status: station.status || LAB_STATUS.AVAILABLE,
                 isActive: station.isActive !== false
             });
         } else {
@@ -164,7 +171,7 @@ const AdminLabStationManager = () => {
     const handleSelectChange = (name: string, value: string) => {
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: name === 'status' ? parseInt(value) : value
         }));
     };
 
@@ -212,7 +219,7 @@ const AdminLabStationManager = () => {
         }
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (id: number) => {
         if (window.confirm('Are you sure you want to deactivate this station? It will no longer be available for reservations.')) {
             try {
                 await labStationService.delete(id);
@@ -284,12 +291,20 @@ const AdminLabStationManager = () => {
                                 Workstations ({stations.length})
                             </h2>
                             <div className="flex items-center gap-4 text-sm">
-                                {Object.entries(STATION_STATUS_LABELS).map(([key, label]) => (
-                                    <div key={key} className="flex items-center gap-2">
-                                        <div className={`w-3 h-3 rounded-full ${key === 'available' ? 'bg-green-500' : key === 'reserved' ? 'bg-yellow-500' : key === 'occupied' ? 'bg-red-500' : 'bg-gray-500'}`}></div>
-                                        <span className="text-muted-foreground">{label}</span>
-                                    </div>
-                                ))}
+                                {Object.entries(STATION_STATUS_LABELS).map(([key, label]) => {
+                                    const statusId = parseInt(key);
+                                    let bgClass = 'bg-gray-500';
+                                    if (statusId === LAB_STATUS.AVAILABLE) bgClass = 'bg-green-500';
+                                    else if (statusId === LAB_STATUS.RESERVED) bgClass = 'bg-yellow-500';
+                                    else if (statusId === LAB_STATUS.OCCUPIED) bgClass = 'bg-red-500';
+
+                                    return (
+                                        <div key={key} className="flex items-center gap-2">
+                                            <div className={`w-3 h-3 rounded-full ${bgClass}`}></div>
+                                            <span className="text-muted-foreground">{label}</span>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
 
@@ -305,8 +320,8 @@ const AdminLabStationManager = () => {
                                     <div
                                         key={station.id}
                                         className={`relative p-4 rounded-lg border transition-all hover:shadow-md ${station.isActive !== false
-                                                ? STATION_STATUS_CLASSES[station.status]
-                                                : 'bg-muted border-muted-foreground/20 opacity-60'
+                                            ? STATION_STATUS_CLASSES[station.status]
+                                            : 'bg-muted border-muted-foreground/20 opacity-60'
                                             }`}
                                     >
                                         {/* Action buttons */}
@@ -408,7 +423,7 @@ const AdminLabStationManager = () => {
                         <div className="space-y-2">
                             <Label htmlFor="status">Status *</Label>
                             <Select
-                                value={formData.status}
+                                value={formData.status.toString()}
                                 onValueChange={(value) => handleSelectChange('status', value)}
                             >
                                 <SelectTrigger>
@@ -416,7 +431,7 @@ const AdminLabStationManager = () => {
                                 </SelectTrigger>
                                 <SelectContent>
                                     {STATION_STATUS_OPTIONS.map(option => (
-                                        <SelectItem key={option.value} value={option.value}>
+                                        <SelectItem key={option.value} value={option.value.toString()}>
                                             {option.label}
                                         </SelectItem>
                                     ))}

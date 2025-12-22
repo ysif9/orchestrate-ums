@@ -25,6 +25,20 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Plus, Search } from 'lucide-react'
 
+const PD_ACTIVITY_TYPE = {
+    WORKSHOP: 1,
+    CONFERENCE: 2,
+    CERTIFICATION: 3,
+    OTHER: 4
+};
+
+const ACTIVITY_TYPE_LABELS: Record<number, string> = {
+    [PD_ACTIVITY_TYPE.WORKSHOP]: 'Workshop',
+    [PD_ACTIVITY_TYPE.CONFERENCE]: 'Conference',
+    [PD_ACTIVITY_TYPE.CERTIFICATION]: 'Certification',
+    [PD_ACTIVITY_TYPE.OTHER]: 'Other'
+};
+
 const StaffPDTrackingPage = () => {
     const navigate = useNavigate();
     const [activities, setActivities] = useState<any[]>([]);
@@ -38,7 +52,7 @@ const StaffPDTrackingPage = () => {
     const initialFormState = {
         professorId: '',
         title: '',
-        activityType: 'Workshop',
+        activityType: PD_ACTIVITY_TYPE.WORKSHOP,
         date: '',
         hours: '',
         provider: '',
@@ -76,7 +90,7 @@ const StaffPDTrackingPage = () => {
     const handleSelectChange = (name: string, value: string) => {
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: name === 'activityType' ? parseInt(value) : value
         }));
     };
 
@@ -175,7 +189,7 @@ const StaffPDTrackingPage = () => {
                                                     {activity.professor?.name}
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <Badge variant="outline">{activity.activityType}</Badge>
+                                                    <Badge variant="outline">{ACTIVITY_TYPE_LABELS[activity.activityType] || activity.activityType}</Badge>
                                                 </td>
                                                 <td className="px-6 py-4 text-muted-foreground">
                                                     {new Date(activity.date).toLocaleDateString()}
@@ -240,17 +254,17 @@ const StaffPDTrackingPage = () => {
                             <div className="space-y-2">
                                 <Label>Type</Label>
                                 <Select
-                                    value={formData.activityType}
+                                    value={formData.activityType.toString()}
                                     onValueChange={(val) => handleSelectChange('activityType', val)}
                                 >
                                     <SelectTrigger>
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Workshop">Workshop</SelectItem>
-                                        <SelectItem value="Conference">Conference</SelectItem>
-                                        <SelectItem value="Certification">Certification</SelectItem>
-                                        <SelectItem value="Other">Other</SelectItem>
+                                        <SelectItem value={PD_ACTIVITY_TYPE.WORKSHOP.toString()}>Workshop</SelectItem>
+                                        <SelectItem value={PD_ACTIVITY_TYPE.CONFERENCE.toString()}>Conference</SelectItem>
+                                        <SelectItem value={PD_ACTIVITY_TYPE.CERTIFICATION.toString()}>Certification</SelectItem>
+                                        <SelectItem value={PD_ACTIVITY_TYPE.OTHER.toString()}>Other</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

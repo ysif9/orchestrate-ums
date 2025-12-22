@@ -13,18 +13,25 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-const ROOM_TYPES: Record<string, string> = {
-    classroom: 'Classroom',
-    lab: 'Lab',
-    lecture_hall: 'Lecture Hall',
-    conference_room: 'Conference Room'
+const ROOM_TYPE = {
+    CLASSROOM: 1,
+    LAB: 2,
+    LECTURE_HALL: 3,
+    CONFERENCE_ROOM: 4
 };
 
-const ROOM_TYPE_COLORS: Record<string, string> = {
-    classroom: 'bg-blue-100 text-blue-800',
-    lab: 'bg-purple-100 text-purple-800',
-    lecture_hall: 'bg-green-100 text-green-800',
-    conference_room: 'bg-orange-100 text-orange-800'
+const ROOM_TYPES: Record<number, string> = {
+    [ROOM_TYPE.CLASSROOM]: 'Classroom',
+    [ROOM_TYPE.LAB]: 'Lab',
+    [ROOM_TYPE.LECTURE_HALL]: 'Lecture Hall',
+    [ROOM_TYPE.CONFERENCE_ROOM]: 'Conference Room'
+};
+
+const ROOM_TYPE_COLORS: Record<number, string> = {
+    [ROOM_TYPE.CLASSROOM]: 'bg-blue-100 text-blue-800',
+    [ROOM_TYPE.LAB]: 'bg-purple-100 text-purple-800',
+    [ROOM_TYPE.LECTURE_HALL]: 'bg-green-100 text-green-800',
+    [ROOM_TYPE.CONFERENCE_ROOM]: 'bg-orange-100 text-orange-800'
 };
 
 export default function RoomBookingPage() {
@@ -66,7 +73,7 @@ export default function RoomBookingPage() {
 
     // Filter rooms
     const filteredRooms = rooms.filter(room => {
-        if (roomTypeFilter !== 'all' && room.type !== roomTypeFilter) return false;
+        if (roomTypeFilter !== 'all' && room.type.toString() !== roomTypeFilter) return false;
         if (buildingFilter !== 'all' && room.building !== buildingFilter) return false;
         return true;
     });
@@ -204,7 +211,7 @@ export default function RoomBookingPage() {
     const checkClientSideConflict = (roomId: number, startTime: Date, endTime: Date) => {
         const roomBookings = bookings.filter(b =>
             (b.room?.id === roomId || b.room === roomId) &&
-            b.status !== 'cancelled'
+            b.status !== 3 // 3 is Cancelled
         );
 
         for (const booking of roomBookings) {
@@ -706,7 +713,7 @@ export default function RoomBookingPage() {
                                 </div>
 
                                 <div className="text-sm text-muted-foreground">
-                                    Booked by: <span className="font-medium text-foreground">{selectedBooking.bookedBy?.name}</span>
+                                    Booked by: <span className="font-medium text-foreground">{selectedBooking.createdBy?.name}</span>
                                 </div>
 
                                 {selectedBooking.notes && (
@@ -717,7 +724,7 @@ export default function RoomBookingPage() {
                                 )}
 
                                 {/* Show cancel button only if user owns the booking */}
-                                {selectedBooking.bookedBy?.id === user?.id && (
+                                {selectedBooking.createdBy?.id === user?.id && (
                                     <DialogFooter>
                                         <Button
                                             variant="destructive"

@@ -20,6 +20,28 @@ function CourseCatalog() {
     const [completedCourseIds, setCompletedCourseIds] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const COURSE_TYPE_LABELS: Record<number, string> = {
+        1: 'Core',
+        2: 'Elective'
+    };
+
+    const DIFFICULTY_LABELS: Record<number, string> = {
+        1: 'Introductory',
+        2: 'Intermediate',
+        3: 'Advanced'
+    };
+
+    const REVERSE_DIFFICULTY: Record<string, number> = {
+        'Introductory': 1,
+        'Intermediate': 2,
+        'Advanced': 3
+    };
+
+    const REVERSE_COURSE_TYPE: Record<string, number> = {
+        'Core': 1,
+        'Elective': 2
+    };
+
     // Filter states
     const [filters, setFilters] = useState({
         searchTerm: '',
@@ -60,7 +82,8 @@ function CourseCatalog() {
 
         // Filter by level (difficulty)
         if (filters.level !== 'All') {
-            result = result.filter(c => c.difficulty === filters.level);
+            const levelInt = REVERSE_DIFFICULTY[filters.level];
+            result = result.filter(c => c.difficulty === levelInt);
         }
 
         // Filter by credits
@@ -70,7 +93,8 @@ function CourseCatalog() {
 
         // Filter by type
         if (filters.type !== 'All') {
-            result = result.filter(c => c.type === filters.type);
+            const typeInt = REVERSE_COURSE_TYPE[filters.type];
+            result = result.filter(c => c.type === typeInt);
         }
 
         // Filter by prerequisite status
@@ -268,8 +292,8 @@ function CourseCatalog() {
                                         <div className="flex justify-between items-start mb-4">
                                             <div className="text-primary font-bold text-lg">{course.code}</div>
                                             <div className="flex gap-2 flex-wrap justify-end">
-                                                <Badge variant={course.type === 'Core' ? 'default' : 'secondary'}>
-                                                    {course.type}
+                                                <Badge variant={course.type === 1 ? 'default' : 'secondary'}>
+                                                    {COURSE_TYPE_LABELS[course.type]}
                                                 </Badge>
                                                 {locked && (
                                                     <Badge variant="outline" className="flex items-center gap-1">
@@ -285,7 +309,7 @@ function CourseCatalog() {
                                         <div className="space-y-2 mb-4">
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-muted-foreground">Level:</span>
-                                                <span className="font-medium text-foreground">{course.difficulty}</span>
+                                                <span className="font-medium text-foreground">{DIFFICULTY_LABELS[course.difficulty]}</span>
                                             </div>
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-muted-foreground">Credits:</span>

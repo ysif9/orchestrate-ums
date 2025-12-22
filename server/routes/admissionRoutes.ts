@@ -4,19 +4,19 @@ import { RequestContext } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Applicant } from '../entities/Applicant';
 import { Application, ApplicationStatus } from '../entities/Application';
+import { Program } from '../entities/Program';
+import { Semester, SemesterStatus } from '../entities/Semester';
+import { updateEntityAttributes, toFlatObject } from '../utils/eavHelpers';
 
 const router = express.Router();
 
 /**
  * Available programs for admission
  */
-const PROGRAMS = [
-    { id: 'cs', name: 'Computer Science', department: 'Engineering' },
-    { id: 'ee', name: 'Electrical Engineering', department: 'Engineering' },
-    { id: 'me', name: 'Mechanical Engineering', department: 'Engineering' },
-    { id: 'ce', name: 'Civil Engineering', department: 'Engineering' },
-    { id: 'arch', name: 'Architecture', department: 'Engineering' },
-];
+/**
+ * Available programs for admission (will be fetched from DB)
+ */
+let PROGRAMS: any[] = [];
 
 /**
  * Admission requirements and information
@@ -52,9 +52,16 @@ const ADMISSION_INFO = {
  */
 router.get('/info', async (req: Request, res: Response) => {
     try {
+        const em = RequestContext.getEntityManager() as EntityManager;
+        const programs = await em.find(Program, {}, { populate: ['attributes', 'attributes.attribute'] });
+        const formattedPrograms = programs.map(p => toFlatObject(p));
+
         res.json({
             success: true,
-            data: ADMISSION_INFO,
+            data: {
+                ...ADMISSION_INFO,
+                programs: formattedPrograms
+            },
         });
     } catch (error: any) {
         console.error('Error fetching admission info:', error);
@@ -104,30 +111,78 @@ router.post('/apply', [
 
         if (!applicant) {
             // Create new applicant
-            applicant = new Applicant(firstName, lastName, email);
-            if (phone) applicant.phone = phone;
+            applicant = new Applicant(firstName, lastName, email, phone || '');
             if (address) applicant.address = address;
-            if (academicHistory) applicant.academicHistory = academicHistory;
-            if (personalInfo) applicant.personalInfo = personalInfo;
 
             await em.persistAndFlush(applicant);
+
+            // Update EAV attributes (applicant now has an ID)
+            const eavData = { ...academicHistory, ...personalInfo };
+            await updateEntityAttributes(em, applicant, 'Applicant', eavData);
+
+            await em.flush();
         } else {
             // Update existing applicant's information
             applicant.firstName = firstName;
             applicant.lastName = lastName;
             if (phone) applicant.phone = phone;
             if (address) applicant.address = address;
-            if (academicHistory) applicant.academicHistory = academicHistory;
-            if (personalInfo) applicant.personalInfo = personalInfo;
+
+            // Update EAV attributes
+            const eavData = { ...academicHistory, ...personalInfo };
+            await updateEntityAttributes(em, applicant, 'Applicant', eavData);
 
             await em.flush();
+        }
+
+        // Find program entity
+        let programEntity: Program | null = null;
+        if (!isNaN(Number(program))) {
+            programEntity = await em.findOne(Program, { id: Number(program) });
+        } else {
+            const programNameMap: Record<string, string> = {
+                'cs': 'Computer Science',
+                'ee': 'Electrical Engineering',
+                'me': 'Mechanical Engineering',
+                'ce': 'Civil Engineering',
+                'arch': 'Architecture'
+            };
+            const programName = programNameMap[program] || program;
+            programEntity = await em.findOne(Program, { name: programName });
+
+            if (!programEntity) {
+                programEntity = new Program(programName);
+                em.persist(programEntity);
+            }
+        }
+
+        if (!programEntity) {
+            return res.status(400).json({ success: false, message: 'Invalid program selection' });
+        }
+
+        // Find semester entity
+        let semesterEntity = await em.findOne(Semester, { name: semester });
+        if (!semesterEntity && !isNaN(Number(semester))) {
+            semesterEntity = await em.findOne(Semester, { id: Number(semester) });
+        }
+
+        if (!semesterEntity) {
+            // Fallback: use first active semester or any semester as default
+            semesterEntity = await em.findOne(Semester, { status: SemesterStatus.Active });
+            if (!semesterEntity) {
+                semesterEntity = await em.findOne(Semester, {});
+            }
+        }
+
+        if (!semesterEntity) {
+            return res.status(400).json({ success: false, message: 'No valid semester found/defined' });
         }
 
         // Check if an application for this program/semester already exists
         const existingApplication = await em.findOne(Application, {
             applicant,
-            program,
-            semester,
+            program: programEntity,
+            semester: semesterEntity,
         });
 
         if (existingApplication) {
@@ -138,8 +193,7 @@ router.post('/apply', [
         }
 
         // Create new application
-        const application = new Application(applicant, program);
-        application.semester = semester;
+        const application = new Application(applicant, programEntity, semesterEntity);
         application.status = ApplicationStatus.Pending;
         application.submissionDate = new Date();
 
@@ -150,8 +204,8 @@ router.post('/apply', [
             data: {
                 applicationId: application.id,
                 applicantId: applicant.id,
-                program,
-                semester,
+                program: application.program.name,
+                semester: application.semester.name,
                 status: application.status,
                 submissionDate: application.submissionDate,
             },
@@ -190,6 +244,7 @@ router.get('/status/:email', async (req: Request, res: Response) => {
 
         const applications = await em.find(Application, { applicant }, {
             orderBy: { submissionDate: 'DESC' },
+            populate: ['semester', 'program']
         });
 
         res.json({
@@ -198,8 +253,8 @@ router.get('/status/:email', async (req: Request, res: Response) => {
                 applicantName: `${applicant.firstName} ${applicant.lastName}`,
                 applications: applications.map(app => ({
                     id: app.id,
-                    program: app.program,
-                    semester: app.semester,
+                    program: app.program.name,
+                    semester: app.semester.name,
                     status: app.status,
                     submissionDate: app.submissionDate,
                 })),

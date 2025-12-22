@@ -1,77 +1,61 @@
-import { Entity, Property, ManyToOne, Enum } from "@mikro-orm/core";
+import { Entity, Property, ManyToOne, Enum, Collection, OneToMany } from "@mikro-orm/core";
 import { BaseEntity } from "./BaseEntity";
 import { Applicant } from "./Applicant";
 import { User } from "./User";
+import { AttachmentAttributeValue } from "./AttachmentAttributeValue";
 
+// @Solution
+// Switch to EAV and INT
 /**
  * Attachment type enum for categorizing uploaded documents.
+ * Using integers for better database performance.
  */
 export enum AttachmentType {
-    Transcript = "transcript",
-    Essay = "essay",
-    Recommendation = "recommendation",
-    Certificate = "certificate",
-    IdDocument = "id_document",
-    Photo = "photo",
-    Other = "other",
+    Transcript = 1,
+    Essay = 2,
+    Recommendation = 3,
+    Certificate = 4,
+    IdDocument = 5,
+    Photo = 6,
+    Other = 7,
 }
 
 /**
  * Represents a file attachment uploaded by or for an applicant.
  * Stores file metadata and the path to the file on disk.
+ * Uses EAV for flexible metadata per attachment type.
  */
 @Entity()
 export class Attachment extends BaseEntity {
-    @ManyToOne(() => Applicant)
+    @ManyToOne(() => Applicant, { deleteRule: 'cascade' })
     applicant!: Applicant;
 
-    /**
-     * The stored filename (UUID-based or sanitized name).
-     */
     @Property()
     filename!: string;
 
-    /**
-     * The original filename as uploaded by the user.
-     */
     @Property()
     originalName!: string;
 
-    /**
-     * MIME type of the file (e.g., application/pdf, image/jpeg).
-     */
     @Property()
     mimeType!: string;
 
-    /**
-     * File size in bytes.
-     */
     @Property()
     size!: number;
 
-    /**
-     * Relative path to the file on disk (e.g., uploads/applicant-documents/uuid.pdf).
-     */
     @Property()
     filePath!: string;
 
-    /**
-     * Type/category of the attachment.
-     */
     @Enum({ items: () => AttachmentType })
     type: AttachmentType = AttachmentType.Other;
 
-    /**
-     * Timestamp when the file was uploaded.
-     */
     @Property()
     uploadedAt: Date = new Date();
 
-    /**
-     * User who uploaded the file (could be staff or the applicant themselves).
-     */
     @ManyToOne(() => User, { nullable: true })
-    uploadedBy?: User;
+    createdBy?: User;
+
+    @OneToMany(() => AttachmentAttributeValue, (eav) => eav.attachment, { cascade: ["all" as any] })
+    attributes = new Collection<AttachmentAttributeValue>(this);
 
     constructor(
         applicant: Applicant,

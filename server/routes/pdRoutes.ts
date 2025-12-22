@@ -1,34 +1,62 @@
 import express from 'express';
-import { RequestContext } from '@mikro-orm/core';
+import { RequestContext, wrap } from '@mikro-orm/core';
 import { ProfessionalDevelopment, PDActivityType } from '../entities/ProfessionalDevelopment';
-import { User, UserRole } from '../entities/User';
+import { User } from '../entities/User';
+import { Attribute, AttributeDataType } from '../entities/Attribute';
+import { ProfessionalDevelopmentAttributeValue } from '../entities/ProfessionalDevelopmentAttributeValue';
 
 const router = express.Router();
+
+function flattenPD(pd: ProfessionalDevelopment): any {
+    const obj = wrap(pd).toJSON() as any;
+    if (pd.attributes && pd.attributes.isInitialized()) {
+        pd.attributes.getItems().forEach(attrVal => {
+            obj[attrVal.attribute.name] = attrVal.value;
+        });
+    }
+    return obj;
+}
+
+// Helper function to upsert attribute
+async function upsertAttribute(em: any, pd: ProfessionalDevelopment, key: string, value: any, dataType: AttributeDataType) {
+    if (value === undefined || value === null) return;
+
+    let attr = await em.findOne(Attribute, { name: key, entityType: 'ProfessionalDevelopment' });
+    if (!attr) {
+        attr = new Attribute(key, key.charAt(0).toUpperCase() + key.slice(1), dataType, 'ProfessionalDevelopment');
+        await em.persist(attr);
+    }
+
+    const existingVal = pd.attributes.getItems().find(a => a.attribute.name === key);
+    if (existingVal) {
+        existingVal.setValue(value);
+    } else {
+        const newVal = new ProfessionalDevelopmentAttributeValue(pd);
+        newVal.attribute = attr;
+        newVal.setValue(value);
+        pd.attributes.add(newVal);
+        em.persist(newVal);
+    }
+}
 
 // GET /api/pd/activities
 router.get('/activities', async (req, res) => {
     try {
         const em = RequestContext.getEntityManager();
-        const { userId } = req.query; // Optional filter by user ID (for staff)
-        // TODO: proper auth middleware usage to get current user from request if not using args, 
-        // but looking at other routes it seems we might need to rely on what's passed or assuming protected in a certain way.
-        // However, usually we'd have req.user from middleware. I'll check authRoutes or similar to see how they handle it.
-        // For now assuming we can filter.
+        if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
-        // Actually, let's check how other routes handle "current user". 
-        // Usually via a middleware that populates req.user.
-        // I will stick to basic implementation and refine if I see patterns in `userRoutes.ts`.
+        const { userId } = req.query;
 
         const options: any = {};
         if (userId) {
             options.professor = userId;
         }
 
-        const pdRepo = em?.getRepository(ProfessionalDevelopment);
-        const activities = await pdRepo?.find(options, { populate: ['professor'] });
+        const pdRepo = em.getRepository(ProfessionalDevelopment);
+        const activities = await pdRepo.find(options, { populate: ['professor', 'attributes', 'attributes.attribute'] });
 
-        res.json(activities);
-    } catch (error) {
+        res.json(activities.map(flattenPD));
+    } catch (error: any) {
         console.error(error);
         res.status(500).json({ message: 'Error fetching PD activities' });
     }
@@ -38,33 +66,42 @@ router.get('/activities', async (req, res) => {
 router.post('/activities', async (req, res) => {
     try {
         const em = RequestContext.getEntityManager();
+        if (!em) return res.status(500).json({ message: 'EntityManager not found' });
+
         const { professorId, title, activityType, date, hours, provider, notes } = req.body;
 
+        // validate provider also if it's considered required effectively in old code? 
+        // It was required in check: "if (!professorId || ... || !provider)"
         if (!professorId || !title || !activityType || !date || !hours || !provider) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
-        const userRepo = em?.getRepository(User);
-        const professor = await userRepo?.findOne({ id: professorId });
+        const userRepo = em.getRepository(User);
+        const professor = await userRepo.findOne({ id: professorId });
 
         if (!professor) {
             return res.status(404).json({ message: 'Professor not found' });
         }
 
-        // Basic validation that user is professor or staff? 
-        // The requirement says "Professional dev activities for faculty".
-
         const pd = new ProfessionalDevelopment(
             professor,
             title,
-            activityType,
+            activityType as PDActivityType,
             new Date(date),
-            hours,
-            provider,
-            notes
+            hours
         );
 
-        await em?.persistAndFlush(pd);
+        await em.persist(pd);
+
+        if (provider) {
+            await upsertAttribute(em, pd, 'provider', provider, AttributeDataType.String);
+        }
+        if (notes) {
+            await upsertAttribute(em, pd, 'notes', notes, AttributeDataType.String);
+        }
+
+        await em.flush();
+        await em.populate(pd, ['attributes', 'attributes.attribute']);
         res.status(201).json(pd);
     } catch (error) {
         console.error(error);

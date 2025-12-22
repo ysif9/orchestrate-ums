@@ -1,25 +1,14 @@
-// entities/ResourceAttributeValue.ts
-import { Entity, Property, ManyToOne, Unique } from '@mikro-orm/core';
-import { BaseEntity } from './BaseEntity';
+import { Entity, ManyToOne } from '@mikro-orm/core';
+import { BaseAttributeValue } from './BaseAttributeValue';
+import { Resource } from './Resource';
 
 @Entity()
-@Unique({ properties: ['resource', 'attribute'] })
-export class ResourceAttributeValue extends BaseEntity {
-  @ManyToOne('Resource', { deleteRule: 'cascade' })
-  resource!: any;
+export class ResourceAttributeValue extends BaseAttributeValue {
+  @ManyToOne(() => Resource)
+  resource!: Resource;
 
-  @ManyToOne('ResourceAttribute')
-  attribute!: any;
-
-  @Property({ nullable: true })
-  stringValue?: string;
-
-  @Property({ nullable: true })
-  numberValue?: number;
-
-  @Property({ nullable: true })
-  dateValue?: Date;
-
-  @Property({ nullable: true })
-  booleanValue?: boolean;
+  constructor(resource: Resource) {
+    super();
+    this.resource = resource;
+  }
 }

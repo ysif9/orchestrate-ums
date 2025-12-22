@@ -11,18 +11,25 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 
-const STATION_STATUS_COLORS: Record<string, string> = {
-    available: 'bg-green-100 border-green-500 text-green-800',
-    reserved: 'bg-yellow-100 border-yellow-500 text-yellow-800',
-    occupied: 'bg-red-100 border-red-500 text-red-800',
-    out_of_service: 'bg-gray-100 border-gray-500 text-gray-500'
+const LAB_STATUS = {
+    AVAILABLE: 1,
+    RESERVED: 2,
+    OCCUPIED: 3,
+    OUT_OF_SERVICE: 4
 };
 
-const STATION_STATUS_LABELS: Record<string, string> = {
-    available: 'Available',
-    reserved: 'Reserved',
-    occupied: 'Occupied',
-    out_of_service: 'Out of Service'
+const STATION_STATUS_COLORS: Record<number, string> = {
+    [LAB_STATUS.AVAILABLE]: 'bg-green-100 border-green-500 text-green-800',
+    [LAB_STATUS.RESERVED]: 'bg-yellow-100 border-yellow-500 text-yellow-800',
+    [LAB_STATUS.OCCUPIED]: 'bg-red-100 border-red-500 text-red-800',
+    [LAB_STATUS.OUT_OF_SERVICE]: 'bg-gray-100 border-gray-500 text-gray-500'
+};
+
+const STATION_STATUS_LABELS: Record<number, string> = {
+    [LAB_STATUS.AVAILABLE]: 'Available',
+    [LAB_STATUS.RESERVED]: 'Reserved',
+    [LAB_STATUS.OCCUPIED]: 'Occupied',
+    [LAB_STATUS.OUT_OF_SERVICE]: 'Out of Service'
 };
 
 const MAX_RESERVATION_HOURS = 4;
@@ -140,7 +147,7 @@ export default function LabStationBookingPage() {
             setFormError('You already have an active reservation. Please complete or cancel it first.');
             return;
         }
-        if (station.status !== 'available') {
+        if (station.status !== LAB_STATUS.AVAILABLE) {
             return;
         }
         setSelectedStation(station);
@@ -370,7 +377,7 @@ export default function LabStationBookingPage() {
                                             className={cn(
                                                 "p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md flex flex-col items-center justify-center min-h-[120px]",
                                                 STATION_STATUS_COLORS[station.status],
-                                                station.status === 'available' ? 'hover:scale-105' : 'cursor-not-allowed opacity-75'
+                                                station.status === LAB_STATUS.AVAILABLE ? 'hover:scale-105' : 'cursor-not-allowed opacity-75'
                                             )}
                                         >
                                             <Monitor size={32} className="mb-2" />

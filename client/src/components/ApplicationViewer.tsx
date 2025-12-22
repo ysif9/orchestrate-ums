@@ -1,20 +1,12 @@
 import { useState } from 'react';
-import { User, GraduationCap, FileText, Paperclip, Mail, Phone, MapPin, Calendar } from 'lucide-react';
+import { User, GraduationCap, Mail, Phone, MapPin, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 
 
-const ATTACHMENT_TYPE_LABELS: Record<number, string> = {
-    1: 'Transcript',
-    2: 'Essay',
-    3: 'Recommendation',
-    4: 'Certificate',
-    5: 'ID Document',
-    6: 'Photo',
-    7: 'Other'
-};
+
 
 function InfoRow({ label, value, icon: Icon }: any) {
     return (
@@ -130,57 +122,9 @@ function ApplicationViewer({ application }: any) {
         </div>
     );
 
-    const renderDocuments = () => (
-        <div>
-            {applicant?.documents && Object.keys(applicant.documents).length > 0 ? (
-                Object.entries(applicant.documents).map(([key, value]) => (
-                    <Section key={key} title={key.replace(/([A-Z])/g, ' $1').trim()}>
-                        {typeof value === 'string' ? (
-                            <div className="whitespace-pre-wrap text-sm text-foreground">{value}</div>
-                        ) : (
-                            <InfoRow label={key} value={JSON.stringify(value, null, 2)} />
-                        )}
-                    </Section>
-                ))
-            ) : (
-                <div className="text-center py-8 text-muted-foreground">No documents information provided</div>
-            )}
-        </div>
-    );
 
-    const renderAttachments = () => (
-        <div>
-            {applicant?.attachments && applicant.attachments.length > 0 ? (
-                <div className="space-y-3">
-                    {applicant.attachments.map((attachment: any) => (
-                        <div
-                            key={attachment.id}
-                            className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-                        >
-                            <Paperclip size={20} className="text-primary" />
-                            <div className="flex-1">
-                                <p className="font-medium text-foreground">{attachment.originalName}</p>
-                                <p className="text-xs text-muted-foreground">
-                                    {ATTACHMENT_TYPE_LABELS[attachment.type] || 'Other'} • {attachment.mimeType} • {(attachment.size / 1024).toFixed(1)} KB
-                                </p>
-                            </div>
-                            <Button variant="link" size="sm" asChild>
-                                <a
-                                    href={`http://localhost:5000/uploads/applicant-documents/${attachment.filename}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    View
-                                </a>
-                            </Button>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <div className="text-center py-8 text-muted-foreground">No attachments uploaded</div>
-            )}
-        </div>
-    );
+
+
 
     return (
         <Card className="overflow-hidden">
@@ -210,20 +154,7 @@ function ApplicationViewer({ application }: any) {
                             <GraduationCap size={16} className="mr-2" />
                             Academic History
                         </TabsTrigger>
-                        <TabsTrigger
-                            value="documents"
-                            className="text-muted-foreground data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none pb-2"
-                        >
-                            <FileText size={16} className="mr-2" />
-                            Documents
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="attachments"
-                            className="text-muted-foreground data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none pb-2"
-                        >
-                            <Paperclip size={16} className="mr-2" />
-                            Attachments
-                        </TabsTrigger>
+
                     </TabsList>
                 </div>
 
@@ -231,8 +162,7 @@ function ApplicationViewer({ application }: any) {
                 <div className="p-6 max-h-[600px] overflow-y-auto">
                     <TabsContent value="personal" className="mt-0">{renderPersonalInfo()}</TabsContent>
                     <TabsContent value="academic" className="mt-0">{renderAcademicHistory()}</TabsContent>
-                    <TabsContent value="documents" className="mt-0">{renderDocuments()}</TabsContent>
-                    <TabsContent value="attachments" className="mt-0">{renderAttachments()}</TabsContent>
+
                 </div>
             </Tabs>
         </Card>

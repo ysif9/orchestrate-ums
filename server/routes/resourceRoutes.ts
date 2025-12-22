@@ -240,7 +240,7 @@ router.post('/allocations/:id/return', authenticate, async (req: AuthRequest, re
   const allocId = Number(req.params.id);
 
   try {
-    const allocation = await em.findOne(Allocation, allocId, { populate: ['resource'] });
+    const allocation = await em.findOne(Allocation, allocId, { populate: ['resource', 'target'] });
     if (!allocation) return res.status(404).json({ success: false, message: 'Allocation not found' });
     if (allocation.status !== AllocationStatus.Active) {
       return res.status(400).json({ success: false, message: 'Allocation is not active' });

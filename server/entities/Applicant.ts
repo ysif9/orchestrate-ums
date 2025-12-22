@@ -1,7 +1,7 @@
 import { Entity, Property, Unique, OneToMany, Collection, Cascade } from "@mikro-orm/core";
 import { BaseEntity } from "./BaseEntity";
 import type { Attachment } from "./Attachment";
-import { ApplicantAttributeValue } from "./ApplicantAttributeValue";
+import { EntityAttributeValue } from "./EntityAttributeValue";
 
 //@Observation
 // Has CSV/JsonB which is bad for queries
@@ -37,8 +37,8 @@ export class Applicant extends BaseEntity {
     @Property()
     address: string = "123 Street";
 
-    @OneToMany(() => ApplicantAttributeValue, (eav) => eav.applicant, { cascade: [Cascade.ALL], orphanRemoval: true })
-    attributes = new Collection<ApplicantAttributeValue>(this);
+    @OneToMany(() => EntityAttributeValue, (eav) => eav.applicant, { cascade: [Cascade.ALL], orphanRemoval: true })
+    attributes = new Collection<EntityAttributeValue>(this);
 
     @OneToMany('Attachment', 'applicant')
     attachments = new Collection<Attachment>(this);

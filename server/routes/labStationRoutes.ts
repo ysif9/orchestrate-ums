@@ -154,10 +154,11 @@ router.get('/lab/:labId', authenticate, async (req: AuthRequest, res: Response) 
             lab: { id: labId },
             isActive: true
         }, {
-            orderBy: { stationNumber: 'ASC' }
+            orderBy: { stationNumber: 'ASC' },
+            populate: ['attributes', 'attributes.attribute']
         });
 
-        // Get current reservations for each station
+        // Get current reservations for each station and flatten EAV attributes
         const now = new Date();
         const stationsWithReservations = await Promise.all(stations.map(async (station) => {
             const currentReservation = await em.findOne(LabStationReservation, {
@@ -169,8 +170,23 @@ router.get('/lab/:labId', authenticate, async (req: AuthRequest, res: Response) 
                 populate: ['student']
             });
 
+            const stationObj = wrap(station).toJSON() as any;
+
+            // Flatten EAV attributes (specifically equipment)
+            station.attributes.getItems().forEach(attrVal => {
+                if (attrVal.attribute.name === 'equipment') {
+                    try {
+                        stationObj['equipment'] = JSON.parse(attrVal.value);
+                    } catch (e) {
+                        stationObj['equipment'] = [];
+                    }
+                } else {
+                    stationObj[attrVal.attribute.name] = attrVal.value;
+                }
+            });
+
             return {
-                ...station,
+                ...stationObj,
                 currentReservation: currentReservation ? {
                     id: currentReservation.id,
                     startTime: currentReservation.startTime,

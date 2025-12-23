@@ -42,6 +42,11 @@ const getDefaultBenefits = (role: string) => {
 
 router.get('/', authenticate, async (req: any, res: Response) => {
     try {
+        const allowedRoles = [UserRole.Professor, UserRole.TeachingAssistant, UserRole.Staff];
+        if (!allowedRoles.includes(req.user!.role)) {
+            return res.status(403).json({ message: 'Access denied: Benefits are for employment roles only' });
+        }
+
         const em = RequestContext.getEntityManager();
         const userId = req.user!.id;
         const user = await em?.findOne(User, { id: userId });

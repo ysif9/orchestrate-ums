@@ -239,4 +239,64 @@ router.put('/:id/read', authenticate, async (req: AuthRequest, res: Response) =>
     }
 });
 
+// GET /api/messages/unread-count - Get unread message count for the logged-in user
+router.get('/unread-count', authenticate, async (req: AuthRequest, res: Response) => {
+    const em = RequestContext.getEntityManager() as EntityManager;
+    const userId = Number(req.user!.id);
+
+    try {
+        // Count messages where the user is the receiver and message is unread
+        const unreadCount = await em.count(Message, {
+            receiver: { id: userId } as any,
+            isRead: false
+        });
+
+        return res.json({
+            success: true,
+            data: { unreadCount }
+        });
+    } catch (err) {
+        console.error('Error fetching unread count:', err);
+        return res.status(500).json({ success: false, message: 'Error fetching unread count' });
+    }
+});
+
+// PUT /api/messages/:id/read-thread - Mark all messages in a thread as read
+router.put('/:id/read-thread', authenticate, async (req: AuthRequest, res: Response) => {
+    const em = RequestContext.getEntityManager() as EntityManager;
+    const userId = req.user!.id;
+    const messageId = Number(req.params.id);
+
+    try {
+        // Find the root message
+        const root = await em.findOne(Message, { id: messageId });
+        if (!root) {
+            return res.status(404).json({ success: false, message: 'Message not found' });
+        }
+
+        // Find all messages in the thread where user is receiver and mark as read
+        const messages = await em.find(Message, {
+            $or: [
+                { id: messageId, receiver: { id: userId } as any },
+                { parent: { id: messageId } as any, receiver: { id: userId } as any }
+            ],
+            isRead: false
+        });
+
+        messages.forEach(msg => {
+            msg.isRead = true;
+        });
+
+        await em.flush();
+
+        return res.json({
+            success: true,
+            message: `${messages.length} messages marked as read`
+        });
+    } catch (err) {
+        console.error('Error updating thread read status:', err);
+        return res.status(500).json({ success: false, message: 'Error updating read status' });
+    }
+});
+
 export default router;

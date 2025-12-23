@@ -579,4 +579,72 @@ router.get('/professor', authenticate, async (req: AuthRequest, res: Response) =
     }
 });
 
+/**
+ * GET /api/parent-inquiries/professor/unread-count
+ * Get count of unread parent messages for the logged-in professor
+ */
+router.get('/professor/unread-count', authenticate, async (req: AuthRequest, res: Response) => {
+    const em = RequestContext.getEntityManager() as EntityManager;
+    const userId = Number(req.user!.id);
+
+    try {
+        const user = await em.findOne(User, { id: userId });
+        if (!user || user.role !== UserRole.Professor) {
+            return res.status(403).json({ success: false, message: 'Access denied. Professors only.' });
+        }
+
+        const unreadCount = await em.count(ParentInquiry, {
+            professor: { id: userId } as any,
+            hasUnreadParentMessages: true,
+            status: { $ne: InquiryStatus.Archived }
+        });
+
+        return res.json({
+            success: true,
+            data: { unreadCount }
+        });
+    } catch (err) {
+        console.error('Error fetching professor unread count:', err);
+        return res.status(500).json({ success: false, message: 'Error fetching unread count' });
+    }
+});
+
+/**
+ * PUT /api/parent-inquiries/:id/professor-archive
+ * Archive an inquiry (professor only)
+ */
+router.put('/:id/professor-archive', authenticate, async (req: AuthRequest, res: Response) => {
+    const em = RequestContext.getEntityManager() as EntityManager;
+    const userId = Number(req.user!.id);
+    const inquiryId = Number(req.params.id);
+
+    try {
+        const inquiry = await em.findOne(
+            ParentInquiry,
+            { id: inquiryId },
+            { populate: ['professor'] }
+        );
+
+        if (!inquiry) {
+            return res.status(404).json({ success: false, message: 'Inquiry not found' });
+        }
+
+        // Only professor can archive
+        if (inquiry.professor.id !== userId) {
+            return res.status(403).json({ success: false, message: 'Only the professor can archive this inquiry' });
+        }
+
+        inquiry.status = InquiryStatus.Archived;
+        await em.flush();
+
+        return res.json({
+            success: true,
+            message: 'Inquiry archived successfully'
+        });
+    } catch (err) {
+        console.error('Error archiving inquiry:', err);
+        return res.status(500).json({ success: false, message: 'Error archiving inquiry' });
+    }
+});
+
 export default router;

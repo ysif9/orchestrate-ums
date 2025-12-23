@@ -4,7 +4,7 @@ import axios from 'axios';
 import { authService } from '@/services/authService';
 import { courseService } from '@/services/courseService';
 import { semesterService } from '@/services/semesterService';
-import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, Package, User, Users, Wrench } from 'lucide-react';
+import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, Package, User, Users, Wrench, DollarSign } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -243,6 +243,17 @@ function AdminHome() {
                 path: '/facilities/my-resources',
                 color: '#db2777', // pink-600
             },
+        ] : []),
+
+        // Academic Staff Actions (Staff, Professor, TA)
+        ...(isStaff || isProfessor || user?.role === 'teaching_assistant' ? [
+            {
+                title: 'My Payroll',
+                description: 'View salary and deductions',
+                icon: DollarSign,
+                path: '/admin/payroll',
+                color: '#10b981', // emerald-500
+            }
         ] : []),
     ];
 

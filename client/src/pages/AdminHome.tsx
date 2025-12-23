@@ -4,7 +4,7 @@ import axios from 'axios';
 import { authService } from '@/services/authService';
 import { courseService } from '@/services/courseService';
 import { semesterService } from '@/services/semesterService';
-import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, Package, User, Users, Wrench, DollarSign } from 'lucide-react';
+import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, Package, User, Users, Wrench, DollarSign, Shield } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -253,6 +253,13 @@ function AdminHome() {
                 icon: DollarSign,
                 path: '/admin/payroll',
                 color: '#10b981', // emerald-500
+            },
+            {
+                title: 'My Benefits',
+                description: 'View employment benefits',
+                icon: Shield,
+                path: '/admin/benefits',
+                color: '#8b5cf6', // violet-500
             }
         ] : []),
     ];

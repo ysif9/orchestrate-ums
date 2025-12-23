@@ -94,38 +94,7 @@ router.post('/signup', [
 
         await em.persistAndFlush(user);
 
-        // Create default payroll if academic staff
-        if ([UserRole.Staff, UserRole.Professor, UserRole.TeachingAssistant].includes(roleEnum)) {
-            let baseSalary = 0;
-            let taxRate = 0;
-            let insurance = 0;
-            let otherDeductions = 0;
 
-            if (roleEnum === UserRole.Professor) {
-                baseSalary = 25000.00;
-                taxRate = 18.00;
-                insurance = 800.00;
-                otherDeductions = 500.00;
-            } else if (roleEnum === UserRole.Staff) {
-                baseSalary = 15000.00;
-                taxRate = 14.50;
-                insurance = 500.00;
-                otherDeductions = 200.00;
-            } else if (roleEnum === UserRole.TeachingAssistant) {
-                baseSalary = 8000.00;
-                taxRate = 10.00;
-                insurance = 300.00;
-                otherDeductions = 100.00;
-            }
-
-            const payroll = new PayrollDetails(user, baseSalary);
-            payroll.taxRate = taxRate;
-            payroll.insuranceAmount = insurance;
-            payroll.otherDeductions = otherDeductions;
-            payroll.paymentFrequency = PaymentFrequency.Monthly;
-
-            await em.persistAndFlush(payroll);
-        }
 
         const token = generateToken(user.id, user.role);
 

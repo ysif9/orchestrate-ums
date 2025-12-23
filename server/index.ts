@@ -41,6 +41,7 @@ import evaluationRoutes from './routes/evaluationRoutes';
 import parentInquiryRoutes from './routes/parentInquiryRoutes';
 import payrollRoutes from './routes/payrollRoutes';
 import benefitRoutes from './routes/benefitRoutes';
+import leaveRoutes from './routes/leaveRoutes';
 dotenv.config();
 
 const app = express();
@@ -251,6 +252,7 @@ export const init = async () => {
     app.use('/api/parent-inquiries', parentInquiryRoutes);
     app.use('/api/payroll', payrollRoutes);
     app.use('/api/benefits', benefitRoutes);
+    app.use('/api/leave-requests', leaveRoutes);
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);
     });

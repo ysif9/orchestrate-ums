@@ -47,6 +47,10 @@ import StaffPerformanceManagementPage from './pages/StaffPerformanceManagementPa
 import ProfessorPerformancePage from './pages/ProfessorPerformancePage';
 import StaffPayrollPage from './pages/StaffPayrollPage';
 import BenefitsPage from './pages/BenefitsPage';
+import LeaveRequestPage from './pages/LeaveRequestPage';
+import LeaveHistoryPage from './pages/LeaveHistoryPage';
+import LeaveApprovalPage from './pages/LeaveApprovalPage';
+import { Toaster } from "@/components/ui/sonner"
 
 /**
  * Protected Route Component
@@ -233,6 +237,13 @@ function App() {
         <Route path="/admin/payroll" element={<AcademicStaffRoute><StaffPayrollPage /></AcademicStaffRoute>} />
         <Route path="/admin/benefits" element={<AcademicStaffRoute><BenefitsPage /></AcademicStaffRoute>} />
 
+        {/* Leave Requests (Professor & TA) */}
+        <Route path="/faculty/leave-request" element={<AcademicStaffRoute><LeaveRequestPage /></AcademicStaffRoute>} />
+        <Route path="/faculty/leave-history" element={<AcademicStaffRoute><LeaveHistoryPage /></AcademicStaffRoute>} />
+
+        {/* Leave Approval (Staff Only) */}
+        <Route path="/admin/leave-approval" element={<StaffOnlyRoute><LeaveApprovalPage /></StaffOnlyRoute>} />
+
         {/* My Performance (Professor) */}
         <Route path="/faculty/performance" element={<ProtectedRoute><ProfessorPerformancePage /></ProtectedRoute>} />
 
@@ -311,6 +322,7 @@ function App() {
 
 
       </Routes>
+      <Toaster />
     </BrowserRouter>
   );
 }

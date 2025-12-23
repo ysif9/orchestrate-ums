@@ -41,6 +41,8 @@ import ProfessorOfficeHoursPage from './pages/ProfessorOfficeHoursPage';
 import MessagesPage from './pages/MessagesPage';
 import ParentHome from './pages/ParentHome';
 import ParentLogin from './pages/ParentLogin';
+import ParentInbox from './pages/ParentInbox';
+import ProfessorInbox from './pages/ProfessorInbox';
 import StaffPerformanceManagementPage from './pages/StaffPerformanceManagementPage';
 import ProfessorPerformancePage from './pages/ProfessorPerformancePage';
 
@@ -175,7 +177,7 @@ function App() {
         <Route path="/admin/home" element={<ProtectedRoute><AdminHome /></ProtectedRoute>} />
 
         {/* Course Management (Admin) */}
-        <Route path="/admin/courses" element={<ProtectedRoute><AdminCourseManager /></ProtectedRoute>} />
+        <Route path="/admin/courses" element={<StaffOnlyRoute><AdminCourseManager /></StaffOnlyRoute>} />
 
         {/* TA Dashboard */}
         <Route path="/ta-dashboard" element={<ProtectedRoute><TADashboard /></ProtectedRoute>} />
@@ -232,6 +234,16 @@ function App() {
           }
         />
 
+        {/* Professor Parent Inbox */}
+        <Route
+          path="/faculty/parent-inbox"
+          element={
+            <ProtectedRoute>
+              <ProfessorInbox />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Legacy/Specific route aliases */}
         <Route path="/faculty/messages" element={<Navigate to="/admin/messages" replace />} />
 
@@ -253,6 +265,7 @@ function App() {
 
         {/* Parent Routes */}
         <Route path="/parent/home" element={<ProtectedRoute><ParentHome /></ProtectedRoute>} />
+        <Route path="/parent/inbox" element={<ProtectedRoute><ParentInbox /></ProtectedRoute>} />
 
         {/* Root redirect */}
         <Route path="/" element={<RootRedirect />} />

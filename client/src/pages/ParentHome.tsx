@@ -13,7 +13,8 @@ import {
     AlertCircle,
     Loader2,
     GraduationCap,
-    BarChart3
+    BarChart3,
+    MessageSquare
 } from 'lucide-react';
 
 
@@ -33,10 +34,12 @@ function ParentHome() {
     const [linkedStudents, setLinkedStudents] = useState<LinkedStudent[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [unreadInquiryCount, setUnreadInquiryCount] = useState(0);
 
 
     useEffect(() => {
         fetchLinkedStudents();
+        fetchUnreadInquiryCount();
     }, []);
 
     const fetchLinkedStudents = async () => {
@@ -49,6 +52,16 @@ function ParentHome() {
             setError(err.response?.data?.message || 'Failed to load linked students.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchUnreadInquiryCount = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/parent-inquiries/unread-count');
+            setUnreadInquiryCount(response.data.data.unreadCount);
+        } catch (err: any) {
+            console.error("Error fetching unread inquiry count:", err);
+            // Don't show error to user, just log it
         }
     };
 
@@ -114,6 +127,7 @@ function ParentHome() {
                     </h1>
                     <div className="flex items-center gap-6">
                         <span className="text-primary-foreground/90 text-sm">Welcome, {(user as any)?.name}</span>
+
                         <Button
                             onClick={handleLogout}
                             variant="outline"
@@ -193,6 +207,56 @@ function ParentHome() {
                                 ))}
                             </div>
                         )}
+                    </CardContent>
+                </Card>
+
+                {/* CONTACT TEACHER CARD */}
+                <Card
+                    className="mb-8 border-2 border-primary/20 hover:border-primary/40 transition-all cursor-pointer hover:shadow-lg"
+                    onClick={() => navigate('/parent/inbox')}
+                >
+                    <CardHeader>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle className="flex items-center gap-2 text-2xl">
+                                    <MessageSquare className="h-6 w-6 text-primary" />
+                                    Contact Teacher
+                                </CardTitle>
+                                <CardDescription className="text-base mt-2">
+                                    Send messages to your child's teachers and view their responses
+                                </CardDescription>
+                            </div>
+                            {unreadInquiryCount > 0 && (
+                                <div className="flex flex-col items-center">
+                                    <div className="h-16 w-16 bg-red-500 rounded-full flex items-center justify-center mb-2">
+                                        <span className="text-2xl font-bold text-white">
+                                            {unreadInquiryCount > 9 ? '9+' : unreadInquiryCount}
+                                        </span>
+                                    </div>
+                                    <span className="text-sm font-medium text-red-500">New Messages</span>
+                                </div>
+                            )}
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center justify-between bg-primary/5 rounded-lg p-6">
+                            <div className="flex items-center gap-4">
+                                <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <MessageSquare className="h-7 w-7 text-primary" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-1">
+                                        {unreadInquiryCount > 0 ? 'You have unread messages' : 'Start a conversation'}
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground">
+                                        {unreadInquiryCount > 0
+                                            ? 'Click to view and respond to teacher messages'
+                                            : 'Ask questions about your child\'s progress and courses'}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="text-4xl text-primary">→</div>
+                        </div>
                     </CardContent>
                 </Card>
 

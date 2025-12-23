@@ -38,6 +38,7 @@ import parentRoutes from './routes/parentRoutes';
 import studentRoutes from './routes/studentRoutes';
 import publicationRoutes from './routes/publicationRoutes';
 import evaluationRoutes from './routes/evaluationRoutes';
+import parentInquiryRoutes from './routes/parentInquiryRoutes';
 dotenv.config();
 
 const app = express();
@@ -245,6 +246,7 @@ export const init = async () => {
     app.use('/api/students', studentRoutes);
     app.use('/api/publications', publicationRoutes);
     app.use('/api/evaluations', evaluationRoutes);
+    app.use('/api/parent-inquiries', parentInquiryRoutes);
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);
     });

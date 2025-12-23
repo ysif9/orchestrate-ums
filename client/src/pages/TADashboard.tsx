@@ -6,7 +6,7 @@ import { courseService } from '@/services/courseService';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { BookOpen, Users } from 'lucide-react';
+import { BookOpen, Users, DollarSign } from 'lucide-react';
 
 function TADashboard() {
     const navigate = useNavigate();
@@ -72,6 +72,22 @@ function TADashboard() {
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">Assigned Courses</CardTitle>
                             <CardTitle className="text-2xl font-bold">{assignments.length}</CardTitle>
+                        </CardHeader>
+                    </Card>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <Card
+                        className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-emerald-500"
+                        onClick={() => navigate('/admin/payroll')}
+                    >
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <DollarSign className="h-5 w-5 text-emerald-600" />
+                                My Payroll
+                            </CardTitle>
+                            <CardDescription>View salary and deductions</CardDescription>
                         </CardHeader>
                     </Card>
                 </div>

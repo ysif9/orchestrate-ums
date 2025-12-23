@@ -45,6 +45,7 @@ import ParentInbox from './pages/ParentInbox';
 import ProfessorMessagesPage from './pages/ProfessorMessagesPage';
 import StaffPerformanceManagementPage from './pages/StaffPerformanceManagementPage';
 import ProfessorPerformancePage from './pages/ProfessorPerformancePage';
+import StaffPayrollPage from './pages/StaffPayrollPage';
 
 /**
  * Protected Route Component
@@ -66,6 +67,25 @@ function StaffOnlyRoute({ children }: { children: React.ReactNode }) {
   const user: any = authService.getCurrentUser();
   if (user?.role !== 'staff') {
     return <Navigate to="/admin/home" replace />;
+  }
+
+  return children;
+}
+
+/**
+ * Academic Staff Route Component (Staff + Professor + TA)
+ */
+function AcademicStaffRoute({ children }: { children: React.ReactNode }) {
+  const isAuthenticated = authService.isAuthenticated();
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const user: any = authService.getCurrentUser();
+  const allowedRoles = ['staff', 'professor', 'teaching_assistant'];
+
+  if (!allowedRoles.includes(user?.role)) {
+    return <Navigate to="/home" replace />;
   }
 
   return children;
@@ -207,6 +227,9 @@ function App() {
 
         {/* Semester Management (Staff Only) */}
         <Route path="/admin/semesters" element={<StaffOnlyRoute><StaffSemesterManagementPage /></StaffOnlyRoute>} />
+
+        {/* Staff Payroll (Academic Staff Only) */}
+        <Route path="/admin/payroll" element={<AcademicStaffRoute><StaffPayrollPage /></AcademicStaffRoute>} />
 
         {/* My Performance (Professor) */}
         <Route path="/faculty/performance" element={<ProtectedRoute><ProfessorPerformancePage /></ProtectedRoute>} />

@@ -40,8 +40,8 @@ const seedRooms = async () => {
             ];
 
             // Add some details
-            rooms[0].amenities = ['Projector', 'Sound System', 'Whiteboard'];
-            rooms[7].amenities = ['Computers', 'Projector', 'Whiteboard', 'AC'];
+            // rooms[0].amenities = ['Projector', 'Sound System', 'Whiteboard'];
+            // rooms[7].amenities = ['Computers', 'Projector', 'Whiteboard', 'AC'];
 
             for (const room of rooms) {
                 em.persist(room);
@@ -69,7 +69,7 @@ const seedRooms = async () => {
                         const station = new LabStation(stationNumber, lab);
                         station.description = `Workstation ${i} in ${lab.name}`;
                         station.status = LabStationStatus.Available;
-                        station.equipment = ['PC', 'Power Supply', 'Multimeter'];
+                        // station.equipment = ['PC', 'Power Supply', 'Multimeter'];
 
                         em.persist(station);
                         totalStations++;

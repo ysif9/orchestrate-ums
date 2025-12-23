@@ -122,6 +122,19 @@ export default function StaffDirectoryPage() {
             Add staff member
           </button>
         )}
+        <button
+          type="button"
+          onClick={() => {
+            const role = user?.role;
+            if (role === 'teaching_assistant') navigate('/ta-dashboard');
+            else if (role === 'parent') navigate('/parent/home');
+            else if (role === 'professor' || role === 'staff') navigate('/admin/home');
+            else navigate('/home');
+          }}
+          className="rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium shadow-sm hover:bg-muted"
+        >
+          Back to Dashboard
+        </button>
       </div>
 
       <div className="mb-4">

@@ -42,7 +42,6 @@ function ApplicationFormPage() {
         graduationYear: '',
         // Step 3: Program Selection
         program: '',
-        semester: '',
         // Personal Info (additional)
         dateOfBirth: '',
         nationality: '',
@@ -109,7 +108,6 @@ function ApplicationFormPage() {
 
         if (step === 3) {
             if (!formData.program) newErrors.program = 'Please select a program';
-            if (!formData.semester) newErrors.semester = 'Please select a semester';
         }
 
         setErrors(newErrors);
@@ -138,7 +136,6 @@ function ApplicationFormPage() {
                 phone: formData.phone || undefined,
                 address: formData.address || undefined,
                 program: formData.program,
-                semester: formData.semester,
                 academicHistory: {
                     previousDegree: formData.previousDegree,
                     institution: formData.institution,
@@ -427,23 +424,6 @@ function ApplicationFormPage() {
                                     {errors.program && <span className="text-destructive text-sm">{errors.program}</span>}
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="semester">Select Semester *</Label>
-                                    <Select
-                                        value={formData.semester}
-                                        onValueChange={(val) => updateFormData('semester', val)}
-                                    >
-                                        <SelectTrigger id="semester" className={errors.semester ? 'border-destructive' : ''}>
-                                            <SelectValue placeholder="Choose a semester" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {admissionInfo.semesters.map((sem: any) => (
-                                                <SelectItem key={sem.id} value={sem.id}>{sem.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.semester && <span className="text-destructive text-sm">{errors.semester}</span>}
-                                </div>
                             </div>
                         )}
 
@@ -508,10 +488,6 @@ function ApplicationFormPage() {
                                                 className="text-foreground font-medium">
                                                 {admissionInfo?.programs.find((p: any) => p.id === formData.program)?.name || formData.program}
                                             </span></div>
-                                            <div><span className="text-muted-foreground">Semester:</span> <span
-                                                className="text-foreground font-medium">
-                                                {admissionInfo?.semesters.find((s: any) => s.id === formData.semester)?.name || formData.semester}
-                                            </span></div>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -522,7 +498,8 @@ function ApplicationFormPage() {
                                     confirmation email once your application is submitted.
                                 </div>
                             </div>
-                        )}
+                        )
+                        }
 
                         {/* Navigation Buttons */}
                         <div className="flex justify-between mt-8 pt-6 border-t border-border">
@@ -566,10 +543,10 @@ function ApplicationFormPage() {
                                 </Button>
                             )}
                         </div>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
+                    </CardContent >
+                </Card >
+            </div >
+        </div >
     );
 }
 

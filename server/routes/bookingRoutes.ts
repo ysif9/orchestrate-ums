@@ -212,8 +212,11 @@ router.post('/', authenticate, authorize(UserRole.Professor, UserRole.Staff), as
             .filter(key => !schemaFields.includes(key))
             .reduce((obj: any, key) => ({ ...obj, [key]: req.body[key] }), {});
 
-        await updateEntityAttributes(em, booking, 'Booking', attributesData);
         await em.persistAndFlush(booking);
+
+        // Update attributes (booking now has an ID)
+        await updateEntityAttributes(em, booking, 'Booking', attributesData);
+        await em.flush();
 
         // Populate for response
         await em.populate(booking, ['room', 'createdBy', 'attributes.attribute']);

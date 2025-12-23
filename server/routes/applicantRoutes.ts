@@ -124,9 +124,9 @@ router.post('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), [
         const applicant = new Applicant(firstName, lastName, email, phone || '');
         if (address) applicant.address = address;
 
-        await em.persist(applicant);
+        await em.persistAndFlush(applicant);
 
-        // Update EAV attributes
+        // Update EAV attributes (applicant now has an ID)
         const eavData = { ...academicHistory, ...personalInfo, ...documents };
         await updateEntityAttributes(em, applicant, 'Applicant', eavData);
 

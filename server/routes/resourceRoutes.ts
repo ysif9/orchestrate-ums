@@ -28,7 +28,7 @@ router.post(
   authorize(UserRole.Staff),
   [
     body('name').notEmpty(),
-    body('type').isIn(Object.values(ResourceType)),
+    body('type').isString(),
     body('attributes').optional().isArray(),
     body('attributes.*.key').notEmpty().withMessage('Attribute key is required'),
     body('attributes.*.value').exists().withMessage('Attribute value is required'),
@@ -41,7 +41,19 @@ router.post(
     const { name, type, description, attributes = [] } = req.body;
 
     try {
-      const resource = new Resource(name, type);
+      // Map string type to enum value
+      const typeMap: Record<string, ResourceType> = {
+        'equipment': ResourceType.Equipment,
+        'software_license': ResourceType.SoftwareLicense,
+        'other': ResourceType.Other,
+      };
+
+      const resourceType = typeMap[type];
+      if (!resourceType) {
+        return res.status(400).json({ success: false, message: `Invalid resource type: ${type}` });
+      }
+
+      const resource = new Resource(name, resourceType);
       resource.description = description || null;
 
       // Persist resource first so that relation targets can reference it (Mikro ORM will handle it but persisting is clearer)
@@ -49,10 +61,24 @@ router.post(
 
       for (const attr of attributes) {
         // Use Attribute entity instead of ResourceAttribute
-        const attribute = await em.findOne(Attribute, { name: attr.key, entityType: 'Resource' });
+        let attribute = await em.findOne(Attribute, { name: attr.key, entityType: 'Resource' });
         if (!attribute) {
-          // Clean up in-memory resource (not flushed) and return error
-          return res.status(400).json({ success: false, message: `Attribute '${attr.key}' not defined for Resource` });
+          // Auto-create attribute if it doesn't exist
+          let inferredType = AttributeDataType.String;
+          const valStr = String(attr.value).toLowerCase().trim();
+
+          // Simple type inference
+          if (!isNaN(Number(attr.value)) && attr.value !== '' && attr.value !== null) {
+            inferredType = AttributeDataType.Number;
+          } else if (['true', 'false', 'yes', 'no', '1', '0'].includes(valStr)) {
+            inferredType = AttributeDataType.Boolean;
+          } else if (!isNaN(Date.parse(attr.value)) && valStr.length > 5 && (valStr.includes('-') || valStr.includes('/'))) {
+            // Very basic date check: must include separators and parse
+            inferredType = AttributeDataType.Date;
+          }
+
+          attribute = new Attribute(attr.key, attr.key, inferredType, 'Resource');
+          em.persist(attribute);
         }
 
         const value = new ResourceAttributeValue(resource);
@@ -214,7 +240,7 @@ router.post('/allocations/:id/return', authenticate, async (req: AuthRequest, re
   const allocId = Number(req.params.id);
 
   try {
-    const allocation = await em.findOne(Allocation, allocId, { populate: ['resource'] });
+    const allocation = await em.findOne(Allocation, allocId, { populate: ['resource', 'target'] });
     if (!allocation) return res.status(404).json({ success: false, message: 'Allocation not found' });
     if (allocation.status !== AllocationStatus.Active) {
       return res.status(400).json({ success: false, message: 'Allocation is not active' });

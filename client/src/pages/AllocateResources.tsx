@@ -24,6 +24,20 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Plus, Save, Package, AlertCircle, Loader2, CheckCircle, XCircle, Trash2, ArrowLeft } from 'lucide-react';
 
+// Helper function to convert ResourceType enum (number) to display string
+const getResourceTypeLabel = (type: number | undefined): string => {
+    switch (type) {
+        case 1:
+            return 'Equipment';
+        case 2:
+            return 'Software License';
+        case 3:
+            return 'Other';
+        default:
+            return 'Unknown';
+    }
+};
+
 export default function AllocateResources() {
     const navigate = useNavigate();
     const [resources, setResources] = useState<any[]>([]);
@@ -89,9 +103,10 @@ export default function AllocateResources() {
             setType('equipment');
             setAttributes([{ key: '', value: '' }]);
             await loadResources();
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            setError('Failed to create resource. Make sure attributes exist in DB.');
+            const errorMessage = err?.response?.data?.message || err?.message || 'Failed to create resource. Please try again.';
+            setError(errorMessage);
         } finally {
             setSubmitting(false);
         }
@@ -241,16 +256,16 @@ export default function AllocateResources() {
 
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <Label>Attributes (EAV)</Label>
+                                    <Label>Extra Details</Label>
                                     <Button type="button" variant="outline" size="sm" onClick={addAttributeRow} className="gap-1">
-                                        <Plus className="w-3 h-3" /> Add Attribute
+                                        <Plus className="w-3 h-3" /> Add Information
                                     </Button>
                                 </div>
 
                                 {attributes.map((attr, idx) => (
                                     <div key={idx} className="flex gap-3 items-center">
                                         <Input
-                                            placeholder="Key (e.g., serial_number)"
+                                            placeholder="Detail Name (e.g., Color, Serial #)"
                                             value={attr.key}
                                             onChange={(e) => updateAttribute(idx, 'key', e.target.value)}
                                             className="flex-1"
@@ -314,7 +329,7 @@ export default function AllocateResources() {
                                                 <td className="px-6 py-4 font-medium">{res.name}</td>
                                                 <td className="px-6 py-4">
                                                     <Badge variant="outline" className="capitalize">
-                                                        {res.type?.replace('_', ' ')}
+                                                        {getResourceTypeLabel(res.type)}
                                                     </Badge>
                                                 </td>
                                                 <td className="px-6 py-4 text-muted-foreground">

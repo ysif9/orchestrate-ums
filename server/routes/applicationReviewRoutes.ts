@@ -161,9 +161,9 @@ router.post('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), [
 
         // Create the review
         const review = new ApplicationReview(application, reviewer, Number(finalDecision));
-        await em.persist(review);
+        await em.persistAndFlush(review);
 
-        // Update EAV attributes
+        // Update EAV attributes (review now has an ID)
         const eavData: any = {};
         if (scoringRubric) Object.assign(eavData, scoringRubric);
         if (comments) eavData.comments = comments;

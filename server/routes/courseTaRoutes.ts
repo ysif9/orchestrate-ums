@@ -68,11 +68,13 @@ router.post('/:courseId/tas', authenticate, authorize(UserRole.Staff, UserRole.P
 
         const assignment = new CourseTA(ta, course, responsibilities);
 
-        // Handle dynamic attributes (EAV)
+        await em.persistAndFlush(assignment);
+
+        // Handle dynamic attributes (EAV) - assignment now has an ID
         const attributes = getCourseTAAttributes(req.body);
         await updateEntityAttributes(em, assignment, 'CourseTA', attributes);
 
-        await em.persistAndFlush(assignment);
+        await em.flush();
 
         res.status(201).json(toFlatObject(assignment));
     } catch (error: any) {

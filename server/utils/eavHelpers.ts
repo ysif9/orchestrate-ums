@@ -1,5 +1,5 @@
 import { EntityManager, Collection, wrap } from '@mikro-orm/core';
-import { Attribute } from '../entities/Attribute';
+import { Attribute, AttributeDataType } from '../entities/Attribute';
 import { EntityAttributeValue } from '../entities/EntityAttributeValue';
 
 export async function updateEntityAttributes(
@@ -13,8 +13,32 @@ export async function updateEntityAttributes(
     const attributeMap = new Map(attributes.map(a => [a.name, a]));
 
     for (const [key, value] of Object.entries(data)) {
-        if (attributeMap.has(key)) {
-            const attribute = attributeMap.get(key)!;
+        let attribute = attributeMap.get(key);
+
+        if (!attribute) {
+            // Auto-create attribute if it doesn't exist
+            let inferredType = AttributeDataType.String;
+            const valStr = String(value).toLowerCase().trim();
+
+            if (typeof value === 'number') {
+                inferredType = AttributeDataType.Number;
+            } else if (typeof value === 'boolean') {
+                inferredType = AttributeDataType.Boolean;
+            } else if (!isNaN(Number(value)) && value !== '' && value !== null) {
+                inferredType = AttributeDataType.Number;
+            } else if (['true', 'false', 'yes', 'no', '1', '0'].includes(valStr)) {
+                inferredType = AttributeDataType.Boolean;
+            } else if (typeof value === 'string' && !isNaN(Date.parse(value)) && valStr.length > 5 && (valStr.includes('-') || valStr.includes('/'))) {
+                inferredType = AttributeDataType.Date;
+            }
+
+            attribute = new Attribute(key, key, inferredType, entityType);
+            em.persist(attribute);
+            attributeMap.set(key, attribute);
+        }
+
+        if (attribute) {
+
 
             // Determine query filter
             const where: any = { attribute };

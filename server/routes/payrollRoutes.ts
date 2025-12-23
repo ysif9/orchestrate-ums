@@ -2,7 +2,7 @@ import express, { Response } from 'express';
 import { RequestContext } from '@mikro-orm/core';
 import { PayrollDetails } from '../entities/PayrollDetails';
 import authenticate, { AuthRequest } from '../middleware/auth';
-import { UserRole } from '../entities/User';
+import { UserRole, User } from '../entities/User';
 
 const router = express.Router();
 
@@ -23,13 +23,49 @@ router.get('/me', authenticate, async (req: AuthRequest, res: Response) => {
             });
         }
 
-        const payroll = await em.findOne(PayrollDetails, { user: parseInt(req.user.id) });
+        let payroll = await em.findOne(PayrollDetails, { user: parseInt(req.user.id) });
 
         if (!payroll) {
-            return res.status(404).json({
-                success: false,
-                message: 'Payroll details not found for this user'
-            });
+            // Auto-create defaults if missing (Backward Compatibility logic)
+            const user = await em.findOne(User, { id: parseInt(req.user.id) });
+            if (!user) return res.status(404).json({ message: 'User not found' });
+
+            let baseSalary = 0;
+            let taxRate = 0;
+            let insurance = 0;
+            let otherDeductions = 0;
+            const role = user.role;
+
+            if (role === UserRole.Professor) {
+                baseSalary = 25000.00;
+                taxRate = 18.00;
+                insurance = 800.00;
+                otherDeductions = 500.00;
+            } else if (role === UserRole.Staff) {
+                baseSalary = 15000.00;
+                taxRate = 14.50;
+                insurance = 500.00;
+                otherDeductions = 200.00;
+            } else if (role === UserRole.TeachingAssistant) {
+                baseSalary = 8000.00;
+                taxRate = 10.00;
+                insurance = 300.00;
+                otherDeductions = 100.00;
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Role not eligible for payroll'
+                });
+            }
+
+            payroll = new PayrollDetails(user, baseSalary);
+            payroll.taxRate = taxRate;
+            payroll.insuranceAmount = insurance;
+            payroll.otherDeductions = otherDeductions;
+            // PaymentFrequency is default Monthly in entity, so we can skip or set explicitly if imported
+            // payroll.paymentFrequency = PaymentFrequency.Monthly; 
+
+            await em.persistAndFlush(payroll);
         }
 
         res.json({

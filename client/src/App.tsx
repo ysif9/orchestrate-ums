@@ -46,6 +46,7 @@ import ProfessorMessagesPage from './pages/ProfessorMessagesPage';
 import StaffPerformanceManagementPage from './pages/StaffPerformanceManagementPage';
 import ProfessorPerformancePage from './pages/ProfessorPerformancePage';
 import StaffPayrollPage from './pages/StaffPayrollPage';
+import BenefitsPage from './pages/BenefitsPage';
 
 /**
  * Protected Route Component
@@ -230,6 +231,7 @@ function App() {
 
         {/* Staff Payroll (Academic Staff Only) */}
         <Route path="/admin/payroll" element={<AcademicStaffRoute><StaffPayrollPage /></AcademicStaffRoute>} />
+        <Route path="/admin/benefits" element={<AcademicStaffRoute><BenefitsPage /></AcademicStaffRoute>} />
 
         {/* My Performance (Professor) */}
         <Route path="/faculty/performance" element={<ProtectedRoute><ProfessorPerformancePage /></ProtectedRoute>} />

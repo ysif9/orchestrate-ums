@@ -50,7 +50,7 @@ function AdminHome() {
     const fetchActiveSemester = async () => {
         try {
             const semester = await semesterService.getActive();
-            setActiveSemester(semester ? semester.name : null);
+            setActiveSemester(semester ? (semester as any).name : null);
         } catch (error) {
             console.error('Failed to fetch active semester:', error);
             setActiveSemester(null);
@@ -59,13 +59,7 @@ function AdminHome() {
 
     // Quick action cards configuration - using accessible colors
     const quickActions = [
-        {
-            title: 'Manage Courses',
-            description: 'View, edit, and delete existing courses',
-            icon: BookOpen,
-            path: '/admin/courses',
-            color: '#0066cc' // brand-500
-        },
+
         {
             title: 'Create Assessment',
             description: 'Create quizzes, assignments, and exams',
@@ -99,6 +93,13 @@ function AdminHome() {
         ,
         // Staff-only actions
         ...(isStaff ? [
+                    {
+            title: 'Manage Courses',
+            description: 'View, edit, and delete existing courses',
+            icon: BookOpen,
+            path: '/admin/courses',
+            color: '#0066cc' // brand-500
+        },
             {
                 title: 'Manage Rooms',
                 description: 'Add, edit, and manage classrooms and labs',
@@ -278,7 +279,7 @@ function AdminHome() {
                                                 <h3 className="font-bold text-lg">{course.code}</h3>
                                                 <span
                                                     className="text-xs font-semibold bg-primary/10 text-primary px-2 py-1 rounded-full">
-                                                    {course.semester || 'Current'}
+                                                    {course.semester?.name || 'Current'}
                                                 </span>
                                             </div>
                                             <h4 className="font-medium mb-4 line-clamp-1">{course.title}</h4>

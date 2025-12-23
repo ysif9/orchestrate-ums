@@ -42,7 +42,7 @@ import MessagesPage from './pages/MessagesPage';
 import ParentHome from './pages/ParentHome';
 import ParentLogin from './pages/ParentLogin';
 import ParentInbox from './pages/ParentInbox';
-import ProfessorInbox from './pages/ProfessorInbox';
+import ProfessorMessagesPage from './pages/ProfessorMessagesPage';
 import StaffPerformanceManagementPage from './pages/StaffPerformanceManagementPage';
 import ProfessorPerformancePage from './pages/ProfessorPerformancePage';
 
@@ -224,23 +224,21 @@ function App() {
           }
         />
 
-        {/* Messages (Professor only - outside StudentLayout) */}
+        {/* Professor Messages (unified inbox for both student and parent messages) */}
         <Route
           path="/admin/messages"
           element={
             <ProtectedRoute>
-              <MessagesPage />
+              <ProfessorMessagesPage />
             </ProtectedRoute>
           }
         />
 
-        {/* Professor Parent Inbox */}
+        {/* Legacy route for backward compatibility */}
         <Route
           path="/faculty/parent-inbox"
           element={
-            <ProtectedRoute>
-              <ProfessorInbox />
-            </ProtectedRoute>
+            <Navigate to="/admin/messages" replace />
           }
         />
 

@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { authService } from '@/services/authService';
 import { courseService } from '@/services/courseService';
 import { semesterService } from '@/services/semesterService';
@@ -21,10 +22,12 @@ function AdminHome() {
 
     const [myCourses, setMyCourses] = useState<any[]>([]);
     const [activeSemester, setActiveSemester] = useState<string | null>(null);
+    const [totalUnreadMessages, setTotalUnreadMessages] = useState(0);
 
     useEffect(() => {
         if (isProfessor && user?.id) {
             fetchMyCourses();
+            fetchUnreadMessageCounts();
         }
         fetchActiveSemester();
     }, [isProfessor, user?.id]);
@@ -54,6 +57,25 @@ function AdminHome() {
         } catch (error) {
             console.error('Failed to fetch active semester:', error);
             setActiveSemester(null);
+        }
+    };
+
+    const fetchUnreadMessageCounts = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const headers = { Authorization: `Bearer ${token}` };
+
+            // Fetch student messages unread count
+            const studentCountRes = await axios.get('http://localhost:5000/api/messages/unread-count', { headers });
+            const studentUnread = studentCountRes.data.success ? studentCountRes.data.data.unreadCount : 0;
+
+            // Fetch parent inquiries unread count
+            const parentCountRes = await axios.get('http://localhost:5000/api/parent-inquiries/professor/unread-count', { headers });
+            const parentUnread = parentCountRes.data.success ? parentCountRes.data.data.unreadCount : 0;
+
+            setTotalUnreadMessages(studentUnread + parentUnread);
+        } catch (error) {
+            console.error('Failed to fetch unread message counts:', error);
         }
     };
 
@@ -93,13 +115,13 @@ function AdminHome() {
         ,
         // Staff-only actions
         ...(isStaff ? [
-                    {
-            title: 'Manage Courses',
-            description: 'View, edit, and delete existing courses',
-            icon: BookOpen,
-            path: '/admin/courses',
-            color: '#0066cc' // brand-500
-        },
+            {
+                title: 'Manage Courses',
+                description: 'View, edit, and delete existing courses',
+                icon: BookOpen,
+                path: '/admin/courses',
+                color: '#0066cc' // brand-500
+            },
             {
                 title: 'Manage Rooms',
                 description: 'Add, edit, and manage classrooms and labs',
@@ -187,10 +209,11 @@ function AdminHome() {
             },
             {
                 title: 'My Messages',
-                description: 'View and respond to student messages',
+                description: 'View and respond to student and parent messages',
                 icon: MessageSquare,
                 path: '/admin/messages',
                 color: '#2563eb', // blue-600
+                badge: totalUnreadMessages > 0 ? totalUnreadMessages : undefined,
             },
             {
                 title: 'My Performance',
@@ -304,23 +327,29 @@ function AdminHome() {
                 )}
 
                 {/* QUICK ACTIONS GRID */}
-                <div className="mb-8">
+                <div className="mb-8 overflow-visible">
                     <h2 className="text-2xl font-bold text-primary mb-6">Quick Actions</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-visible">
                         {quickActions.map((action, index) => {
                             const IconComponent = action.icon;
+                            const badgeValue = (action as any).badge;
                             // Convert hex color to equivalent Tailwind class or style? 
                             // For simplicity, we keep the inline style but style the card wrapper with Shadcn
                             return (
                                 <Card
                                     key={index}
-                                    className="border-l-4 shadow-sm hover:shadow-lg transition-all cursor-pointer group"
+                                    className="border-l-4 shadow-sm hover:shadow-lg transition-all cursor-pointer group relative overflow-visible"
                                     onClick={() => navigate(action.path)}
                                     style={{ borderLeftColor: action.color }}
                                 >
+                                    {badgeValue && (
+                                        <span className="absolute -top-2 -right-2 h-6 w-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-md z-10">
+                                            {badgeValue > 9 ? '9+' : badgeValue}
+                                        </span>
+                                    )}
                                     <CardContent className="p-6 flex items-start gap-4">
                                         <div
-                                            className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
+                                            className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 relative"
                                             style={{ backgroundColor: action.color }}
                                         >
                                             <IconComponent size={24} color="white" strokeWidth={2} />

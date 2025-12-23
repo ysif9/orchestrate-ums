@@ -1,7 +1,8 @@
-import { Entity, Property, ManyToOne, OneToMany, Collection } from '@mikro-orm/core';
+import { Entity, Property, ManyToOne, OneToMany, Collection, OneToOne } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 import { User } from './User';
 import { Course } from './Course';
+import { MessageRelatedStudent } from './MessageRelatedStudent';
 
 @Entity()
 export class Message extends BaseEntity {
@@ -19,6 +20,9 @@ export class Message extends BaseEntity {
 
     @Property()
     isRead: boolean = false;
+
+    @OneToOne(() => MessageRelatedStudent, related => related.message, { nullable: true })
+    relatedStudentRef?: MessageRelatedStudent;
 
     @ManyToOne(() => Message, { nullable: true })
     parent?: Message;

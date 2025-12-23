@@ -8,12 +8,12 @@ import { Badge } from "@/components/ui/badge";
 
 import {
     Users,
-    Calendar,
     BookOpen,
     AlertCircle,
     Loader2,
     GraduationCap,
-    BarChart3
+    BarChart3,
+    MessageCircle
 } from 'lucide-react';
 
 
@@ -165,23 +165,21 @@ function ParentHome() {
 
                 {/* PLACEHOLDER SECTIONS */}
                 <div className="grid gap-6 md:grid-cols-2">
-                    {/* Attendance Placeholder */}
-                    <Card className="border-dashed border-2">
+                    {/* Contact Teachers */}
+                    <Card className="hover:border-primary cursor-pointer transition-colors" onClick={() => navigate('/parent/messages')}>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-muted-foreground">
-                                <Calendar className="h-5 w-5" />
-                                Attendance Records
+                            <CardTitle className="flex items-center gap-2 text-primary">
+                                <MessageCircle className="h-5 w-5" />
+                                Contact Teachers
                             </CardTitle>
                             <CardDescription>
-                                View your children's attendance history
+                                Monitor and address concerns with your child's instructors
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-center py-8">
-                                <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
-                                <p className="text-sm text-muted-foreground">
-                                    Attendance tracking feature coming soon
-                                </p>
+                            <div className="text-center py-6">
+                                <MessageCircle className="h-12 w-12 mx-auto mb-4 text-primary/80" />
+                                <Button className="w-full">Open Messages</Button>
                             </div>
                         </CardContent>
                     </Card>

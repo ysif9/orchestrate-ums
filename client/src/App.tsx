@@ -40,6 +40,7 @@ import StaffProfileDetailPage from './pages/StaffProfileDetailPage';
 import ProfessorOfficeHoursPage from './pages/ProfessorOfficeHoursPage';
 import MessagesPage from './pages/MessagesPage';
 import ParentHome from './pages/ParentHome';
+import ParentMessagesPage from './pages/ParentMessagesPage';
 import ParentLogin from './pages/ParentLogin';
 import StaffPerformanceManagementPage from './pages/StaffPerformanceManagementPage';
 import ProfessorPerformancePage from './pages/ProfessorPerformancePage';
@@ -253,6 +254,8 @@ function App() {
 
         {/* Parent Routes */}
         <Route path="/parent/home" element={<ProtectedRoute><ParentHome /></ProtectedRoute>} />
+        <Route path="/parent/messages" element={<ProtectedRoute><ParentMessagesPage /></ProtectedRoute>} />
+
 
         {/* Root redirect */}
         <Route path="/" element={<RootRedirect />} />

@@ -37,6 +37,7 @@ import parentRoutes from './routes/parentRoutes';
 import studentRoutes from './routes/studentRoutes';
 import publicationRoutes from './routes/publicationRoutes';
 import evaluationRoutes from './routes/evaluationRoutes';
+import { seedData } from './seedData';
 dotenv.config();
 
 const app = express();
@@ -146,11 +147,16 @@ export const init = async () => {
         console.warn('Could not drop default constraints (they might not exist):', e.message);
     }
 
+
+
     await generator.updateSchema();
     console.log('Database schema synchronized');
 
     // Migrate existing enrollments to use Semester entity
     await migrateEnrollmentsToSemesters(orm.em);
+
+    // Seed dummy data
+    await seedData(orm.em as any);
 
     app.use(cors());
     app.use(express.json());

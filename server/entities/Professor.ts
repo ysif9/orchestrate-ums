@@ -1,4 +1,4 @@
-import { Entity, OneToMany, Collection } from '@mikro-orm/core';
+import { Entity, OneToMany, Collection, Property } from '@mikro-orm/core';
 import { User, UserRole } from './User';
 
 @Entity({ discriminatorValue: 'professor' })

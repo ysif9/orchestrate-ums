@@ -4,7 +4,7 @@ import axios from 'axios';
 import { authService } from '@/services/authService';
 import { courseService } from '@/services/courseService';
 import { semesterService } from '@/services/semesterService';
-import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, Package, User, Users, Wrench, DollarSign, Shield } from 'lucide-react';
+import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, Package, User, Users, Wrench, DollarSign, Shield, CalendarDays, CheckCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -178,6 +178,13 @@ function AdminHome() {
                 icon: Package,
                 path: '/facilities/allocate',
                 color: '#ec4899' // pink-500
+            },
+            {
+                title: 'Leave Approvals',
+                description: 'Review and approve leave requests',
+                icon: CheckCircle,
+                path: '/admin/leave-approval',
+                color: '#f59e0b' // amber-500
             }
         ] : []),
 
@@ -243,6 +250,20 @@ function AdminHome() {
                 path: '/facilities/my-resources',
                 color: '#db2777', // pink-600
             },
+            {
+                title: 'Request Leave',
+                description: 'Submit a new leave request',
+                icon: CalendarDays,
+                path: '/faculty/leave-request',
+                color: '#f97316', // orange-500
+            },
+            {
+                title: 'Leave History',
+                description: 'View status of your leave requests',
+                icon: Calendar,
+                path: '/faculty/leave-history',
+                color: '#6366f1', // indigo-500
+            }
         ] : []),
 
         // Academic Staff Actions (Staff, Professor, TA)

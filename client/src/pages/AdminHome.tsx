@@ -8,6 +8,7 @@ import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { AnnouncementsBanner } from "@/components/AnnouncementsBanner"
+import { EventsBanner } from "@/components/EventsBanner"
 
 function AdminHome() {
     const navigate = useNavigate();
@@ -332,7 +333,10 @@ function AdminHome() {
                 </div>
 
                 {/* ANNOUNCEMENTS SECTION */}
-                <AnnouncementsBanner maxItems={5} className="mb-8" />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <AnnouncementsBanner maxItems={3} />
+                    <EventsBanner maxItems={3} />
+                </div>
 
                 {/* PROFESSOR: MY COURSES SECTION */}
                 {isProfessor && (

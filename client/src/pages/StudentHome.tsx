@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { AnnouncementsBanner } from "@/components/AnnouncementsBanner"
+import { EventsBanner } from "@/components/EventsBanner"
 
 function StudentHome() {
     const navigate = useNavigate();
@@ -114,8 +115,11 @@ function StudentHome() {
                 </Card>
             </div>
 
-            {/* ANNOUNCEMENTS SECTION */}
-            <AnnouncementsBanner maxItems={3} className="mb-8" />
+            {/* ANNOUNCEMENTS & EVENTS SECTION */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <AnnouncementsBanner maxItems={3} />
+                <EventsBanner maxItems={3} />
+            </div>
 
             {/* PARENT LINKING SECTION */}
             <Card className="mb-8 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">

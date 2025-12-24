@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AnnouncementsBanner } from "@/components/AnnouncementsBanner";
+import { EventsBanner } from "@/components/EventsBanner";
 
 import {
     Users,
@@ -154,8 +155,11 @@ function ParentHome() {
                     </div>
                 )}
 
-                {/* ANNOUNCEMENTS SECTION */}
-                <AnnouncementsBanner maxItems={3} className="mb-8" />
+                {/* ANNOUNCEMENTS & EVENTS SECTION */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <AnnouncementsBanner maxItems={3} />
+                    <EventsBanner maxItems={3} />
+                </div>
 
                 {/* LINK STUDENT BUTTON - REMOVED AS PER REQUIREMENT (1 Student : 1 Parent) */}
                 {/* <div className="mb-6"> ... </div> */}

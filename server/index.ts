@@ -43,6 +43,7 @@ import payrollRoutes from './routes/payrollRoutes';
 import benefitRoutes from './routes/benefitRoutes';
 import leaveRoutes from './routes/leaveRoutes';
 import announcementRoutes from './routes/announcementRoutes';
+import eventRoutes from './routes/eventRoutes';
 dotenv.config();
 
 const app = express();
@@ -255,6 +256,7 @@ export const init = async () => {
     app.use('/api/benefits', benefitRoutes);
     app.use('/api/leave-requests', leaveRoutes);
     app.use('/api/announcements', announcementRoutes);
+    app.use('/api/events', eventRoutes);
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);
     });

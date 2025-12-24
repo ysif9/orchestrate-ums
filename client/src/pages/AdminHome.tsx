@@ -4,9 +4,10 @@ import axios from 'axios';
 import { authService } from '@/services/authService';
 import { courseService } from '@/services/courseService';
 import { semesterService } from '@/services/semesterService';
-import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, Package, User, Users, Wrench, DollarSign, Shield, CalendarDays, CheckCircle } from 'lucide-react';
+import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, Package, User, Users, Wrench, DollarSign, Shield, CalendarDays, CheckCircle, Megaphone } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { AnnouncementsBanner } from "@/components/AnnouncementsBanner"
 
 function AdminHome() {
     const navigate = useNavigate();
@@ -185,6 +186,13 @@ function AdminHome() {
                 icon: CheckCircle,
                 path: '/admin/leave-approval',
                 color: '#f59e0b' // amber-500
+            },
+            {
+                title: 'Announcements',
+                description: 'Create and publish announcements',
+                icon: Megaphone,
+                path: '/admin/announcements',
+                color: '#6366f1' // indigo-500
             }
         ] : []),
 
@@ -322,6 +330,9 @@ function AdminHome() {
                         <p className="text-primary-foreground/80">Manage courses, students, and system settings.</p>
                     </div>
                 </div>
+
+                {/* ANNOUNCEMENTS SECTION */}
+                <AnnouncementsBanner maxItems={5} className="mb-8" />
 
                 {/* PROFESSOR: MY COURSES SECTION */}
                 {isProfessor && (

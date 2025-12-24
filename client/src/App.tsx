@@ -50,6 +50,7 @@ import BenefitsPage from './pages/BenefitsPage';
 import LeaveRequestPage from './pages/LeaveRequestPage';
 import LeaveHistoryPage from './pages/LeaveHistoryPage';
 import LeaveApprovalPage from './pages/LeaveApprovalPage';
+import StaffAnnouncementsPage from './pages/StaffAnnouncementsPage';
 import { Toaster } from "@/components/ui/sonner"
 
 /**
@@ -243,6 +244,9 @@ function App() {
 
         {/* Leave Approval (Staff Only) */}
         <Route path="/admin/leave-approval" element={<StaffOnlyRoute><LeaveApprovalPage /></StaffOnlyRoute>} />
+
+        {/* Announcements Management (Staff Only) */}
+        <Route path="/admin/announcements" element={<StaffOnlyRoute><StaffAnnouncementsPage /></StaffOnlyRoute>} />
 
         {/* My Performance (Professor) */}
         <Route path="/faculty/performance" element={<ProtectedRoute><ProfessorPerformancePage /></ProtectedRoute>} />

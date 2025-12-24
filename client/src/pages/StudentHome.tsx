@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import { AnnouncementsBanner } from "@/components/AnnouncementsBanner"
 
 function StudentHome() {
     const navigate = useNavigate();
@@ -112,6 +113,9 @@ function StudentHome() {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* ANNOUNCEMENTS SECTION */}
+            <AnnouncementsBanner maxItems={3} className="mb-8" />
 
             {/* PARENT LINKING SECTION */}
             <Card className="mb-8 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">

@@ -5,7 +5,7 @@ import { authService } from '../services/authService.js';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { EventsBanner } from "@/components/EventsBanner";
+
 import { AnnouncementNotification } from "@/components/AnnouncementNotification";
 
 import {
@@ -156,8 +156,7 @@ function ParentHome() {
                     </div>
                 )}
 
-                {/* UPCOMING EVENTS SECTION */}
-                <EventsBanner maxItems={3} className="mb-8" />
+
 
                 {/* LINK STUDENT BUTTON - REMOVED AS PER REQUIREMENT (1 Student : 1 Parent) */}
                 {/* <div className="mb-6"> ... </div> */}

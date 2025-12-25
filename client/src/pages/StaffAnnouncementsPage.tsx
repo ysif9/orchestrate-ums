@@ -27,8 +27,7 @@ interface Announcement {
     statusName: string;
     priority: number;
     priorityName: string;
-    audience: number;
-    audienceName: string;
+
     scheduledAt?: string | null;
     publishedAt?: string | null;
     expiresAt?: string | null;
@@ -49,8 +48,7 @@ interface Event {
     statusName: string;
     priority: number;
     priorityName: string;
-    audience: number;
-    audienceName: string;
+
     startDate: string;
     endDate: string;
     location?: string | null;
@@ -64,7 +62,7 @@ interface AnnouncementFormData {
     content: string;
     status: number;
     priority: number;
-    audience: number;
+
     scheduledAt: string;
     expiresAt: string;
 }
@@ -74,7 +72,7 @@ interface EventFormData {
     description: string;
     status: number;
     priority: number;
-    audience: number;
+
     startDate: string;
     endDate: string;
     location: string;
@@ -96,7 +94,7 @@ function StaffAnnouncementsPage() {
         content: '',
         status: 0,
         priority: 1,
-        audience: 0,
+
         scheduledAt: '',
         expiresAt: ''
     });
@@ -113,7 +111,7 @@ function StaffAnnouncementsPage() {
         description: '',
         status: 0,
         priority: 1,
-        audience: 0,
+
         startDate: '',
         endDate: '',
         location: ''
@@ -148,7 +146,7 @@ function StaffAnnouncementsPage() {
                 content: announcement.content,
                 status: announcement.status,
                 priority: announcement.priority,
-                audience: announcement.audience,
+
                 scheduledAt: announcement.scheduledAt ? new Date(announcement.scheduledAt).toISOString().slice(0, 16) : '',
                 expiresAt: announcement.expiresAt ? new Date(announcement.expiresAt).toISOString().slice(0, 16) : ''
             });
@@ -159,7 +157,7 @@ function StaffAnnouncementsPage() {
                 content: '',
                 status: 0,
                 priority: 1,
-                audience: 0,
+
                 scheduledAt: '',
                 expiresAt: ''
             });
@@ -242,7 +240,7 @@ function StaffAnnouncementsPage() {
                 description: event.description,
                 status: event.status,
                 priority: event.priority,
-                audience: event.audience,
+
                 startDate: new Date(event.startDate).toISOString().slice(0, 16),
                 endDate: new Date(event.endDate).toISOString().slice(0, 16),
                 location: event.location || ''
@@ -254,7 +252,7 @@ function StaffAnnouncementsPage() {
                 description: '',
                 status: 0,
                 priority: 1,
-                audience: 0,
+
                 startDate: '',
                 endDate: '',
                 location: ''
@@ -347,10 +345,7 @@ function StaffAnnouncementsPage() {
         }
     };
 
-    const getAudienceBadge = (audience: number) => {
-        const names = ['All Users', 'Students', 'Staff', 'Professors', 'Parents'];
-        return <Badge variant="secondary">{names[audience] || 'Unknown'}</Badge>;
-    };
+
 
     const formatDateTime = (dateString: string) => {
         return new Date(dateString).toLocaleString(undefined, {
@@ -476,7 +471,7 @@ function StaffAnnouncementsPage() {
                                                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                                                         {getAnnouncementStatusBadge(announcement.status)}
                                                         {getPriorityBadge(announcement.priority)}
-                                                        {getAudienceBadge(announcement.audience)}
+
                                                     </div>
                                                     <h3 className="text-lg font-semibold mb-2">{announcement.title}</h3>
                                                     <p className="text-muted-foreground line-clamp-2 mb-3">{announcement.content}</p>
@@ -596,7 +591,7 @@ function StaffAnnouncementsPage() {
                                                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                                                         {getEventStatusBadge(event.status)}
                                                         {getPriorityBadge(event.priority, true)}
-                                                        {getAudienceBadge(event.audience)}
+
                                                     </div>
                                                     <h3 className="text-lg font-semibold mb-2">{event.title}</h3>
                                                     <p className="text-muted-foreground line-clamp-2 mb-3">{event.description}</p>
@@ -730,22 +725,7 @@ function StaffAnnouncementsPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label>Target Audience</Label>
-                                <Select
-                                    value={announcementFormData.audience.toString()}
-                                    onValueChange={(value) => setAnnouncementFormData({ ...announcementFormData, audience: parseInt(value) })}
-                                >
-                                    <SelectTrigger><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="0">All Users</SelectItem>
-                                        <SelectItem value="1">Students Only</SelectItem>
-                                        <SelectItem value="2">Staff Only</SelectItem>
-                                        <SelectItem value="3">Professors Only</SelectItem>
-                                        <SelectItem value="4">Parents Only</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
+
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
@@ -900,22 +880,7 @@ function StaffAnnouncementsPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label>Target Audience</Label>
-                                <Select
-                                    value={eventFormData.audience.toString()}
-                                    onValueChange={(value) => setEventFormData({ ...eventFormData, audience: parseInt(value) })}
-                                >
-                                    <SelectTrigger><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="0">All Users</SelectItem>
-                                        <SelectItem value="1">Students Only</SelectItem>
-                                        <SelectItem value="2">Staff Only</SelectItem>
-                                        <SelectItem value="3">Professors Only</SelectItem>
-                                        <SelectItem value="4">Parents Only</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
+
                         </div>
 
                         <DialogFooter>

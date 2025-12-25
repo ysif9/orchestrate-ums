@@ -19,8 +19,7 @@ interface Announcement {
     statusName: string;
     priority: number;
     priorityName: string;
-    audience: number;
-    audienceName: string;
+
     publishedAt?: string | null;
     createdAt: string;
     updatedAt: string;
@@ -183,9 +182,7 @@ function AnnouncementsPage() {
                                                     {getPriorityIcon(announcement.priority)}
                                                     <span className="ml-1">{announcement.priorityName}</span>
                                                 </Badge>
-                                                <Badge variant="outline">
-                                                    {announcement.audienceName}
-                                                </Badge>
+
                                             </div>
                                             <span className="text-xs text-muted-foreground flex items-center gap-1 flex-shrink-0">
                                                 <Clock className="h-3 w-3" />

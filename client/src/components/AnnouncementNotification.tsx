@@ -101,7 +101,7 @@ export function AnnouncementNotification({ variant = 'light' }: AnnouncementNoti
 
     const handleClick = () => {
         setShowPreview(false);
-        navigate('/announcements');
+        navigate('/news?tab=announcements');
     };
 
     if (loading) {

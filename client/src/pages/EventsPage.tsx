@@ -19,8 +19,7 @@ interface Event {
     statusName: string;
     priority: number;
     priorityName: string;
-    audience: number;
-    audienceName: string;
+
     startDate: string;
     endDate: string;
     location?: string | null;
@@ -257,10 +256,7 @@ function EventsPage() {
                                                             <Badge variant="outline" className="text-emerald-600 border-emerald-300">
                                                                 {getRelativeDate(event.startDate)}
                                                             </Badge>
-                                                            <Badge variant="secondary">
-                                                                <Users className="h-3 w-3 mr-1" />
-                                                                {event.audienceName}
-                                                            </Badge>
+
                                                         </div>
 
                                                         <h3 className="text-xl font-semibold mb-2 text-gray-800">{event.title}</h3>

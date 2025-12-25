@@ -32,6 +32,7 @@ import StudentResources from './pages/StudentResources';
 import AdmissionsInfoPage from './pages/AdmissionsInfoPage';
 import ApplicationFormPage from './pages/ApplicationFormPage';
 import ApplicationConfirmationPage from './pages/ApplicationConfirmationPage';
+import UniversityNewsPage from './pages/UniversityNewsPage';
 import StaffPDTrackingPage from './pages/StaffPDTrackingPage';
 import ProfessorPDHistoryPage from './pages/ProfessorPDHistoryPage';
 import StudentLayout from './components/StudentLayout';
@@ -51,8 +52,7 @@ import LeaveRequestPage from './pages/LeaveRequestPage';
 import LeaveHistoryPage from './pages/LeaveHistoryPage';
 import LeaveApprovalPage from './pages/LeaveApprovalPage';
 import StaffAnnouncementsPage from './pages/StaffAnnouncementsPage';
-import EventsPage from './pages/EventsPage';
-import AnnouncementsPage from './pages/AnnouncementsPage';
+
 import { Toaster } from "@/components/ui/sonner"
 
 /**
@@ -165,6 +165,11 @@ function App() {
         <Route path="/apply" element={<ApplicationFormPage />} />
         <Route path="/apply/confirmation/:id" element={<ApplicationConfirmationPage />} />
 
+
+        {/* Public University News (Announcements & Events) */}
+        <Route path="/news" element={<UniversityNewsPage />} />
+
+
         {/* Protected Student Routes wrapped in Layout */}
         <Route element={<ProtectedRoute><StudentLayout /></ProtectedRoute>}>
           {/* Student Home / Dashboard (My Courses) */}
@@ -198,11 +203,7 @@ function App() {
           <Route path="staff-directory" element={<StaffDirectoryPage />} />
           <Route path="staff-directory/:id" element={<StaffProfileDetailPage />} />
 
-          {/* Events Page (accessible to all authenticated users) */}
-          <Route path="/events" element={<EventsPage />} />
 
-          {/* Announcements Page (accessible to all authenticated users) */}
-          <Route path="/announcements" element={<AnnouncementsPage />} />
         </Route>
 
         {/* --- Admin/Staff Routes --- */}

@@ -19,14 +19,7 @@ export enum EventPriority {
     Featured = 3
 }
 
-// Integer enum for target audience
-export enum EventAudience {
-    All = 0,
-    Students = 1,
-    Staff = 2,
-    Professors = 3,
-    Parents = 4
-}
+
 
 @Entity()
 export class Event extends BaseEntity {
@@ -45,8 +38,7 @@ export class Event extends BaseEntity {
     @Enum({ items: () => EventPriority, default: EventPriority.Normal })
     priority: EventPriority = EventPriority.Normal;
 
-    @Enum({ items: () => EventAudience, default: EventAudience.All })
-    audience: EventAudience = EventAudience.All;
+
 
     // Required: Event start date/time
     @Property()
@@ -69,8 +61,7 @@ export class Event extends BaseEntity {
         startDate: Date,
         endDate: Date,
         status: EventStatus = EventStatus.Draft,
-        priority: EventPriority = EventPriority.Normal,
-        audience: EventAudience = EventAudience.All
+        priority: EventPriority = EventPriority.Normal
     ) {
         super();
         this.title = title;
@@ -80,6 +71,6 @@ export class Event extends BaseEntity {
         this.endDate = endDate;
         this.status = status;
         this.priority = priority;
-        this.audience = audience;
+
     }
 }

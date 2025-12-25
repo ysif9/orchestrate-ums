@@ -4,7 +4,7 @@ import axios from 'axios';
 import { authService } from '@/services/authService';
 import { courseService } from '@/services/courseService';
 import { semesterService } from '@/services/semesterService';
-import { eventService } from '@/services/eventService';
+
 import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, Package, User, Users, Wrench, DollarSign, Shield, CalendarDays, CheckCircle, Megaphone, Mail } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -27,7 +27,7 @@ function AdminHome() {
     const [myCourses, setMyCourses] = useState<any[]>([]);
     const [activeSemester, setActiveSemester] = useState<string | null>(null);
     const [totalUnreadMessages, setTotalUnreadMessages] = useState(0);
-    const [upcomingEventsCount, setUpcomingEventsCount] = useState(0);
+
     const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
     const [courseEnrollments, setCourseEnrollments] = useState<any>(null);
     const [loadingEnrollments, setLoadingEnrollments] = useState(false);
@@ -38,7 +38,7 @@ function AdminHome() {
             fetchUnreadMessageCounts();
         }
         fetchActiveSemester();
-        fetchUpcomingEventsCount();
+
     }, [isProfessor, user?.id]);
 
     const fetchMyCourses = async () => {
@@ -82,20 +82,7 @@ function AdminHome() {
         }
     };
 
-    const fetchUpcomingEventsCount = async () => {
-        try {
-            const response = await eventService.getEvents();
-            if (response.success) {
-                const now = new Date();
-                const upcoming = response.data.filter((e: any) =>
-                    new Date(e.endDate) >= now && (e.status === 1 || e.status === 2)
-                );
-                setUpcomingEventsCount(upcoming.length);
-            }
-        } catch (error) {
-            console.error('Failed to fetch events count:', error);
-        }
-    };
+
 
     const fetchCourseEnrollments = async (courseId: number) => {
         try {
@@ -149,14 +136,7 @@ function AdminHome() {
             path: '/admin/room-booking',
             color: '#059669' // emerald-600
         },
-        {
-            title: 'University Events',
-            description: 'View upcoming campus events and activities',
-            icon: CalendarDays,
-            path: '/events',
-            color: '#10b981', // emerald-500
-            badge: upcomingEventsCount > 0 ? upcomingEventsCount : undefined,
-        },
+
         ...(!isStaff ? [
             {
                 title: 'Report Maintenance',
@@ -241,8 +221,8 @@ function AdminHome() {
                 color: '#f59e0b' // amber-500
             },
             {
-                title: 'Announcements',
-                description: 'Create and publish announcements',
+                title: 'Announcements & Events',
+                description: 'Create and publish announcements and events',
                 icon: Megaphone,
                 path: '/admin/announcements',
                 color: '#6366f1' // indigo-500

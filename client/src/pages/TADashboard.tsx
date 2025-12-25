@@ -6,29 +6,12 @@ import { courseService } from '@/services/courseService';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { BookOpen, Users } from 'lucide-react';
+import { BookOpen, Users, DollarSign, Shield, CalendarDays, Calendar, History, Megaphone } from 'lucide-react';
 
 function TADashboard() {
     const navigate = useNavigate();
     const user = authService.getCurrentUser();
 
-    // In a real app we would have a dedicated endpoint for "my assignments"
-    // For now, since we don't have a direct "get my TA assignments" endpoint yet (unless I missed it in plan),
-    // we might need to rely on the fact that the backend should provide this.
-    // Wait, the plan said "GET /api/tas/me". I didn't implement that in courseTaRoutes.ts!
-    // I implemented generic CRUD on course.
-
-    // Let's assume for now we might fetch all courses and filter? No that's inefficient.
-    // I should add the "get my assignments" endpoint to the backend. 
-    // BUT since I already marked backend as "Done" and I am in frontend mode, 
-    // I will quickly add that endpoint or just fetch all courses and filter on client if acceptable for MVP?
-    // Looking at `courseTaRoutes.ts`... I missed `GET /api/tas/me`.
-
-    // Actually, I can use `GET /api/users?role=teaching_assistant` to get TAs, but that doesn't help the TA see their courses.
-    // I will quickly patch the backend to add `GET /api/courses/my-ta-assignments` or similar in `courseTaRoutes.ts`.
-    // OR, I can use the existing `GET /api/courses` and maybe update it to return courses where I am TA?
-
-    // Let's check `courseTaRoutes.ts` again. 
 
     const [assignments, setAssignments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -72,6 +55,70 @@ function TADashboard() {
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">Assigned Courses</CardTitle>
                             <CardTitle className="text-2xl font-bold">{assignments.length}</CardTitle>
+                        </CardHeader>
+                    </Card>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <Card
+                        className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-emerald-500"
+                        onClick={() => navigate('/admin/payroll')}
+                    >
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <DollarSign className="h-5 w-5 text-emerald-600" />
+                                My Payroll
+                            </CardTitle>
+                            <CardDescription>View salary and deductions</CardDescription>
+                        </CardHeader>
+                    </Card>
+                    <Card
+                        className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-violet-500"
+                        onClick={() => navigate('/admin/benefits')}
+                    >
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Shield className="h-5 w-5 text-violet-600" />
+                                My Benefits
+                            </CardTitle>
+                            <CardDescription>View employment benefits</CardDescription>
+                        </CardHeader>
+                    </Card>
+                    <Card
+                        className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-blue-500"
+                        onClick={() => navigate('/faculty/leave-request')}
+                    >
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <CalendarDays className="h-5 w-5 text-blue-600" />
+                                Request Leave
+                            </CardTitle>
+                            <CardDescription>Submit a leave request</CardDescription>
+                        </CardHeader>
+                    </Card>
+                    <Card
+                        className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-amber-500"
+                        onClick={() => navigate('/faculty/leave-history')}
+                    >
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <History className="h-5 w-5 text-amber-600" />
+                                Leave History
+                            </CardTitle>
+                            <CardDescription>View past leave requests</CardDescription>
+                        </CardHeader>
+                    </Card>
+                    <Card
+                        className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-indigo-500"
+                        onClick={() => navigate('/news')}
+                    >
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Megaphone className="h-5 w-5 text-indigo-600" />
+                                University News
+                            </CardTitle>
+                            <CardDescription>View announcements and events</CardDescription>
                         </CardHeader>
                     </Card>
                 </div>

@@ -1,11 +1,16 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { authService } from '@/services/authService';
 import { courseService } from '@/services/courseService';
 import { semesterService } from '@/services/semesterService';
-import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, Package, User, Users, Wrench } from 'lucide-react';
+
+import { BookOpen, Building, Calendar, ClipboardCheck, FileText, MessageSquare, Package, User, Users, Wrench, DollarSign, Shield, CalendarDays, CheckCircle, Megaphone, Mail } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { AnnouncementNotification } from "@/components/AnnouncementNotification"
 
 function AdminHome() {
     const navigate = useNavigate();
@@ -21,23 +26,24 @@ function AdminHome() {
 
     const [myCourses, setMyCourses] = useState<any[]>([]);
     const [activeSemester, setActiveSemester] = useState<string | null>(null);
+    const [totalUnreadMessages, setTotalUnreadMessages] = useState(0);
+
+    const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
+    const [courseEnrollments, setCourseEnrollments] = useState<any>(null);
+    const [loadingEnrollments, setLoadingEnrollments] = useState(false);
 
     useEffect(() => {
         if (isProfessor && user?.id) {
             fetchMyCourses();
+            fetchUnreadMessageCounts();
         }
         fetchActiveSemester();
+
     }, [isProfessor, user?.id]);
 
     const fetchMyCourses = async () => {
         try {
-            // Determine if we need a specific endpoint or just filter on client.
-            // For now, let's fetch all and filter, or assuming API supports filtering.
-            // Since we didn't add a specific "my courses" endpoint, we'll fetch all and filter.
-            // Ideally backend adds 'getMyCourses'.
-            // But wait, the courses table stores professorId (or relation).
-            // Let's assume we fetch all and filter for now as per plan, or use a new endpoint if I made one?
-            // I didn't make a specific endpoint. I'll fetch all.
+
             const allCourses = await courseService.getAll();
             // Filter where professor.id === user.id
             const my = allCourses.filter((c: any) => c.professor?.id === user.id || c.professorName === user.name);
@@ -50,22 +56,65 @@ function AdminHome() {
     const fetchActiveSemester = async () => {
         try {
             const semester = await semesterService.getActive();
-            setActiveSemester(semester ? semester.name : null);
+            setActiveSemester(semester ? (semester as any).name : null);
         } catch (error) {
             console.error('Failed to fetch active semester:', error);
             setActiveSemester(null);
         }
     };
 
+    const fetchUnreadMessageCounts = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const headers = { Authorization: `Bearer ${token}` };
+
+            // Fetch student messages unread count
+            const studentCountRes = await axios.get('http://localhost:5000/api/messages/unread-count', { headers });
+            const studentUnread = studentCountRes.data.success ? studentCountRes.data.data.unreadCount : 0;
+
+            // Fetch parent inquiries unread count
+            const parentCountRes = await axios.get('http://localhost:5000/api/parent-inquiries/professor/unread-count', { headers });
+            const parentUnread = parentCountRes.data.success ? parentCountRes.data.data.unreadCount : 0;
+
+            setTotalUnreadMessages(studentUnread + parentUnread);
+        } catch (error) {
+            console.error('Failed to fetch unread message counts:', error);
+        }
+    };
+
+
+
+    const fetchCourseEnrollments = async (courseId: number) => {
+        try {
+            setLoadingEnrollments(true);
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`http://localhost:5000/api/enrollments/course/${courseId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.data.success) {
+                setCourseEnrollments(response.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch course enrollments:', error);
+        } finally {
+            setLoadingEnrollments(false);
+        }
+    };
+
+    const handleCourseClick = (course: any) => {
+        setSelectedCourseId(course.id);
+        setCourseEnrollments(null);
+        fetchCourseEnrollments(course.id);
+    };
+
+    const closeModal = () => {
+        setSelectedCourseId(null);
+        setCourseEnrollments(null);
+    };
+
     // Quick action cards configuration - using accessible colors
     const quickActions = [
-        {
-            title: 'Manage Courses',
-            description: 'View, edit, and delete existing courses',
-            icon: BookOpen,
-            path: '/admin/courses',
-            color: '#0066cc' // brand-500
-        },
+
         {
             title: 'Create Assessment',
             description: 'Create quizzes, assignments, and exams',
@@ -87,6 +136,7 @@ function AdminHome() {
             path: '/admin/room-booking',
             color: '#059669' // emerald-600
         },
+
         ...(!isStaff ? [
             {
                 title: 'Report Maintenance',
@@ -99,6 +149,13 @@ function AdminHome() {
         ,
         // Staff-only actions
         ...(isStaff ? [
+            {
+                title: 'Manage Courses',
+                description: 'View, edit, and delete existing courses',
+                icon: BookOpen,
+                path: '/admin/courses',
+                color: '#0066cc' // brand-500
+            },
             {
                 title: 'Manage Rooms',
                 description: 'Add, edit, and manage classrooms and labs',
@@ -155,6 +212,20 @@ function AdminHome() {
                 icon: Package,
                 path: '/facilities/allocate',
                 color: '#ec4899' // pink-500
+            },
+            {
+                title: 'Leave Approvals',
+                description: 'Review and approve leave requests',
+                icon: CheckCircle,
+                path: '/admin/leave-approval',
+                color: '#f59e0b' // amber-500
+            },
+            {
+                title: 'Announcements & Events',
+                description: 'Create and publish announcements and events',
+                icon: Megaphone,
+                path: '/admin/announcements',
+                color: '#6366f1' // indigo-500
             }
         ] : []),
 
@@ -186,10 +257,11 @@ function AdminHome() {
             },
             {
                 title: 'My Messages',
-                description: 'View and respond to student messages',
+                description: 'View and respond to student and parent messages',
                 icon: MessageSquare,
                 path: '/admin/messages',
                 color: '#2563eb', // blue-600
+                badge: totalUnreadMessages > 0 ? totalUnreadMessages : undefined,
             },
             {
                 title: 'My Performance',
@@ -219,6 +291,38 @@ function AdminHome() {
                 path: '/facilities/my-resources',
                 color: '#db2777', // pink-600
             },
+            {
+                title: 'Request Leave',
+                description: 'Submit a new leave request',
+                icon: CalendarDays,
+                path: '/faculty/leave-request',
+                color: '#f97316', // orange-500
+            },
+            {
+                title: 'Leave History',
+                description: 'View status of your leave requests',
+                icon: Calendar,
+                path: '/faculty/leave-history',
+                color: '#6366f1', // indigo-500
+            }
+        ] : []),
+
+        // Academic Staff Actions (Staff, Professor, TA)
+        ...(isStaff || isProfessor || user?.role === 'teaching_assistant' ? [
+            {
+                title: 'My Payroll',
+                description: 'View salary and deductions',
+                icon: DollarSign,
+                path: '/admin/payroll',
+                color: '#10b981', // emerald-500
+            },
+            {
+                title: 'My Benefits',
+                description: 'View employment benefits',
+                icon: Shield,
+                path: '/admin/benefits',
+                color: '#8b5cf6', // violet-500
+            }
         ] : []),
     ];
 
@@ -235,7 +339,8 @@ function AdminHome() {
                             UNIVERSITY | FACULTY OF ENGINEERING
                         </span>
                     </h1>
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4">
+                        <AnnouncementNotification variant="dark" />
                         <span className="text-sm font-medium text-primary-foreground/90">
                             {user?.role === 'professor' ? 'Professor' : 'Staff Member'}
                         </span>
@@ -272,13 +377,13 @@ function AdminHome() {
                                 {myCourses.map(course => (
                                     <Card key={course.id}
                                         className="hover:shadow-md transition-shadow cursor-pointer border-t-4 border-t-primary"
-                                        onClick={() => navigate(`/admin/courses`)}>
+                                        onClick={() => handleCourseClick(course)}>
                                         <CardContent className="p-6">
                                             <div className="flex justify-between items-start mb-2">
                                                 <h3 className="font-bold text-lg">{course.code}</h3>
                                                 <span
                                                     className="text-xs font-semibold bg-primary/10 text-primary px-2 py-1 rounded-full">
-                                                    {course.semester || 'Current'}
+                                                    {course.semester?.name || 'Current'}
                                                 </span>
                                             </div>
                                             <h4 className="font-medium mb-4 line-clamp-1">{course.title}</h4>
@@ -302,24 +407,119 @@ function AdminHome() {
                     </div>
                 )}
 
+                {/* Course Details Modal */}
+                <Dialog open={selectedCourseId !== null} onOpenChange={(open) => !open && closeModal()}>
+                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                                <BookOpen className="h-5 w-5 text-primary" />
+                                {myCourses.find(c => c.id === selectedCourseId)?.code} - {myCourses.find(c => c.id === selectedCourseId)?.title}
+                            </DialogTitle>
+                        </DialogHeader>
+
+                        {/* Course Info */}
+                        {selectedCourseId && (
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <Badge variant="secondary">
+                                        {myCourses.find(c => c.id === selectedCourseId)?.semester?.name || 'Current'}
+                                    </Badge>
+                                    <Badge variant="outline">
+                                        {myCourses.find(c => c.id === selectedCourseId)?.credits} Credits
+                                    </Badge>
+                                    <Badge variant="outline">
+                                        {myCourses.find(c => c.id === selectedCourseId)?.type}
+                                    </Badge>
+                                </div>
+
+                                {myCourses.find(c => c.id === selectedCourseId)?.description && (
+                                    <p className="text-sm text-muted-foreground">
+                                        {myCourses.find(c => c.id === selectedCourseId)?.description}
+                                    </p>
+                                )}
+
+                                <div className="border-t pt-4">
+                                    <h4 className="font-semibold flex items-center gap-2 mb-4">
+                                        <Users className="h-4 w-4" />
+                                        Enrolled Students
+                                        {courseEnrollments && (
+                                            <Badge className="ml-2">{courseEnrollments.totalStudents}</Badge>
+                                        )}
+                                    </h4>
+
+                                    {loadingEnrollments ? (
+                                        <div className="flex items-center justify-center py-8">
+                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                                            <span className="ml-2 text-muted-foreground">Loading students...</span>
+                                        </div>
+                                    ) : courseEnrollments && courseEnrollments.enrollments.length > 0 ? (
+                                        <div className="space-y-3">
+                                            {courseEnrollments.enrollments.map((enrollment: any) => (
+                                                <div
+                                                    key={enrollment.id}
+                                                    className="flex items-center justify-between bg-muted/50 rounded-lg p-4"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                                            <User className="h-5 w-5 text-primary" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-medium">{enrollment.studentName}</p>
+                                                            <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                                                <Mail className="h-3 w-3" />
+                                                                {enrollment.studentEmail}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <Badge
+                                                        variant={enrollment.status === 'active' ? 'default' : 'secondary'}
+                                                        className={enrollment.status === 'active' ? 'bg-green-500' : ''}
+                                                    >
+                                                        {enrollment.status}
+                                                    </Badge>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : courseEnrollments ? (
+                                        <div className="text-center py-8 text-muted-foreground">
+                                            <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                            <p>No students enrolled yet</p>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8 text-muted-foreground">
+                                            <p>Unable to load enrollment data</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </DialogContent>
+                </Dialog>
+
                 {/* QUICK ACTIONS GRID */}
-                <div className="mb-8">
+                <div className="mb-8 overflow-visible">
                     <h2 className="text-2xl font-bold text-primary mb-6">Quick Actions</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-visible">
                         {quickActions.map((action, index) => {
                             const IconComponent = action.icon;
+                            const badgeValue = (action as any).badge;
                             // Convert hex color to equivalent Tailwind class or style? 
                             // For simplicity, we keep the inline style but style the card wrapper with Shadcn
                             return (
                                 <Card
                                     key={index}
-                                    className="border-l-4 shadow-sm hover:shadow-lg transition-all cursor-pointer group"
+                                    className="border-l-4 shadow-sm hover:shadow-lg transition-all cursor-pointer group relative overflow-visible"
                                     onClick={() => navigate(action.path)}
                                     style={{ borderLeftColor: action.color }}
                                 >
+                                    {badgeValue && (
+                                        <span className="absolute -top-2 -right-2 h-6 w-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-md z-10">
+                                            {badgeValue > 9 ? '9+' : badgeValue}
+                                        </span>
+                                    )}
                                     <CardContent className="p-6 flex items-start gap-4">
                                         <div
-                                            className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
+                                            className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 relative"
                                             style={{ backgroundColor: action.color }}
                                         >
                                             <IconComponent size={24} color="white" strokeWidth={2} />

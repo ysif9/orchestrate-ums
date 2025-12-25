@@ -32,6 +32,7 @@ import StudentResources from './pages/StudentResources';
 import AdmissionsInfoPage from './pages/AdmissionsInfoPage';
 import ApplicationFormPage from './pages/ApplicationFormPage';
 import ApplicationConfirmationPage from './pages/ApplicationConfirmationPage';
+import UniversityNewsPage from './pages/UniversityNewsPage';
 import StaffPDTrackingPage from './pages/StaffPDTrackingPage';
 import ProfessorPDHistoryPage from './pages/ProfessorPDHistoryPage';
 import StudentLayout from './components/StudentLayout';
@@ -41,8 +42,18 @@ import ProfessorOfficeHoursPage from './pages/ProfessorOfficeHoursPage';
 import MessagesPage from './pages/MessagesPage';
 import ParentHome from './pages/ParentHome';
 import ParentLogin from './pages/ParentLogin';
+import ParentInbox from './pages/ParentInbox';
+import ProfessorMessagesPage from './pages/ProfessorMessagesPage';
 import StaffPerformanceManagementPage from './pages/StaffPerformanceManagementPage';
 import ProfessorPerformancePage from './pages/ProfessorPerformancePage';
+import StaffPayrollPage from './pages/StaffPayrollPage';
+import BenefitsPage from './pages/BenefitsPage';
+import LeaveRequestPage from './pages/LeaveRequestPage';
+import LeaveHistoryPage from './pages/LeaveHistoryPage';
+import LeaveApprovalPage from './pages/LeaveApprovalPage';
+import StaffAnnouncementsPage from './pages/StaffAnnouncementsPage';
+
+import { Toaster } from "@/components/ui/sonner"
 
 /**
  * Protected Route Component
@@ -64,6 +75,25 @@ function StaffOnlyRoute({ children }: { children: React.ReactNode }) {
   const user: any = authService.getCurrentUser();
   if (user?.role !== 'staff') {
     return <Navigate to="/admin/home" replace />;
+  }
+
+  return children;
+}
+
+/**
+ * Academic Staff Route Component (Staff + Professor + TA)
+ */
+function AcademicStaffRoute({ children }: { children: React.ReactNode }) {
+  const isAuthenticated = authService.isAuthenticated();
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const user: any = authService.getCurrentUser();
+  const allowedRoles = ['staff', 'professor', 'teaching_assistant'];
+
+  if (!allowedRoles.includes(user?.role)) {
+    return <Navigate to="/home" replace />;
   }
 
   return children;
@@ -135,6 +165,11 @@ function App() {
         <Route path="/apply" element={<ApplicationFormPage />} />
         <Route path="/apply/confirmation/:id" element={<ApplicationConfirmationPage />} />
 
+
+        {/* Public University News (Announcements & Events) */}
+        <Route path="/news" element={<UniversityNewsPage />} />
+
+
         {/* Protected Student Routes wrapped in Layout */}
         <Route element={<ProtectedRoute><StudentLayout /></ProtectedRoute>}>
           {/* Student Home / Dashboard (My Courses) */}
@@ -167,6 +202,8 @@ function App() {
           {/* Student routes inside StudentLayout */}
           <Route path="staff-directory" element={<StaffDirectoryPage />} />
           <Route path="staff-directory/:id" element={<StaffProfileDetailPage />} />
+
+
         </Route>
 
         {/* --- Admin/Staff Routes --- */}
@@ -175,7 +212,7 @@ function App() {
         <Route path="/admin/home" element={<ProtectedRoute><AdminHome /></ProtectedRoute>} />
 
         {/* Course Management (Admin) */}
-        <Route path="/admin/courses" element={<ProtectedRoute><AdminCourseManager /></ProtectedRoute>} />
+        <Route path="/admin/courses" element={<StaffOnlyRoute><AdminCourseManager /></StaffOnlyRoute>} />
 
         {/* TA Dashboard */}
         <Route path="/ta-dashboard" element={<ProtectedRoute><TADashboard /></ProtectedRoute>} />
@@ -206,6 +243,20 @@ function App() {
         {/* Semester Management (Staff Only) */}
         <Route path="/admin/semesters" element={<StaffOnlyRoute><StaffSemesterManagementPage /></StaffOnlyRoute>} />
 
+        {/* Staff Payroll (Academic Staff Only) */}
+        <Route path="/admin/payroll" element={<AcademicStaffRoute><StaffPayrollPage /></AcademicStaffRoute>} />
+        <Route path="/admin/benefits" element={<AcademicStaffRoute><BenefitsPage /></AcademicStaffRoute>} />
+
+        {/* Leave Requests (Professor & TA) */}
+        <Route path="/faculty/leave-request" element={<AcademicStaffRoute><LeaveRequestPage /></AcademicStaffRoute>} />
+        <Route path="/faculty/leave-history" element={<AcademicStaffRoute><LeaveHistoryPage /></AcademicStaffRoute>} />
+
+        {/* Leave Approval (Staff Only) */}
+        <Route path="/admin/leave-approval" element={<StaffOnlyRoute><LeaveApprovalPage /></StaffOnlyRoute>} />
+
+        {/* Announcements Management (Staff Only) */}
+        <Route path="/admin/announcements" element={<StaffOnlyRoute><StaffAnnouncementsPage /></StaffOnlyRoute>} />
+
         {/* My Performance (Professor) */}
         <Route path="/faculty/performance" element={<ProtectedRoute><ProfessorPerformancePage /></ProtectedRoute>} />
 
@@ -222,13 +273,21 @@ function App() {
           }
         />
 
-        {/* Messages (Professor only - outside StudentLayout) */}
+        {/* Professor Messages (unified inbox for both student and parent messages) */}
         <Route
           path="/admin/messages"
           element={
             <ProtectedRoute>
-              <MessagesPage />
+              <ProfessorMessagesPage />
             </ProtectedRoute>
+          }
+        />
+
+        {/* Legacy route for backward compatibility */}
+        <Route
+          path="/faculty/parent-inbox"
+          element={
+            <Navigate to="/admin/messages" replace />
           }
         />
 
@@ -253,6 +312,7 @@ function App() {
 
         {/* Parent Routes */}
         <Route path="/parent/home" element={<ProtectedRoute><ParentHome /></ProtectedRoute>} />
+        <Route path="/parent/inbox" element={<ProtectedRoute><ParentInbox /></ProtectedRoute>} />
 
         {/* Root redirect */}
         <Route path="/" element={<RootRedirect />} />
@@ -275,6 +335,7 @@ function App() {
 
 
       </Routes>
+      <Toaster />
     </BrowserRouter>
   );
 }

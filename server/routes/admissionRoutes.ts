@@ -53,8 +53,14 @@ const ADMISSION_INFO = {
 router.get('/info', async (req: Request, res: Response) => {
     try {
         const em = RequestContext.getEntityManager() as EntityManager;
-        const programs = await em.find(Program, {}, { populate: ['attributes', 'attributes.attribute'] });
-        const formattedPrograms = programs.map(p => toFlatObject(p));
+        const programs = await em.find(Program, {}, { populate: ['attributes', 'attributes.attribute', 'department'] });
+        const formattedPrograms = programs.map(p => {
+            const flat = toFlatObject(p);
+            if (p.department) {
+                flat.department = p.department.name;
+            }
+            return flat;
+        });
 
         res.json({
             success: true,
@@ -82,7 +88,6 @@ router.post('/apply', [
     body('phone').optional().trim(),
     body('address').optional().trim(),
     body('program').trim().notEmpty().withMessage('Program selection is required'),
-    body('semester').trim().notEmpty().withMessage('Semester selection is required'),
     body('academicHistory').optional().isObject().withMessage('Academic history must be an object'),
     body('personalInfo').optional().isObject().withMessage('Personal info must be an object'),
 ], async (req: Request, res: Response) => {
@@ -161,9 +166,12 @@ router.post('/apply', [
         }
 
         // Find semester entity
-        let semesterEntity = await em.findOne(Semester, { name: semester });
-        if (!semesterEntity && !isNaN(Number(semester))) {
-            semesterEntity = await em.findOne(Semester, { id: Number(semester) });
+        let semesterEntity: Semester | null = null;
+        if (semester) {
+            semesterEntity = await em.findOne(Semester, { name: semester });
+            if (!semesterEntity && !isNaN(Number(semester))) {
+                semesterEntity = await em.findOne(Semester, { id: Number(semester) });
+            }
         }
 
         if (!semesterEntity) {

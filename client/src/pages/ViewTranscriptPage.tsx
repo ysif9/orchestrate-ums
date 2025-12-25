@@ -33,7 +33,8 @@ function ViewTranscriptPage() {
 
             setRequest(response.request);
 
-            if (response.request.status !== 'approved') {
+            // Status: 1=PendingReview, 2=Approved, 3=Rejected
+            if (response.request.status !== 2) {
                 setError('This transcript request has not been approved yet.');
                 return;
             }

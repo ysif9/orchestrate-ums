@@ -9,6 +9,7 @@ import { Professor } from '../entities/Professor';
 import { TeachingAssistant } from '../entities/TeachingAssistant';
 import { Parent } from '../entities/Parent';
 import { ParentStudentLink } from '../entities/ParentStudentLink';
+import { PayrollDetails, PaymentFrequency } from '../entities/PayrollDetails';
 import authenticate, { AuthRequest } from '../middleware/auth';
 
 const router = express.Router();
@@ -92,6 +93,8 @@ router.post('/signup', [
         }
 
         await em.persistAndFlush(user);
+
+
 
         const token = generateToken(user.id, user.role);
 

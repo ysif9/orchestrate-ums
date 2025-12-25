@@ -144,7 +144,33 @@ router.get('/:id', authenticate, authorize(UserRole.Staff, UserRole.Professor), 
 
         const data = { ...application } as any;
         if (application.applicant) {
-            data.applicant = toFlatObject(application.applicant);
+            const flatApplicant = toFlatObject(application.applicant) as any;
+
+            // Reconstruct academicHistory from flat attributes
+            flatApplicant.academicHistory = {
+                previousDegree: flatApplicant.previousDegree || null,
+                institution: flatApplicant.institution || null,
+                gpa: flatApplicant.gpa || null,
+                graduationYear: flatApplicant.graduationYear || null,
+            };
+
+            // Map to previousEducation array if sufficient data exists (for better UI display)
+            if (flatApplicant.institution || flatApplicant.previousDegree) {
+                flatApplicant.academicHistory.previousEducation = [{
+                    institution: flatApplicant.institution,
+                    degree: flatApplicant.previousDegree,
+                    year: flatApplicant.graduationYear,
+                    gpa: flatApplicant.gpa
+                }];
+            }
+
+            // Reconstruct personalInfo
+            flatApplicant.personalInfo = {
+                dateOfBirth: flatApplicant.dateOfBirth,
+                nationality: flatApplicant.nationality,
+            };
+
+            data.applicant = flatApplicant;
         }
         if (application.semester) {
             data.semester = application.semester.name;

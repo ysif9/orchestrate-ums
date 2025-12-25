@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import { applicationService } from '../services/applicationService.js';
-import { X, Download, FileText, Clock, User, Loader2 } from 'lucide-react';
+import { Download, FileText, Clock, User, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Separator } from "@/components/ui/separator"
-import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 /**
  * DecisionLetterModal - Modal component for viewing and downloading decision letters
@@ -73,7 +71,7 @@ function DecisionLetterModal({ isOpen, onClose, applicationId, generatedLetter }
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 overflow-hidden">
+            <DialogContent className="sm:max-w-7xl h-[90vh] flex flex-col p-0 overflow-hidden">
                 <DialogHeader className="px-6 py-4 border-b border-border">
                     <DialogTitle className="flex items-center gap-3 text-lg font-semibold">
                         <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -81,7 +79,7 @@ function DecisionLetterModal({ isOpen, onClose, applicationId, generatedLetter }
                         </div>
                         <div>
                             Decision Letters
-                            <p className="text-sm font-normal text-muted-foreground">View and download generated letters</p>
+                            <DialogDescription>View and download generated letters</DialogDescription>
                         </div>
                     </DialogTitle>
                 </DialogHeader>

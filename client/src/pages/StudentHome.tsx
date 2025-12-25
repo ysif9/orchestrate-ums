@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 
+
 function StudentHome() {
     const navigate = useNavigate();
     const user: any = authService.getCurrentUser();
@@ -112,6 +113,8 @@ function StudentHome() {
                     </CardContent>
                 </Card>
             </div>
+
+
 
             {/* PARENT LINKING SECTION */}
             <Card className="mb-8 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">

@@ -38,6 +38,12 @@ import parentRoutes from './routes/parentRoutes';
 import studentRoutes from './routes/studentRoutes';
 import publicationRoutes from './routes/publicationRoutes';
 import evaluationRoutes from './routes/evaluationRoutes';
+import parentInquiryRoutes from './routes/parentInquiryRoutes';
+import payrollRoutes from './routes/payrollRoutes';
+import benefitRoutes from './routes/benefitRoutes';
+import leaveRoutes from './routes/leaveRoutes';
+import announcementRoutes from './routes/announcementRoutes';
+import eventRoutes from './routes/eventRoutes';
 dotenv.config();
 
 const app = express();
@@ -245,6 +251,12 @@ export const init = async () => {
     app.use('/api/students', studentRoutes);
     app.use('/api/publications', publicationRoutes);
     app.use('/api/evaluations', evaluationRoutes);
+    app.use('/api/parent-inquiries', parentInquiryRoutes);
+    app.use('/api/payroll', payrollRoutes);
+    app.use('/api/benefits', benefitRoutes);
+    app.use('/api/leave-requests', leaveRoutes);
+    app.use('/api/announcements', announcementRoutes);
+    app.use('/api/events', eventRoutes);
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);
     });

@@ -5,6 +5,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import authenticate, { AuthRequest } from '../middleware/auth';
 import authorize from '../middleware/authorize';
 import { User, UserRole } from '../entities/User';
+import { PayrollDetails, PaymentFrequency } from '../entities/PayrollDetails';
 import { Department } from '../entities/Department';
 import { OfficeHours } from '../entities/OfficeHours';
 import { Publication } from '../entities/Publication';
@@ -195,6 +196,33 @@ router.post(
 
       await em.persistAndFlush(user);
 
+      // Create default payroll
+      let baseSalary = 0;
+      let taxRate = 0;
+      let insurance = 0;
+      let otherDeductions = 0;
+
+      if (user.role === UserRole.Professor) {
+        baseSalary = 25000.00;
+        taxRate = 18.00;
+        insurance = 800.00;
+        otherDeductions = 500.00;
+      } else if (user.role === UserRole.TeachingAssistant) {
+        baseSalary = 8000.00;
+        taxRate = 10.00;
+        insurance = 300.00;
+        otherDeductions = 100.00;
+      }
+
+      if (baseSalary > 0) {
+        const payroll = new PayrollDetails(user, baseSalary);
+        payroll.taxRate = taxRate;
+        payroll.insuranceAmount = insurance;
+        payroll.otherDeductions = otherDeductions;
+        payroll.paymentFrequency = PaymentFrequency.Monthly;
+        await em.persistAndFlush(payroll);
+      }
+
       return res.status(201).json({
         success: true,
         data: {
@@ -279,7 +307,7 @@ router.put(
           department: user.department
             ? { id: user.department.id, name: user.department.name }
             : null,
-          },
+        },
       });
     } catch (err) {
       console.error('Error updating staff profile:', err);

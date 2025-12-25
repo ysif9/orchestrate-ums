@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { AnnouncementsBanner } from "@/components/AnnouncementsBanner"
+import { AnnouncementNotification } from "@/components/AnnouncementNotification"
 
 function AdminHome() {
     const navigate = useNavigate();
@@ -359,7 +359,8 @@ function AdminHome() {
                             UNIVERSITY | FACULTY OF ENGINEERING
                         </span>
                     </h1>
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4">
+                        <AnnouncementNotification variant="dark" />
                         <span className="text-sm font-medium text-primary-foreground/90">
                             {user?.role === 'professor' ? 'Professor' : 'Staff Member'}
                         </span>
@@ -383,9 +384,6 @@ function AdminHome() {
                         <p className="text-primary-foreground/80">Manage courses, students, and system settings.</p>
                     </div>
                 </div>
-
-                {/* ANNOUNCEMENTS SECTION */}
-                <AnnouncementsBanner maxItems={5} className="mb-8" />
 
                 {/* PROFESSOR: MY COURSES SECTION */}
                 {isProfessor && (

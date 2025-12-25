@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { AnnouncementNotification } from "@/components/AnnouncementNotification";
 
 interface StudentLayoutProps {
     children?: React.ReactNode;
@@ -52,13 +53,14 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
         <div className="min-h-screen bg-gray-50 flex">
             {/* Sidebar - Desktop */}
             <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen sticky top-0">
-                <div className="p-6 border-b border-gray-100">
+                <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                     <h1 className="text-xl font-bold text-primary">
                         AIN SHAMS
                         <span className="block text-[10px] font-normal text-muted-foreground tracking-wider mt-1">
                             UNIVERSITY | ENGINEERING
                         </span>
                     </h1>
+                    <AnnouncementNotification />
                 </div>
 
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -108,9 +110,12 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
                 {/* Mobile Header */}
                 <header className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center sticky top-0 z-20">
                     <span className="font-bold text-primary">AIN SHAMS UNIV.</span>
-                    <Button variant="ghost" size="icon" onClick={toggleSidebar}>
-                        {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <AnnouncementNotification />
+                        <Button variant="ghost" size="icon" onClick={toggleSidebar}>
+                            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                        </Button>
+                    </div>
                 </header>
 
                 {/* Mobile Sidebar Overlay */}

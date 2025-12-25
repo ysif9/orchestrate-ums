@@ -52,6 +52,7 @@ import LeaveHistoryPage from './pages/LeaveHistoryPage';
 import LeaveApprovalPage from './pages/LeaveApprovalPage';
 import StaffAnnouncementsPage from './pages/StaffAnnouncementsPage';
 import EventsPage from './pages/EventsPage';
+import AnnouncementsPage from './pages/AnnouncementsPage';
 import { Toaster } from "@/components/ui/sonner"
 
 /**
@@ -199,6 +200,9 @@ function App() {
 
           {/* Events Page (accessible to all authenticated users) */}
           <Route path="/events" element={<EventsPage />} />
+
+          {/* Announcements Page (accessible to all authenticated users) */}
+          <Route path="/announcements" element={<AnnouncementsPage />} />
         </Route>
 
         {/* --- Admin/Staff Routes --- */}

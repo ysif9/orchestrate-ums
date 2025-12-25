@@ -5,8 +5,8 @@ import { authService } from '../services/authService.js';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AnnouncementsBanner } from "@/components/AnnouncementsBanner";
 import { EventsBanner } from "@/components/EventsBanner";
+import { AnnouncementNotification } from "@/components/AnnouncementNotification";
 
 import {
     Users,
@@ -127,7 +127,8 @@ function ParentHome() {
                             UNIVERSITY | PARENT PORTAL
                         </span>
                     </h1>
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4">
+                        <AnnouncementNotification variant="dark" />
                         <span className="text-primary-foreground/90 text-sm">Welcome, {(user as any)?.name}</span>
 
                         <Button
@@ -155,11 +156,8 @@ function ParentHome() {
                     </div>
                 )}
 
-                {/* ANNOUNCEMENTS & EVENTS SECTION */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <AnnouncementsBanner maxItems={3} />
-                    <EventsBanner maxItems={3} />
-                </div>
+                {/* UPCOMING EVENTS SECTION */}
+                <EventsBanner maxItems={3} className="mb-8" />
 
                 {/* LINK STUDENT BUTTON - REMOVED AS PER REQUIREMENT (1 Student : 1 Parent) */}
                 {/* <div className="mb-6"> ... </div> */}

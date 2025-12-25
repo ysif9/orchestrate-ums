@@ -1,5 +1,5 @@
 import express, { Response } from 'express';
-import { RequestContext } from '@mikro-orm/core';
+import { RequestContext, wrap } from '@mikro-orm/core';
 import { LabStation, LabStationStatus } from '../entities/LabStation';
 import { LabStationReservation, ReservationStatus, MAX_RESERVATION_DURATION_HOURS } from '../entities/LabStationReservation';
 import { Room, RoomType } from '../entities/Room';
@@ -48,7 +48,7 @@ async function isStationAvailable(em: any, stationId: number, startTime: Date, e
 // Helper function to expire old reservations and update station status
 async function expireOldReservations(em: any): Promise<void> {
     const now = new Date();
-    
+
     // Find all active reservations that have passed their end time
     const expiredReservations = await em.find(LabStationReservation, {
         status: ReservationStatus.Active,
@@ -59,7 +59,7 @@ async function expireOldReservations(em: any): Promise<void> {
 
     for (const reservation of expiredReservations) {
         reservation.status = ReservationStatus.Expired;
-        
+
         // Update station status to available if no other active reservations
         const station = reservation.station.getEntity();
         const otherActiveReservations = await em.find(LabStationReservation, {
@@ -67,7 +67,7 @@ async function expireOldReservations(em: any): Promise<void> {
             status: ReservationStatus.Active,
             id: { $ne: reservation.id }
         });
-        
+
         if (otherActiveReservations.length === 0) {
             station.status = LabStationStatus.Available;
         }
@@ -154,10 +154,11 @@ router.get('/lab/:labId', authenticate, async (req: AuthRequest, res: Response) 
             lab: { id: labId },
             isActive: true
         }, {
-            orderBy: { stationNumber: 'ASC' }
+            orderBy: { stationNumber: 'ASC' },
+            populate: ['attributes', 'attributes.attribute']
         });
 
-        // Get current reservations for each station
+        // Get current reservations for each station and flatten EAV attributes
         const now = new Date();
         const stationsWithReservations = await Promise.all(stations.map(async (station) => {
             const currentReservation = await em.findOne(LabStationReservation, {
@@ -169,8 +170,23 @@ router.get('/lab/:labId', authenticate, async (req: AuthRequest, res: Response) 
                 populate: ['student']
             });
 
+            const stationObj = wrap(station).toJSON() as any;
+
+            // Flatten EAV attributes (specifically equipment)
+            station.attributes.getItems().forEach(attrVal => {
+                if (attrVal.attribute.name === 'equipment') {
+                    try {
+                        stationObj['equipment'] = JSON.parse(attrVal.value);
+                    } catch (e) {
+                        stationObj['equipment'] = [];
+                    }
+                } else {
+                    stationObj[attrVal.attribute.name] = attrVal.value;
+                }
+            });
+
             return {
-                ...station,
+                ...stationObj,
                 currentReservation: currentReservation ? {
                     id: currentReservation.id,
                     startTime: currentReservation.startTime,
@@ -186,6 +202,33 @@ router.get('/lab/:labId', authenticate, async (req: AuthRequest, res: Response) 
     }
 });
 
+import { Attribute, AttributeDataType } from '../entities/Attribute';
+import { LabStationAttributeValue } from '../entities/LabStationAttributeValue';
+// ... imports
+
+// Helper function to upsert attribute
+async function upsertAttribute(em: any, station: LabStation, key: string, value: any, dataType: AttributeDataType) {
+    if (value === undefined || value === null) return;
+
+    let attr = await em.findOne(Attribute, { name: key, entityType: 'LabStation' });
+    if (!attr) {
+        attr = new Attribute(key, key.charAt(0).toUpperCase() + key.slice(1), dataType, 'LabStation');
+        await em.persist(attr);
+    }
+
+    const existingVal = station.attributes.getItems().find(a => a.attribute.name === key);
+    if (existingVal) {
+        existingVal.setValue(value);
+    } else {
+        const newVal = new LabStationAttributeValue(station);
+        newVal.attribute = attr;
+        newVal.setValue(value);
+        station.attributes.add(newVal);
+        em.persist(newVal);
+    }
+}
+
+// ... existing GET ...
 // GET /api/lab-stations/:id - Get single station
 router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     try {
@@ -193,18 +236,33 @@ router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
         const station = await em.findOne(LabStation, { id: parseInt(req.params.id) }, {
-            populate: ['lab', 'reservations']
+            populate: ['lab', 'reservations', 'attributes', 'attributes.attribute']
         });
 
         if (!station) {
             return res.status(404).json({ success: false, message: 'Station not found' });
         }
 
-        res.json({ success: true, station });
+        const stationObj = wrap(station).toJSON() as any;
+        // Flatten attributes
+        station.attributes.getItems().forEach(attrVal => {
+            if (attrVal.attribute.name === 'equipment') {
+                try {
+                    stationObj['equipment'] = JSON.parse(attrVal.value);
+                } catch (e) {
+                    stationObj['equipment'] = [];
+                }
+            } else {
+                stationObj[attrVal.attribute.name] = attrVal.value;
+            }
+        });
+
+        res.json({ success: true, station: stationObj });
     } catch (error: any) {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 
 // POST /api/lab-stations - Create a new lab station (Staff only)
 router.post('/', authenticate, authorize(UserRole.Staff), async (req: AuthRequest, res: Response) => {
@@ -240,11 +298,21 @@ router.post('/', authenticate, authorize(UserRole.Staff), async (req: AuthReques
         }
 
         const station = new LabStation(stationNumber, lab);
-        station.description = description;
-        station.equipment = equipment;
+        station.description = description || ''; // Description is now a property on LabStation, but let's keep it safe. 
+        // Wait, description is a property on LabStation in previous step? 
+        // Let's check LabStation.ts again. 
+        // Yes, I see: @Property({ default: '' }) description: string = '';
+        // So description is NOT EAV. Equipment IS EAV (it was remove from entity).
 
-        await em.persistAndFlush(station);
-        await em.populate(station, ['lab']);
+        await em.persist(station); // Needed for attributes if any
+
+        if (equipment) {
+            // array of strings assumed
+            await upsertAttribute(em, station, 'equipment', JSON.stringify(equipment), AttributeDataType.String);
+        }
+
+        await em.flush();
+        await em.populate(station, ['lab', 'attributes', 'attributes.attribute']);
 
         res.status(201).json({
             success: true,
@@ -262,7 +330,9 @@ router.put('/:id', authenticate, authorize(UserRole.Staff), async (req: AuthRequ
         const em = RequestContext.getEntityManager();
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
-        const station = await em.findOne(LabStation, { id: parseInt(req.params.id) });
+        const station = await em.findOne(LabStation, { id: parseInt(req.params.id) }, {
+            populate: ['attributes', 'attributes.attribute']
+        });
         if (!station) {
             return res.status(404).json({ success: false, message: 'Station not found' });
         }
@@ -270,13 +340,16 @@ router.put('/:id', authenticate, authorize(UserRole.Staff), async (req: AuthRequ
         const { stationNumber, description, equipment, status, isActive } = req.body;
 
         if (stationNumber) station.stationNumber = stationNumber;
-        if (description !== undefined) station.description = description;
-        if (equipment !== undefined) station.equipment = equipment;
+        if (description !== undefined) station.description = description; // Valid property
         if (status) station.status = status as LabStationStatus;
         if (isActive !== undefined) station.isActive = isActive;
 
+        if (equipment !== undefined) {
+            await upsertAttribute(em, station, 'equipment', JSON.stringify(equipment), AttributeDataType.String);
+        }
+
         await em.flush();
-        await em.populate(station, ['lab']);
+        await em.populate(station, ['lab', 'attributes', 'attributes.attribute']);
 
         res.json({ success: true, message: 'Station updated successfully', station });
     } catch (error: any) {

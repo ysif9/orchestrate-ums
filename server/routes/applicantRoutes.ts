@@ -6,6 +6,7 @@ import { Applicant } from '../entities/Applicant';
 import { UserRole } from '../entities/User';
 import authenticate, { AuthRequest } from '../middleware/auth';
 import authorize from '../middleware/authorize';
+import { updateEntityAttributes, toFlatObject } from '../utils/eavHelpers';
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ router.get('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), asy
         const { search, limit = 50, offset = 0 } = req.query;
 
         let where: any = {};
-        
+
         // Search by name or email
         if (search && typeof search === 'string') {
             where = {
@@ -43,7 +44,7 @@ router.get('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), asy
 
         res.json({
             success: true,
-            data: applicants,
+            data: applicants.map(a => toFlatObject(a)),
             pagination: {
                 total,
                 limit: Number(limit),
@@ -74,14 +75,14 @@ router.get('/:id', authenticate, authorize(UserRole.Staff, UserRole.Professor), 
         if (!em) return res.status(500).json({ success: false, message: 'EntityManager not found' });
 
         const applicant = await em.findOne(Applicant, { id: parseInt(req.params.id) }, {
-            populate: ['attachments'],
+            populate: ['attachments', 'attributes', 'attributes.attribute'],
         });
 
         if (!applicant) {
             return res.status(404).json({ success: false, message: 'Applicant not found' });
         }
 
-        res.json({ success: true, data: applicant });
+        res.json({ success: true, data: toFlatObject(applicant) });
     } catch (error: any) {
         console.error('Error fetching applicant:', error);
         res.status(500).json({ success: false, message: error.message });
@@ -120,16 +121,19 @@ router.post('/', authenticate, authorize(UserRole.Staff, UserRole.Professor), [
             return res.status(400).json({ success: false, message: 'An applicant with this email already exists' });
         }
 
-        const applicant = new Applicant(firstName, lastName, email);
-        if (phone) applicant.phone = phone;
+        const applicant = new Applicant(firstName, lastName, email, phone || '');
         if (address) applicant.address = address;
-        if (academicHistory) applicant.academicHistory = academicHistory;
-        if (personalInfo) applicant.personalInfo = personalInfo;
-        if (documents) applicant.documents = documents;
 
         await em.persistAndFlush(applicant);
 
-        res.status(201).json({ success: true, data: applicant, message: 'Applicant created successfully' });
+        // Update EAV attributes (applicant now has an ID)
+        const eavData = { ...academicHistory, ...personalInfo, ...documents };
+        await updateEntityAttributes(em, applicant, 'Applicant', eavData);
+
+        await em.flush();
+
+        await em.populate(applicant, ['attributes', 'attributes.attribute']);
+        res.status(201).json({ success: true, data: toFlatObject(applicant), message: 'Applicant created successfully' });
     } catch (error: any) {
         console.error('Error creating applicant:', error);
         if (error.code === '23505') {
@@ -164,7 +168,9 @@ router.put('/:id', authenticate, authorize(UserRole.Staff, UserRole.Professor), 
         const em = RequestContext.getEntityManager() as EntityManager;
         if (!em) return res.status(500).json({ success: false, message: 'EntityManager not found' });
 
-        const applicant = await em.findOne(Applicant, { id: parseInt(req.params.id) });
+        const applicant = await em.findOne(Applicant, { id: parseInt(req.params.id) }, {
+            populate: ['attributes', 'attributes.attribute']
+        });
         if (!applicant) {
             return res.status(404).json({ success: false, message: 'Applicant not found' });
         }
@@ -176,13 +182,14 @@ router.put('/:id', authenticate, authorize(UserRole.Staff, UserRole.Professor), 
         if (email !== undefined) applicant.email = email;
         if (phone !== undefined) applicant.phone = phone;
         if (address !== undefined) applicant.address = address;
-        if (academicHistory !== undefined) applicant.academicHistory = academicHistory;
-        if (personalInfo !== undefined) applicant.personalInfo = personalInfo;
-        if (documents !== undefined) applicant.documents = documents;
+
+        // Update EAV attributes
+        const eavData = { ...academicHistory, ...personalInfo, ...documents };
+        await updateEntityAttributes(em, applicant, 'Applicant', eavData);
 
         await em.flush();
 
-        res.json({ success: true, data: applicant, message: 'Applicant updated successfully' });
+        res.json({ success: true, data: toFlatObject(applicant), message: 'Applicant updated successfully' });
     } catch (error: any) {
         console.error('Error updating applicant:', error);
         if (error.code === '23505') {

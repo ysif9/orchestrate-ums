@@ -1,14 +1,26 @@
 import express, { Response } from 'express';
-import { RequestContext } from '@mikro-orm/core';
+import { RequestContext, wrap } from '@mikro-orm/core';
 import { TranscriptRequest, TranscriptRequestStatus } from '../entities/TranscriptRequest';
 import { Enrollment, EnrollmentStatus } from '../entities/Enrollment';
 import { Grade } from '../entities/Grade';
 import { Assessment } from '../entities/Assessment';
 import { User, UserRole } from '../entities/User';
+import { Attribute, AttributeDataType } from '../entities/Attribute';
+import { TranscriptRequestAttributeValue } from '../entities/TranscriptRequestAttributeValue';
 import authenticate, { AuthRequest } from '../middleware/auth';
 import authorize from '../middleware/authorize';
 
 const router = express.Router();
+
+function flattenTranscriptRequest(req: TranscriptRequest): any {
+    const obj = wrap(req).toJSON() as any;
+    if (req.attributes && req.attributes.isInitialized()) {
+        req.attributes.getItems().forEach(attrVal => {
+            obj[attrVal.attribute.name] = attrVal.value;
+        });
+    }
+    return obj;
+}
 
 // Helper function to calculate GPA from percentage
 function calculateGPA(percentage: number): number {
@@ -38,7 +50,7 @@ async function generateTranscriptData(studentId: number) {
         student: { id: studentId },
         status: EnrollmentStatus.Completed
     }, {
-        populate: ['course', 'student']
+        populate: ['course', 'student', 'semester']
     });
 
     const courses = [];
@@ -48,7 +60,7 @@ async function generateTranscriptData(studentId: number) {
 
     for (const enrollment of completedEnrollments) {
         const course = enrollment.course;
-        
+
         // Get all assessments for this course
         const assessments = await em.find(Assessment, {
             course: { id: course.id }
@@ -70,8 +82,8 @@ async function generateTranscriptData(studentId: number) {
         for (const assessment of assessments) {
             const grade = grades.find(g => g.assessment.id === assessment.id);
             const score = grade?.score ?? null;
-            const percentage = score !== null && assessment.totalMarks > 0 
-                ? (score / assessment.totalMarks) * 100 
+            const percentage = score !== null && assessment.totalMarks > 0
+                ? (score / assessment.totalMarks) * 100
                 : null;
 
             assessmentGrades.push({
@@ -109,7 +121,7 @@ async function generateTranscriptData(studentId: number) {
             courseCode: course.code,
             courseTitle: course.title,
             credits: course.credits,
-            semester: enrollment.semester,
+            semester: enrollment.semester?.name || 'Unknown',
             enrollmentDate: enrollment.createdAt,
             completedDate: enrollment.updatedAt,
             assessments: assessmentGrades,
@@ -140,7 +152,7 @@ router.post('/', authenticate, authorize(UserRole.Student), async (req: AuthRequ
 
         const studentId = parseInt(req.user.id);
         const student = await em.findOne(User, { id: studentId });
-        
+
         if (!student) {
             return res.status(404).json({ message: 'Student not found' });
         }
@@ -171,13 +183,13 @@ router.get('/', authenticate, authorize(UserRole.Student), async (req: AuthReque
         const requests = await em.find(TranscriptRequest, {
             student: { id: studentId }
         }, {
-            populate: ['student', 'reviewedBy'],
+            populate: ['student', 'reviewedBy', 'attributes', 'attributes.attribute'],
             orderBy: { requestedAt: 'DESC' }
         });
 
         res.json({
             success: true,
-            requests
+            requests: requests.map(flattenTranscriptRequest)
         });
     } catch (error: any) {
         res.status(500).json({ success: false, message: error.message });
@@ -195,13 +207,13 @@ router.get('/pending', authenticate, authorize(UserRole.Staff), async (req: Auth
         const requests = await em.find(TranscriptRequest, {
             status: TranscriptRequestStatus.PendingReview
         }, {
-            populate: ['student'],
+            populate: ['student', 'attributes', 'attributes.attribute'],
             orderBy: { requestedAt: 'ASC' }
         });
 
         res.json({
             success: true,
-            requests
+            requests: requests.map(flattenTranscriptRequest)
         });
     } catch (error: any) {
         res.status(500).json({ success: false, message: error.message });
@@ -218,7 +230,7 @@ router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 
         const requestId = parseInt(req.params.id);
         const request = await em.findOne(TranscriptRequest, { id: requestId }, {
-            populate: ['student', 'reviewedBy']
+            populate: ['student', 'reviewedBy', 'attributes', 'attributes.attribute']
         });
 
         if (!request) {
@@ -237,7 +249,7 @@ router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 
         res.json({
             success: true,
-            request,
+            request: flattenTranscriptRequest(request),
             transcript: transcriptData
         });
     } catch (error: any) {
@@ -255,7 +267,7 @@ router.put('/:id/approve', authenticate, authorize(UserRole.Staff), async (req: 
 
         const requestId = parseInt(req.params.id);
         const request = await em.findOne(TranscriptRequest, { id: requestId }, {
-            populate: ['student']
+            populate: ['student', 'attributes', 'attributes.attribute']
         });
 
         if (!request) {
@@ -279,17 +291,19 @@ router.put('/:id/approve', authenticate, authorize(UserRole.Staff), async (req: 
         request.reviewedAt = new Date();
 
         await em.persistAndFlush(request);
-        await em.populate(request, ['student', 'reviewedBy']);
+        await em.populate(request, ['student', 'reviewedBy', 'attributes', 'attributes.attribute']);
 
         res.json({
             success: true,
             message: 'Transcript request approved successfully',
-            request
+            request: flattenTranscriptRequest(request)
         });
     } catch (error: any) {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
+// ... (existing imports, but add Attribute and EAV imports)
 
 // PUT /api/transcript-requests/:id/reject - Staff reject request
 router.put('/:id/reject', authenticate, authorize(UserRole.Staff), async (req: AuthRequest, res: Response) => {
@@ -302,7 +316,7 @@ router.put('/:id/reject', authenticate, authorize(UserRole.Staff), async (req: A
         const { rejectionReason } = req.body;
         const requestId = parseInt(req.params.id);
         const request = await em.findOne(TranscriptRequest, { id: requestId }, {
-            populate: ['student']
+            populate: ['student', 'attributes', 'attributes.attribute']
         });
 
         if (!request) {
@@ -324,15 +338,31 @@ router.put('/:id/reject', authenticate, authorize(UserRole.Staff), async (req: A
         request.status = TranscriptRequestStatus.Rejected;
         request.reviewedBy = reviewer;
         request.reviewedAt = new Date();
-        request.rejectionReason = rejectionReason || 'No reason provided';
+
+        // Handle EAV for rejection reason
+        if (rejectionReason) {
+            // Find or create the attribute definition
+            let reasonAttr = await em.findOne(Attribute, { name: 'rejectionReason', entityType: 'TranscriptRequest' });
+            if (!reasonAttr) {
+                reasonAttr = new Attribute('rejectionReason', 'Rejection Reason', AttributeDataType.String, 'TranscriptRequest');
+                await em.persist(reasonAttr);
+            }
+
+            // Create attribute value
+            const attrValue = new TranscriptRequestAttributeValue(request);
+            attrValue.attribute = reasonAttr;
+            attrValue.setValue(rejectionReason); // Use setValue
+            request.attributes.add(attrValue); // Add to collection
+            await em.persist(attrValue);
+        }
 
         await em.persistAndFlush(request);
-        await em.populate(request, ['student', 'reviewedBy']);
+        await em.populate(request, ['student', 'reviewedBy', 'attributes', 'attributes.attribute']);
 
         res.json({
             success: true,
             message: 'Transcript request rejected',
-            request
+            request: flattenTranscriptRequest(request)
         });
     } catch (error: any) {
         res.status(500).json({ success: false, message: error.message });
@@ -340,4 +370,3 @@ router.put('/:id/reject', authenticate, authorize(UserRole.Staff), async (req: A
 });
 
 export default router;
-

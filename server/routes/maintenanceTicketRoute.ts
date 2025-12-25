@@ -2,24 +2,24 @@
 import express, { Response } from 'express';
 // @ts-ignore
 import { RequestContext } from '@mikro-orm/core';
-import { Maintenance_Ticket ,ticket_status, issue_type} from '../entities/Maintenance_Ticket';
+import { Maintenance_Ticket, ticket_status, issue_type } from '../entities/Maintenance_Ticket';
 import { User, UserRole } from '../entities/User';
 import authenticate, { AuthRequest } from '../middleware/auth';
 import authorize from '../middleware/authorize';
-import {Room} from "../entities/Room";
+import { Room } from "../entities/Room";
 
 const router = express.Router();
 
 // GET /api/tickets/rooms - Get all rooms
 router.get('/rooms/', authenticate, async (req: AuthRequest, res: Response) => {
-try {
+    try {
         const em = RequestContext.getEntityManager();
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
 
 
 
-        const rooms = await em.find(Room, {},{
+        const rooms = await em.find(Room, {}, {
             orderBy: { building: 'ASC', name: 'ASC' }
         });
 
@@ -37,6 +37,10 @@ router.post('/rooms/tickets', authenticate, async (req: AuthRequest, res: Respon
         if (!em) return res.status(500).json({ message: 'EntityManager not found' });
 
         const { roomId, description, issue_type } = req.body;
+
+        if (!description) {
+            return res.status(400).json({ success: false, message: 'Description is required' });
+        }
 
         if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
 

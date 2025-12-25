@@ -25,7 +25,7 @@ export const admissionService = {
      * @param {string} [applicationData.phone] - Applicant's phone number
      * @param {string} [applicationData.address] - Applicant's address
      * @param {string} applicationData.program - Selected program ID
-     * @param {string} applicationData.semester - Selected semester
+
      * @param {Object} [applicationData.academicHistory] - Academic history data
      * @param {Object} [applicationData.personalInfo] - Personal information data
      * @returns {Promise<Object>} Response with application confirmation

@@ -1,11 +1,19 @@
-import { Entity, Property, ManyToOne, Enum } from '@mikro-orm/core';
+import { Entity, Property, ManyToOne, Enum, OneToMany, Collection, Cascade } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
 import { User } from './User';
 
+import { TranscriptRequestAttributeValue } from './TranscriptRequestAttributeValue';
+
+// @Observation
+// Status can be replaced with int
+// ADD EAV for expandability
+
+// @Solution
+// Switch to INT and EAV for rejection responses
 export enum TranscriptRequestStatus {
-    PendingReview = "pending_review",
-    Approved = "approved",
-    Rejected = "rejected",
+    PendingReview = 1,
+    Approved = 2,
+    Rejected = 3,
 }
 
 @Entity()
@@ -14,7 +22,7 @@ export class TranscriptRequest extends BaseEntity {
     student!: User;
 
     @Enum({ items: () => TranscriptRequestStatus })
-    status: TranscriptRequestStatus = TranscriptRequestStatus.PendingReview;
+    status: TranscriptRequestStatus;
 
     @Property()
     requestedAt: Date = new Date();
@@ -25,12 +33,13 @@ export class TranscriptRequest extends BaseEntity {
     @Property({ nullable: true })
     reviewedAt?: Date;
 
-    @Property({ nullable: true })
-    rejectionReason?: string;
+    @OneToMany(() => TranscriptRequestAttributeValue, av => av.transcriptRequest, { cascade: [Cascade.ALL] })
+    attributes = new Collection<TranscriptRequestAttributeValue>(this);
 
     constructor(student: User) {
         super();
         this.student = student;
+        this.status = TranscriptRequestStatus.PendingReview;
     }
 }
 

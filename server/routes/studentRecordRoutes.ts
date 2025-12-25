@@ -4,15 +4,21 @@ import { Student, StudentStatus } from '../entities/Student';
 import { Enrollment, EnrollmentStatus } from '../entities/Enrollment';
 import { Grade } from '../entities/Grade';
 import { Assessment } from '../entities/Assessment';
+import { Semester, SemesterStatus } from '../entities/Semester';
 import { User, UserRole } from '../entities/User';
 import authenticate, { AuthRequest } from '../middleware/auth';
 import authorize from '../middleware/authorize';
 
 const router = express.Router();
 
-// Current semester constant (can be made configurable later)
-const CURRENT_SEMESTER = 'Fall 2024';
 const MIN_REGISTRATION_CREDITS = 12; // Minimum credits for full-time registration
+
+// Helper function to get active semester
+async function getActiveSemester() {
+    const em = RequestContext.getEntityManager();
+    if (!em) throw new Error('EntityManager not found');
+    return await em.findOne(Semester, { status: SemesterStatus.Active });
+}
 
 // Helper function to calculate GPA from percentage (reused from transcriptRoutes)
 function calculateGPA(percentage: number): number {
@@ -51,7 +57,7 @@ async function calculateStudentGPA(studentId: number): Promise<{ gpa: number | n
 
     for (const enrollment of completedEnrollments) {
         const course = enrollment.course;
-        
+
         // Get all assessments for this course
         const assessments = await em.find(Assessment, {
             course: { id: course.id }
@@ -113,22 +119,43 @@ router.get('/search', authenticate, authorize(UserRole.Staff), async (req: AuthR
 
         if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
 
-        const studentId = req.query.studentId;
-        if (!studentId) {
-            return res.status(400).json({ success: false, message: 'Student ID is required' });
+        const searchParam = (req.query.studentId || req.query.email) as string;
+        if (!searchParam) {
+            return res.status(400).json({ success: false, message: 'Student ID or Email is required' });
         }
 
-        const student = await em.findOne(Student, { id: parseInt(studentId as string) });
+        let student;
+        if (searchParam.includes('@')) {
+            // Search by email
+            student = await em.findOne(Student, { email: searchParam.trim() });
+        } else {
+            // Search by ID
+            const parsedId = parseInt(searchParam);
+            if (isNaN(parsedId)) {
+                return res.status(400).json({ success: false, message: 'Enter a valid Student ID or Email' });
+            }
+            student = await em.findOne(Student, { id: parsedId });
+        }
+
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+
+        // Get active semester
+        const activeSemester = await getActiveSemester();
+        if (!activeSemester) {
+            return res.status(400).json({
+                success: false,
+                message: 'No active semester found. Please contact staff to activate a semester.'
+            });
         }
 
         // Get current term enrollments
         const currentTermEnrollments = await em.find(Enrollment, {
             student: { id: student.id },
-            semester: CURRENT_SEMESTER
+            semester: { id: activeSemester.id }
         }, {
-            populate: ['course']
+            populate: ['course', 'semester']
         });
 
         const registeredCredits = currentTermEnrollments
@@ -150,7 +177,8 @@ router.get('/search', authenticate, authorize(UserRole.Staff), async (req: AuthR
                 maxCredits: student.maxCredits
             },
             currentTermRegistration: {
-                semester: CURRENT_SEMESTER,
+                semester: activeSemester.name,
+                semesterId: activeSemester.id,
                 registeredCredits,
                 registrationStatus,
                 enrolledCourses: currentTermEnrollments
@@ -181,8 +209,11 @@ router.get('/:id/summary', authenticate, authorize(UserRole.Staff), async (req: 
         if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
 
         const studentId = parseInt(req.params.id);
+        if (isNaN(studentId)) {
+            return res.status(400).json({ success: false, message: 'Student ID must be a number' });
+        }
         const student = await em.findOne(Student, { id: studentId });
-        
+
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
         }
@@ -191,15 +222,18 @@ router.get('/:id/summary', authenticate, authorize(UserRole.Staff), async (req: 
         const allEnrollments = await em.find(Enrollment, {
             student: { id: studentId }
         }, {
-            populate: ['course'],
-            orderBy: { semester: 'ASC', createdAt: 'ASC' }
+            populate: ['course', 'semester'],
+            orderBy: { semester: { startDate: 'ASC' }, createdAt: 'ASC' }
         });
 
         // Calculate GPA
         const { gpa, totalCredits } = await calculateStudentGPA(student.id);
 
-        // Get current term enrollments
-        const currentTermEnrollments = allEnrollments.filter(e => e.semester === CURRENT_SEMESTER);
+        // Get active semester for current term
+        const activeSemester = await getActiveSemester();
+        const currentTermEnrollments = activeSemester
+            ? allEnrollments.filter(e => e.semester && e.semester.id === activeSemester.id)
+            : [];
         const registeredCredits = currentTermEnrollments
             .filter(e => e.status === EnrollmentStatus.Enrolled)
             .reduce((sum, e) => sum + (e.course?.credits || 0), 0);
@@ -209,20 +243,25 @@ router.get('/:id/summary', authenticate, authorize(UserRole.Staff), async (req: 
         // Group enrollments by semester
         const enrollmentsBySemester: { [key: string]: any[] } = {};
         for (const enrollment of allEnrollments) {
-            if (!enrollmentsBySemester[enrollment.semester]) {
-                enrollmentsBySemester[enrollment.semester] = [];
+            if (!enrollment.semester) {
+                // Skip enrollments without semester (shouldn't happen after migration)
+                continue;
             }
-            enrollmentsBySemester[enrollment.semester].push(enrollment);
+            const semesterName = enrollment.semester.name;
+            if (!enrollmentsBySemester[semesterName]) {
+                enrollmentsBySemester[semesterName] = [];
+            }
+            enrollmentsBySemester[semesterName].push(enrollment);
         }
 
         // Build course history with grades
         const courseHistory = [];
         for (const [semester, enrollments] of Object.entries(enrollmentsBySemester)) {
             const semesterCourses = [];
-            
+
             for (const enrollment of enrollments) {
                 const course = enrollment.course;
-                
+
                 // Get grades for completed courses
                 let courseGrade = null;
                 let coursePercentage = null;
@@ -302,7 +341,8 @@ router.get('/:id/summary', authenticate, authorize(UserRole.Staff), async (req: 
                 totalEnrollments: allEnrollments.length
             },
             currentTermRegistration: {
-                semester: CURRENT_SEMESTER,
+                semester: activeSemester ? activeSemester.name : null,
+                semesterId: activeSemester ? activeSemester.id : null,
                 registeredCredits,
                 registrationStatus,
                 enrolledCourses: currentTermEnrollments

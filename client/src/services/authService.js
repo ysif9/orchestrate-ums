@@ -44,6 +44,23 @@ export const authService = {
     },
 
     /**
+     * Login parent with linking code only (no email/password required)
+     * @param {Object} credentials - Parent credentials
+     * @param {string} credentials.linkingCode - Parent's unique linking code
+     * @param {string} [credentials.parentName] - Parent's name (required for first-time login)
+     * @returns {Promise<Object>} Response with token and user data
+     */
+    parentLogin: async (credentials) => {
+        const response = await axios.post(`${API_URL}/parent-login`, credentials);
+        if (response.data.success && response.data.token) {
+            // Store token in localStorage
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+        }
+        return response.data;
+    },
+
+    /**
      * Logout user by removing token from localStorage
      */
     logout: () => {

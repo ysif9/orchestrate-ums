@@ -5,11 +5,15 @@ import { MikroORM, RequestContext } from '@mikro-orm/core';
 import type { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import dotenv from 'dotenv';
 import mikroOrmConfig from './mikro-orm.config';
+import { Semester, SemesterStatus } from './entities/Semester';
+import { Enrollment } from './entities/Enrollment';
+import { Program } from './entities/Program';
 import resourceRoutes from './routes/resourceRoutes';
 
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import courseRoutes from './routes/courseRoutes';
+import courseTaRoutes from './routes/courseTaRoutes';
 import enrollmentRoutes from './routes/enrollmentRoutes';
 import assessmentRoutes from './routes/assessmentRoutes';
 import applicantRoutes from './routes/applicantRoutes';
@@ -25,18 +29,186 @@ import labReservationRoutes from './routes/labReservationRoutes';
 import maintenanceTicketAdminRoutes from './routes/maintenanceTicketAdminRoute';
 import maintenanceTicketRoutes from './routes/maintenanceTicketRoute';
 import admissionRoutes from './routes/admissionRoutes';
-
+import pdRoutes from './routes/pdRoutes';
+import semesterRoutes from './routes/semesterRoutes';
+import officeHoursRoutes from './routes/officeHoursRoutes';
+import staffDirectoryRoutes from './routes/staffDirectoryRoutes';
+import messageRoutes from './routes/messageRoutes';
+import parentRoutes from './routes/parentRoutes';
+import studentRoutes from './routes/studentRoutes';
+import publicationRoutes from './routes/publicationRoutes';
+import evaluationRoutes from './routes/evaluationRoutes';
+import parentInquiryRoutes from './routes/parentInquiryRoutes';
+import payrollRoutes from './routes/payrollRoutes';
+import benefitRoutes from './routes/benefitRoutes';
+import leaveRoutes from './routes/leaveRoutes';
+import announcementRoutes from './routes/announcementRoutes';
+import eventRoutes from './routes/eventRoutes';
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Migration function to handle existing enrollments
+async function migrateEnrollmentsToSemesters(em: any) {
+    try {
+        const connection = em.getConnection();
+
+        // Check if old semester column (string) still exists
+        const hasOldColumn = await connection.execute(`
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name='enrollment' AND column_name='semester' AND data_type='character varying'
+        `).then((result: any) => result.length > 0).catch(() => false);
+
+        if (!hasOldColumn) {
+            console.log('No old semester column found, migration not needed');
+            return;
+        }
+
+        // Get all unique semester strings from the old column
+        const semesterStrings = await connection.execute(`
+            SELECT DISTINCT semester 
+            FROM enrollment 
+            WHERE semester IS NOT NULL AND semester != ''
+        `).then((result: any) => result.map((r: any) => r.semester)).catch(() => []);
+
+        console.log(`Found ${semesterStrings.length} unique semester strings to migrate`);
+
+        // Create Semester entities for each unique semester string
+        const semesterMap: { [key: string]: Semester } = {};
+
+        for (const semesterName of semesterStrings) {
+            let semester = await em.findOne(Semester, { name: semesterName });
+
+            if (!semester) {
+                // Create a semester with default dates based on the name
+                const now = new Date();
+                let startDate: Date;
+                let endDate: Date;
+
+                // Try to parse semester name (e.g., "Fall 2024", "Spring 2025")
+                const yearMatch = semesterName.match(/(\d{4})/);
+                const year = yearMatch ? parseInt(yearMatch[1]) : now.getFullYear();
+
+                if (semesterName.toLowerCase().includes('fall')) {
+                    startDate = new Date(year, 8, 1); // September
+                    endDate = new Date(year, 11, 31); // December
+                } else if (semesterName.toLowerCase().includes('spring')) {
+                    startDate = new Date(year, 0, 1); // January
+                    endDate = new Date(year, 4, 30); // May
+                } else if (semesterName.toLowerCase().includes('summer')) {
+                    startDate = new Date(year, 5, 1); // June
+                    endDate = new Date(year, 7, 31); // August
+                } else {
+                    // Default to current year fall semester
+                    startDate = new Date(year, 8, 1);
+                    endDate = new Date(year, 11, 31);
+                }
+
+                semester = new Semester(semesterName, startDate, endDate);
+                semester.status = SemesterStatus.Inactive;
+                await em.persistAndFlush(semester);
+                console.log(`Created semester: ${semesterName}`);
+            }
+
+            semesterMap[semesterName] = semester;
+        }
+
+        // Update all enrollments to use the new semester_id
+        for (const [semesterName, semester] of Object.entries(semesterMap)) {
+            await connection.execute(
+                `UPDATE enrollment SET semester_id = $1 WHERE semester = $2 AND semester_id IS NULL`,
+                [semester.id, semesterName]
+            );
+        }
+
+        // Drop the old semester column
+        await connection.execute(`ALTER TABLE enrollment DROP COLUMN IF EXISTS semester`);
+
+        console.log('Enrollment migration completed successfully');
+    } catch (error: any) {
+        console.error('Error during enrollment migration:', error.message);
+        console.error(error.stack);
+        // Don't fail startup if migration fails - we'll handle it gracefully
+    }
+}
+
+// Seed function to populate engineering programs
+async function seedPrograms(orm: MikroORM<PostgreSqlDriver>) {
+    try {
+        const em = orm.em.fork();
+
+        const engineeringMajors = [
+            { name: 'Computer Engineering', description: 'Design and development of computer systems and hardware' },
+            { name: 'Electrical Engineering', description: 'Study of electrical systems, circuits, and electronics' },
+            { name: 'Mechanical Engineering', description: 'Design and analysis of mechanical systems and machinery' },
+            { name: 'Civil Engineering', description: 'Infrastructure design and construction engineering' },
+            { name: 'Chemical Engineering', description: 'Chemical processes and industrial production systems' },
+            { name: 'Aerospace Engineering', description: 'Aircraft and spacecraft design and development' },
+            { name: 'Biomedical Engineering', description: 'Medical devices and healthcare technology' },
+            { name: 'Industrial Engineering', description: 'Optimization of complex processes and systems' },
+            { name: 'Environmental Engineering', description: 'Environmental protection and sustainability solutions' },
+            { name: 'Software Engineering', description: 'Software development methodologies and systems design' },
+            { name: 'Materials Engineering', description: 'Study and development of materials and their properties' },
+            { name: 'Petroleum Engineering', description: 'Oil and gas extraction and production engineering' }
+        ];
+
+        let createdCount = 0;
+        let existingCount = 0;
+
+        for (const programData of engineeringMajors) {
+            const existing = await em.findOne(Program, { name: programData.name });
+
+            if (!existing) {
+                const program = em.create(Program, {
+                    name: programData.name,
+                    description: programData.description
+                } as any);
+                em.persist(program);
+                createdCount++;
+                console.log(`✓ Created program: ${programData.name}`);
+            } else {
+                existingCount++;
+            }
+        }
+
+        await em.flush();
+
+        console.log(`\n📚 Program seeding complete: ${createdCount} created, ${existingCount} already existed\n`);
+    } catch (error: any) {
+        console.error('Error seeding programs:', error.message);
+        console.error(error.stack);
+    }
+}
+
 export const init = async () => {
     const orm = await MikroORM.init<PostgreSqlDriver>(mikroOrmConfig);
 
     const generator = orm.getSchemaGenerator();
+
+    // Attempt to drop default constraints that block casting to integers
+    // These defaults are likely string literals ('Active') that cannot be cast to SMALLINT
+    try {
+        const connection = orm.em.getConnection();
+        await connection.execute(`ALTER TABLE "allocation" ALTER COLUMN status DROP DEFAULT`);
+        await connection.execute(`ALTER TABLE "application" ALTER COLUMN status DROP DEFAULT`);
+        await connection.execute(`ALTER TABLE "semester" ALTER COLUMN status DROP DEFAULT`);
+        await connection.execute(`ALTER TABLE "transcript_request" ALTER COLUMN status DROP DEFAULT`);
+        await connection.execute(`ALTER TABLE "user" ALTER COLUMN role DROP DEFAULT`);
+        console.log('Successfully dropped old default constraints');
+    } catch (e: any) {
+        console.warn('Could not drop default constraints (they might not exist):', e.message);
+    }
+
     await generator.updateSchema();
     console.log('Database schema synchronized');
+
+    // Migrate existing enrollments to use Semester entity
+    await migrateEnrollmentsToSemesters(orm.em);
+
+    // Seed engineering programs
+    await seedPrograms(orm);
 
     app.use(cors());
     app.use(express.json());
@@ -51,6 +223,7 @@ export const init = async () => {
 
     app.use('/api/auth', authRoutes);
     app.use('/api/users', userRoutes);
+    app.use('/api/courses', courseTaRoutes); // Register under /api/courses so it matches /api/courses/:courseId/tas
     app.use('/api/courses', courseRoutes);
     app.use('/api/enrollments', enrollmentRoutes);
     app.use('/api/assessments', assessmentRoutes);
@@ -68,7 +241,22 @@ export const init = async () => {
     app.use('/api/admin/tickets', maintenanceTicketAdminRoutes);
     app.use('/api/resources', resourceRoutes);
     app.use('/api/admissions', admissionRoutes);
-
+    app.use('/api/pd', pdRoutes);
+    app.use('/api/staff-directory', staffDirectoryRoutes);
+    app.use('/api/staff-directory', staffDirectoryRoutes);
+    app.use('/api/semesters', semesterRoutes);
+    app.use('/api/office-hours', officeHoursRoutes);
+    app.use('/api/messages', messageRoutes);
+    app.use('/api/parents', parentRoutes);
+    app.use('/api/students', studentRoutes);
+    app.use('/api/publications', publicationRoutes);
+    app.use('/api/evaluations', evaluationRoutes);
+    app.use('/api/parent-inquiries', parentInquiryRoutes);
+    app.use('/api/payroll', payrollRoutes);
+    app.use('/api/benefits', benefitRoutes);
+    app.use('/api/leave-requests', leaveRoutes);
+    app.use('/api/announcements', announcementRoutes);
+    app.use('/api/events', eventRoutes);
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);
     });

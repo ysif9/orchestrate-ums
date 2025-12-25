@@ -1,26 +1,60 @@
 // entities/Allocation.ts
 import { Entity, Property, ManyToOne, Enum, Index } from '@mikro-orm/core';
 import { BaseEntity } from './BaseEntity';
+import { Resource } from './Resource';
+// @Observation
+// Append Heavy, EAV is a bad choice
+// can be split by ID
+// Has ambiguity, Too many Nulls, App level Validation is needed.
+
+
+// @Solution
+// Split by ID
+
 
 export enum AllocationStatus {
-  Active = 'active',
-  Returned = 'returned',
-  Expired = 'expired',
+  Active = 1,
+  Returned = 2,
+  Expired = 0,
 }
+
+export enum TargetType {
+  User = 'user',
+  Department = 'department',
+}
+
+@Entity()
+export class AllocationTarget extends BaseEntity {
+  @Property()
+  name!: string;
+
+  @Property()
+  targetId!: number;
+
+  @Enum({ items: () => TargetType, nullable: false })
+  targetType = TargetType.Department;
+
+  constructor(name: string, targetId: number, targetType: TargetType) {
+    super();
+    this.name = name;
+    this.targetId = targetId;
+    this.targetType = targetType;
+  }
+}
+
+
 
 @Entity()
 @Index({ properties: ['status'] })
 @Index({ properties: ['dueDate'] })
 @Index({ properties: ['allocatedAt'] })
 export class Allocation extends BaseEntity {
-  @ManyToOne('Resource')
-  resource!: any;
+  @ManyToOne(() => Resource)
+  resource!: Resource;
 
-  @ManyToOne('User', { nullable: true })
-  allocatedToUser?: any;
-
-  @ManyToOne('Department', { nullable: true })
-  allocatedToDepartment?: any;
+  // This replaces the two nullable columns with one required target
+  @ManyToOne(() => AllocationTarget)
+  target!: AllocationTarget;
 
   @Property()
   allocatedAt = new Date();
@@ -32,8 +66,17 @@ export class Allocation extends BaseEntity {
   dueDate?: Date;
 
   @Enum({ items: () => AllocationStatus })
-  status: AllocationStatus = AllocationStatus.Active;
+  status: AllocationStatus;
 
   @Property({ nullable: true })
   notes?: string;
+
+  constructor(resource: Resource, target: AllocationTarget) {
+    super();
+    this.resource = resource;
+    this.target = target;
+    this.status = AllocationStatus.Active;
+  }
 }
+
+

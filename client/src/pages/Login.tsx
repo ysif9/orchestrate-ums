@@ -186,6 +186,11 @@ function Login() {
                     <p>
                         Don&apos;t have an account? <Link to="/signup" className="text-primary hover:underline font-medium">Sign up here</Link>
                     </p>
+                    <div className="mt-4 pt-4 border-t w-full">
+                        <Link to="/news" className="text-primary hover:underline font-medium flex items-center justify-center gap-2">
+                            View University Updates (News & Events)
+                        </Link>
+                    </div>
                 </CardFooter>
             </Card>
         </div>

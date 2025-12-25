@@ -18,7 +18,7 @@ interface Event {
     status: number;
     priority: number;
     priorityName: string;
-    audience: number;
+
     startDate: string;
     endDate: string;
     location?: string | null;
@@ -141,7 +141,7 @@ export function EventsBanner({ maxItems = 3, className = '' }: EventsBannerProps
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => navigate('/events')}
+                        onClick={() => navigate('/news?tab=events')}
                         className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
                     >
                         View All

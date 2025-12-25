@@ -2,7 +2,7 @@ import express, { Response } from 'express';
 import { RequestContext } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import authenticate, { AuthRequest } from '../middleware/auth';
-import { Event, EventStatus, EventPriority, EventAudience } from '../entities/Event';
+import { Event, EventStatus, EventPriority } from '../entities/Event';
 import { Staff } from '../entities/Staff';
 import { UserRole } from '../entities/User';
 import { body, validationResult } from 'express-validator';
@@ -31,16 +31,7 @@ const priorityToString = (priority: EventPriority): string => {
     }
 };
 
-const audienceToString = (audience: EventAudience): string => {
-    switch (audience) {
-        case EventAudience.All: return 'All';
-        case EventAudience.Students: return 'Students';
-        case EventAudience.Staff: return 'Staff';
-        case EventAudience.Professors: return 'Professors';
-        case EventAudience.Parents: return 'Parents';
-        default: return 'Unknown';
-    }
-};
+
 
 // Helper to format event for response
 const formatEvent = (e: Event) => ({
@@ -56,8 +47,7 @@ const formatEvent = (e: Event) => ({
     statusName: statusToString(e.status),
     priority: e.priority,
     priorityName: priorityToString(e.priority),
-    audience: e.audience,
-    audienceName: audienceToString(e.audience),
+
     startDate: e.startDate,
     endDate: e.endDate,
     location: e.location,
@@ -95,44 +85,17 @@ const autoArchiveCompletedEvents = async (em: EntityManager) => {
     }
 };
 
-// GET /api/events - Get all events (filtered by user role for visibility)
-router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
+// GET /api/events - Get all public events
+router.get('/', async (req: any, res: Response) => {
     const em = RequestContext.getEntityManager() as EntityManager;
-    const userRole = req.user!.role;
 
     try {
         // Auto-archive completed events
         await autoArchiveCompletedEvents(em);
 
-        // Determine which audience values the user can see
-        const audienceFilter: EventAudience[] = [EventAudience.All];
-
-        switch (userRole) {
-            case UserRole.Student:
-                audienceFilter.push(EventAudience.Students);
-                break;
-            case UserRole.Staff:
-                audienceFilter.push(EventAudience.Staff);
-                break;
-            case UserRole.Professor:
-                audienceFilter.push(EventAudience.Professors);
-                break;
-            case UserRole.Parent:
-                audienceFilter.push(EventAudience.Parents);
-                break;
-        }
-
-        // Staff can see all events (including drafts)
-        // Others can only see published/ongoing events
-        const isStaff = userRole === UserRole.Staff;
-
         const whereConditions: any = {
-            audience: { $in: audienceFilter }
+            status: { $in: [EventStatus.Published, EventStatus.Ongoing] }
         };
-
-        if (!isStaff) {
-            whereConditions.status = { $in: [EventStatus.Published, EventStatus.Ongoing] };
-        }
 
         const events = await em.find(
             Event,
@@ -229,7 +192,7 @@ router.post(
     body('endDate').isISO8601().withMessage('End date is required'),
     body('status').optional().isInt({ min: 0, max: 4 }),
     body('priority').optional().isInt({ min: 0, max: 3 }),
-    body('audience').optional().isInt({ min: 0, max: 4 }),
+
     body('location').optional({ nullable: true }).isString(),
     async (req: AuthRequest, res: Response) => {
         const errors = validationResult(req);
@@ -256,7 +219,7 @@ router.post(
                 endDate,
                 status = EventStatus.Draft,
                 priority = EventPriority.Normal,
-                audience = EventAudience.All,
+
                 location
             } = req.body;
 
@@ -277,8 +240,7 @@ router.post(
                 start,
                 end,
                 status,
-                priority,
-                audience
+                priority
             );
 
             if (location) {
@@ -321,7 +283,7 @@ router.put(
     body('endDate').optional().isISO8601(),
     body('status').optional().isInt({ min: 0, max: 4 }),
     body('priority').optional().isInt({ min: 0, max: 3 }),
-    body('audience').optional().isInt({ min: 0, max: 4 }),
+
     body('location').optional({ nullable: true }).custom((value) => {
         if (value === null || value === '' || value === undefined) return true;
         return typeof value === 'string';
@@ -349,12 +311,12 @@ router.put(
                 });
             }
 
-            const { title, description, startDate, endDate, status, priority, audience, location } = req.body;
+            const { title, description, startDate, endDate, status, priority, location } = req.body;
 
             if (title !== undefined) event.title = title;
             if (description !== undefined) event.description = description;
             if (priority !== undefined) event.priority = priority;
-            if (audience !== undefined) event.audience = audience;
+
 
             if (startDate !== undefined) {
                 event.startDate = new Date(startDate);

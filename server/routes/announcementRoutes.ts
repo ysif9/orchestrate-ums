@@ -2,7 +2,7 @@ import express, { Response } from 'express';
 import { RequestContext } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import authenticate, { AuthRequest } from '../middleware/auth';
-import { Announcement, AnnouncementStatus, AnnouncementPriority, AnnouncementAudience } from '../entities/Announcement';
+import { Announcement, AnnouncementStatus, AnnouncementPriority } from '../entities/Announcement';
 import { Staff } from '../entities/Staff';
 import { UserRole } from '../entities/User';
 import { body, validationResult } from 'express-validator';
@@ -30,16 +30,7 @@ const priorityToString = (priority: AnnouncementPriority): string => {
     }
 };
 
-const audienceToString = (audience: AnnouncementAudience): string => {
-    switch (audience) {
-        case AnnouncementAudience.All: return 'All';
-        case AnnouncementAudience.Students: return 'Students';
-        case AnnouncementAudience.Staff: return 'Staff';
-        case AnnouncementAudience.Professors: return 'Professors';
-        case AnnouncementAudience.Parents: return 'Parents';
-        default: return 'Unknown';
-    }
-};
+
 
 // Helper to format announcement for response
 const formatAnnouncement = (a: Announcement) => ({
@@ -55,8 +46,7 @@ const formatAnnouncement = (a: Announcement) => ({
     statusName: statusToString(a.status),
     priority: a.priority,
     priorityName: priorityToString(a.priority),
-    audience: a.audience,
-    audienceName: audienceToString(a.audience),
+
     scheduledAt: a.scheduledAt,
     publishedAt: a.publishedAt,
     expiresAt: a.expiresAt,
@@ -75,46 +65,18 @@ const staffOnly = (req: AuthRequest, res: Response, next: Function) => {
     next();
 };
 
-// GET /api/announcements - Get all announcements (filtered by user role for visibility)
-router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
+// GET /api/announcements - Get all public announcements
+router.get('/', async (req: any, res: Response) => {
     const em = RequestContext.getEntityManager() as EntityManager;
-    const userRole = req.user!.role;
 
     try {
-        // Determine which audience values the user can see
-        const audienceFilter: AnnouncementAudience[] = [AnnouncementAudience.All];
-
-        switch (userRole) {
-            case UserRole.Student:
-                audienceFilter.push(AnnouncementAudience.Students);
-                break;
-            case UserRole.Staff:
-                audienceFilter.push(AnnouncementAudience.Staff);
-                break;
-            case UserRole.Professor:
-                audienceFilter.push(AnnouncementAudience.Professors);
-                break;
-            case UserRole.Parent:
-                audienceFilter.push(AnnouncementAudience.Parents);
-                break;
-        }
-
-        // Staff can see all announcements (including drafts)
-        // Others can only see published announcements
-        const isStaff = userRole === UserRole.Staff;
-
         const whereConditions: any = {
-            audience: { $in: audienceFilter }
-        };
-
-        if (!isStaff) {
-            whereConditions.status = AnnouncementStatus.Published;
-            // Only show non-expired announcements
-            whereConditions.$or = [
+            status: AnnouncementStatus.Published,
+            $or: [
                 { expiresAt: null },
                 { expiresAt: { $gte: new Date() } }
-            ];
-        }
+            ]
+        };
 
         const announcements = await em.find(
             Announcement,
@@ -206,7 +168,7 @@ router.post(
     body('content').isString().notEmpty().withMessage('Content is required'),
     body('status').optional().isInt({ min: 0, max: 3 }),
     body('priority').optional().isInt({ min: 0, max: 3 }),
-    body('audience').optional().isInt({ min: 0, max: 4 }),
+
     body('scheduledAt').optional({ nullable: true }).custom((value) => {
         if (value === null || value === '' || value === undefined) return true;
         return !isNaN(Date.parse(value));
@@ -238,7 +200,7 @@ router.post(
                 content,
                 status = AnnouncementStatus.Draft,
                 priority = AnnouncementPriority.Normal,
-                audience = AnnouncementAudience.All,
+
                 scheduledAt,
                 expiresAt
             } = req.body;
@@ -248,8 +210,7 @@ router.post(
                 content,
                 author,
                 status,
-                priority,
-                audience
+                priority
             );
 
             if (scheduledAt) {
@@ -294,7 +255,7 @@ router.put(
     body('content').optional().isString().notEmpty(),
     body('status').optional().isInt({ min: 0, max: 3 }),
     body('priority').optional().isInt({ min: 0, max: 3 }),
-    body('audience').optional().isInt({ min: 0, max: 4 }),
+
     body('scheduledAt').optional().custom((value) => {
         if (value === '' || value === null) return true;
         return !isNaN(Date.parse(value));
@@ -326,12 +287,12 @@ router.put(
                 });
             }
 
-            const { title, content, status, priority, audience, scheduledAt, expiresAt } = req.body;
+            const { title, content, status, priority, scheduledAt, expiresAt } = req.body;
 
             if (title !== undefined) announcement.title = title;
             if (content !== undefined) announcement.content = content;
             if (priority !== undefined) announcement.priority = priority;
-            if (audience !== undefined) announcement.audience = audience;
+
 
             if (scheduledAt !== undefined) {
                 announcement.scheduledAt = scheduledAt ? new Date(scheduledAt) : undefined;

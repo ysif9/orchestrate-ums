@@ -11,9 +11,9 @@ const getAuthHeaders = () => {
     };
 };
 
-// Get all announcements (filtered by user's role for visibility)
+// Get all announcements (public)
 export const getAnnouncements = async () => {
-    const response = await axios.get(API_URL, getAuthHeaders());
+    const response = await axios.get(API_URL);
     return response.data;
 };
 
@@ -68,13 +68,7 @@ export const AnnouncementPriority = {
     Urgent: 3
 };
 
-export const AnnouncementAudience = {
-    All: 0,
-    Students: 1,
-    Staff: 2,
-    Professors: 3,
-    Parents: 4
-};
+
 
 export const announcementService = {
     getAnnouncements,
@@ -85,8 +79,7 @@ export const announcementService = {
     deleteAnnouncement,
     publishAnnouncement,
     AnnouncementStatus,
-    AnnouncementPriority,
-    AnnouncementAudience
+    AnnouncementPriority
 };
 
 export default announcementService;

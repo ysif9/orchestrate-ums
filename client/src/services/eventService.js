@@ -11,9 +11,9 @@ const getAuthHeaders = () => {
     };
 };
 
-// Get all events (filtered by user's role for visibility)
+// Get all events (public)
 export const getEvents = async () => {
-    const response = await axios.get(API_URL, getAuthHeaders());
+    const response = await axios.get(API_URL);
     return response.data;
 };
 
@@ -69,13 +69,7 @@ export const EventPriority = {
     Featured: 3
 };
 
-export const EventAudience = {
-    All: 0,
-    Students: 1,
-    Staff: 2,
-    Professors: 3,
-    Parents: 4
-};
+
 
 export const eventService = {
     getEvents,
@@ -86,8 +80,7 @@ export const eventService = {
     deleteEvent,
     publishEvent,
     EventStatus,
-    EventPriority,
-    EventAudience
+    EventPriority
 };
 
 export default eventService;

@@ -16,7 +16,7 @@ interface Announcement {
     status: number;
     priority: number;
     priorityName: string;
-    audience: number;
+
     publishedAt?: string | null;
     createdAt: string;
 }

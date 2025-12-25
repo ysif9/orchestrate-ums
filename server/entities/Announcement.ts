@@ -18,14 +18,7 @@ export enum AnnouncementPriority {
     Urgent = 3
 }
 
-// Integer enum for target audience
-export enum AnnouncementAudience {
-    All = 0,
-    Students = 1,
-    Staff = 2,
-    Professors = 3,
-    Parents = 4
-}
+
 
 @Entity()
 export class Announcement extends BaseEntity {
@@ -44,8 +37,7 @@ export class Announcement extends BaseEntity {
     @Enum({ items: () => AnnouncementPriority, default: AnnouncementPriority.Normal })
     priority: AnnouncementPriority = AnnouncementPriority.Normal;
 
-    @Enum({ items: () => AnnouncementAudience, default: AnnouncementAudience.All })
-    audience: AnnouncementAudience = AnnouncementAudience.All;
+
 
     @Property({ nullable: true })
     scheduledAt?: Date;
@@ -61,8 +53,7 @@ export class Announcement extends BaseEntity {
         content: string,
         author: Staff,
         status: AnnouncementStatus = AnnouncementStatus.Draft,
-        priority: AnnouncementPriority = AnnouncementPriority.Normal,
-        audience: AnnouncementAudience = AnnouncementAudience.All
+        priority: AnnouncementPriority = AnnouncementPriority.Normal
     ) {
         super();
         this.title = title;
@@ -70,6 +61,6 @@ export class Announcement extends BaseEntity {
         this.author = author;
         this.status = status;
         this.priority = priority;
-        this.audience = audience;
+
     }
 }

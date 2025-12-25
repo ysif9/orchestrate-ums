@@ -6,7 +6,7 @@ import { courseService } from '@/services/courseService';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { BookOpen, Users, DollarSign, Shield, CalendarDays, Calendar, History } from 'lucide-react';
+import { BookOpen, Users, DollarSign, Shield, CalendarDays, Calendar, History, Megaphone } from 'lucide-react';
 
 function TADashboard() {
     const navigate = useNavigate();
@@ -107,6 +107,18 @@ function TADashboard() {
                                 Leave History
                             </CardTitle>
                             <CardDescription>View past leave requests</CardDescription>
+                        </CardHeader>
+                    </Card>
+                    <Card
+                        className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-indigo-500"
+                        onClick={() => navigate('/news')}
+                    >
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Megaphone className="h-5 w-5 text-indigo-600" />
+                                University News
+                            </CardTitle>
+                            <CardDescription>View announcements and events</CardDescription>
                         </CardHeader>
                     </Card>
                 </div>

@@ -51,6 +51,7 @@ import LeaveRequestPage from './pages/LeaveRequestPage';
 import LeaveHistoryPage from './pages/LeaveHistoryPage';
 import LeaveApprovalPage from './pages/LeaveApprovalPage';
 import StaffAnnouncementsPage from './pages/StaffAnnouncementsPage';
+import EventsPage from './pages/EventsPage';
 import { Toaster } from "@/components/ui/sonner"
 
 /**
@@ -195,6 +196,9 @@ function App() {
           {/* Student routes inside StudentLayout */}
           <Route path="staff-directory" element={<StaffDirectoryPage />} />
           <Route path="staff-directory/:id" element={<StaffProfileDetailPage />} />
+
+          {/* Events Page (accessible to all authenticated users) */}
+          <Route path="/events" element={<EventsPage />} />
         </Route>
 
         {/* --- Admin/Staff Routes --- */}

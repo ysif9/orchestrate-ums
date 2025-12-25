@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Clock, Star } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Calendar, MapPin, Clock, Star, ArrowRight } from 'lucide-react';
 import { eventService } from '@/services/eventService';
 
 interface Event {
@@ -30,6 +32,7 @@ interface EventsBannerProps {
 }
 
 export function EventsBanner({ maxItems = 3, className = '' }: EventsBannerProps) {
+    const navigate = useNavigate();
     const [events, setEvents] = useState<Event[]>([]);
     const [loading, setLoading] = useState(true);
     const [expanded, setExpanded] = useState<number | null>(null);
@@ -127,10 +130,24 @@ export function EventsBanner({ maxItems = 3, className = '' }: EventsBannerProps
     return (
         <Card className={`${className} overflow-hidden`}>
             <CardHeader className="pb-3 bg-gradient-to-r from-emerald-500/5 to-emerald-500/10">
-                <CardTitle className="text-lg flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-emerald-600" />
-                    Upcoming Events
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                        <Calendar className="h-5 w-5 text-emerald-600" />
+                        Upcoming Events
+                        {events.length > 0 && (
+                            <Badge className="bg-emerald-500 text-white ml-2">{events.length}</Badge>
+                        )}
+                    </CardTitle>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate('/events')}
+                        className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                    >
+                        View All
+                        <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent className="p-0">
                 <div className="divide-y">

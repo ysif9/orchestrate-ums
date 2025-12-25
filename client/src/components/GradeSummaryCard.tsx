@@ -19,7 +19,9 @@ export interface CourseSummary {
 }
 
 export interface AcademicSummary {
-  courses: CourseSummary[];
+    gpa?: number;          // overall GPA across all current/graded courses
+    completedCredits?: number;
+    courses: CourseSummary[];
 }
 
 interface GradeSummaryCardProps {
@@ -27,6 +29,26 @@ interface GradeSummaryCardProps {
   loading?: boolean;
   error?: string;
 }
+
+export interface StudentRecordSummaryResponse {
+  success: boolean;
+  message?: string;
+  student: any;
+  academicSummary: {
+    gpa: number | null;
+    totalCredits: number;
+    completedCourses: number;
+  };
+  currentTermRegistration?: {
+    semester: any;
+    registeredCredits: number;
+    registrationStatus: string;
+    enrolledCourses: any[];
+  };
+  courseHistory: any[];
+  activeHolds: string[];
+}
+
 
 export function GradeSummaryCard({ summary, loading, error }: GradeSummaryCardProps) {
   return (

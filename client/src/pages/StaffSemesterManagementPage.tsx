@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { semesterService } from '@/services/semesterService';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -38,7 +39,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Plus, Edit2, Play, CheckCircle, AlertCircle } from 'lucide-react'
+import { Plus, Edit2, Play, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react'
 
 const SEMESTER_STATUS = {
     ACTIVE: 1,
@@ -47,6 +48,7 @@ const SEMESTER_STATUS = {
 };
 
 const StaffSemesterManagementPage = () => {
+    const navigate = useNavigate();
     const [semesters, setSemesters] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -237,7 +239,18 @@ const StaffSemesterManagementPage = () => {
     return (
         <div className="container mx-auto p-6 space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold">Semester Management</h1>
+                <div className="space-y-1">
+                    <Button
+                        variant="ghost"
+                        onClick={() => navigate('/admin/home')}
+                        className="mb-2 p-0 h-auto hover:bg-transparent hover:text-primary"
+                    >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back to Dashboard
+                    </Button>
+                    <h1 className="text-3xl font-bold">Semester Management</h1>
+                    <p className="text-muted-foreground">Create, activate, and finalize academic semesters</p>
+                </div>
                 <Button onClick={() => handleOpenModal()}>
                     <Plus className="mr-2 h-4 w-4" />
                     Create Semester
